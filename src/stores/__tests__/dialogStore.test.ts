@@ -17,8 +17,8 @@ describe('dialogStore', () => {
 
     it('creates with parentDialogId', () => {
       const pid = useDialogStore.getState().createDialog('Parent')
-      const cid = useDialogStore.getState().createDialog('Child', pid, pid, false)
-      const child = useDialogStore.getState().dialogs.find(d => d.id === cid)
+      const _cid = useDialogStore.getState().createDialog('Child', pid, pid, false)
+      const child = useDialogStore.getState().dialogs.find(d => d.id === _cid)
       expect(child?.parentDialogId).toBe(pid)
     })
   })
@@ -26,7 +26,7 @@ describe('dialogStore', () => {
   describe('setCurrentDialog', () => {
     it('switches current dialog', () => {
       const id = useDialogStore.getState().createDialog('A')
-      const id2 = useDialogStore.getState().createDialog('B', undefined, undefined, true)
+      useDialogStore.getState().createDialog('B', undefined, undefined, true)
       useDialogStore.getState().setCurrentDialog(id)
       expect(useDialogStore.getState().currentDialogId).toBe(id)
     })
@@ -41,7 +41,7 @@ describe('dialogStore', () => {
 
     it('cascade deletes child dialogs', () => {
       const pid = useDialogStore.getState().createDialog('Parent')
-      const cid = useDialogStore.getState().createDialog('Child', pid, pid, false)
+      useDialogStore.getState().createDialog('Child', pid, pid, false)
       useDialogStore.getState().deleteDialog(pid)
       const state = useDialogStore.getState()
       expect(state.dialogs).toHaveLength(0)
