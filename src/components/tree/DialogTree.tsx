@@ -1,8 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from 'react'
 import { useDialogStore } from '../../stores/dialogStore'
 import { useSubDialogStore } from '../../stores/subDialogStore'
-import { useModelStore } from '../../stores/modelStore'
-import { ModelConfigPanel } from '../model/ModelConfigPanel'
 
 interface TreeNode {
   id: string
@@ -150,28 +148,6 @@ export function DialogTree() {
   }
 
   // Order managed by dialogOrder state
-
-  // ── Model presets ──
-  const modelConfigs = useModelStore(s => s.configs)
-  const activeModelId = useModelStore(s => s.activeModelId)
-  const setActiveModel = useModelStore(s => s.setActiveModel)
-  const activeModel = modelConfigs.find(c => c.id === activeModelId)
-  const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
-  const modelButtonRef = useRef<HTMLButtonElement>(null)
-  const modelDropdownRef = useRef<HTMLDivElement>(null)
-  const [showConfigPanel, setShowConfigPanel] = useState(false)
-
-  // Close model dropdown on click outside
-  useEffect(() => {
-    if (!modelDropdownOpen) return
-    const handler = (e: MouseEvent) => {
-      if (modelDropdownRef.current && !modelDropdownRef.current.contains(e.target as Node)) {
-        setModelDropdownOpen(false)
-      }
-    }
-    const id = setTimeout(() => document.addEventListener('mousedown', handler), 0)
-    return () => { clearTimeout(id); document.removeEventListener('mousedown', handler) }
-  }, [modelDropdownOpen])
 
   // Right-click context menu
   const [contextMenu, setContextMenu] = useState<{ id: string; x: number; y: number } | null>(null)
@@ -520,55 +496,6 @@ export function DialogTree() {
         )}
       </div>
 
-      {/* Model selector footer */}
-      <div className="border-t border-gray-100 p-2 shrink-0 relative">
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
-            className="flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs
-                       hover:bg-gray-100 transition-colors text-gray-500 min-w-0"
-          >
-            <span>🤖</span>
-            <span className="truncate flex-1 text-left">{activeModel?.name || '未配置模型'}</span>
-            <span className="text-gray-300 shrink-0">{modelDropdownOpen ? '▼' : '▲'}</span>
-          </button>
-          <button
-            onClick={() => setShowConfigPanel(true)}
-            className="shrink-0 px-1.5 py-1.5 rounded-lg text-xs text-gray-400
-                       hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            title="管理模型配置"
-          >
-            ⚙️
-          </button>
-        </div>
-
-        {modelDropdownOpen && (
-                  <div className="fixed z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-1 animate-fade-in min-w-[180px]"
-                        style={{
-                              left: (modelButtonRef.current?.getBoundingClientRect().left ?? 8) + 'px',
-                              top: 'auto',
-                        bottom: (window.innerHeight - (modelButtonRef.current?.getBoundingClientRect().top ?? 0) + 4) + 'px',
-                        }}>
-            {modelConfigs.length === 0 ? (
-              <div className="px-3 py-2 text-xs text-gray-400">暂无模型配置</div>
-            ) : (
-              modelConfigs.map(config => (
-                <button
-                  key={config.id}
-                  onClick={() => { setActiveModel(config.id); setModelDropdownOpen(false) }}
-                  className={`w-full text-left px-3 py-1.5 text-sm flex items-center gap-2
-                    ${config.id === activeModelId ? 'text-blue-600 bg-blue-50' : 'hover:bg-gray-50'}`}
-                >
-                  <span>{config.id === activeModelId ? '●' : '○'}</span>
-                  <span className="truncate">{config.name}</span>
-                  <span className="text-xs text-gray-400 ml-auto">{config.modelName}</span>
-                </button>
-              ))
-            )}
-          </div>
-        )}
-      </div>
-
       {/* Right-click context menu */}
       {contextMenu && (
         <div
@@ -617,7 +544,6 @@ export function DialogTree() {
       )}
 
       {/* Model config panel (modal overlay) */}
-      {showConfigPanel && <ModelConfigPanel onClose={() => setShowConfigPanel(false)} />}
     </div>
   )
 }
