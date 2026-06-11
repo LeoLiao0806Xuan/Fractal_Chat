@@ -64,6 +64,12 @@ export default function SubDialogPanel() {
       branchId: 'main',
       status: 'complete',
     })
+    // Store anchor info so merge works from main area too
+    if (parentMessageId) {
+      useDialogStore.getState().updateDialog(id, {
+        contextAnchor: { messageId: parentMessageId, selectedText },
+      })
+    }
     setSubDialogId(id)
   }, [isOpen, subDialogId]) // eslint-disable-line react-hooks/exhaustive-deps
 
