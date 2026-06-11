@@ -35,7 +35,7 @@ export function MessageList() {
     <div className="flex-1 flex flex-col min-h-0">
       {/* Sub-dialog banner */}
       {isSubDialog && (
-        <div className="shrink-0 px-4 py-2 bg-amber-50 border-b border-amber-200 flex items-center gap-3 flex-wrap text-sm">
+        <div className="shrink-0 px-4 py-2 bg-amber-50 border-b border-amber-200 flex items-center gap-2 flex-wrap text-sm">
           <span className="text-amber-700 font-medium">🌿 子对话</span>
           <button
             onClick={() => {
@@ -44,6 +44,18 @@ export function MessageList() {
             className="text-amber-600 hover:text-amber-800 hover:underline flex items-center gap-1"
           >
             ↩ 返回「{parentDialog?.title || '父对话'}」
+          </button>
+          <button
+            onClick={() => {
+              useSubDialogStore.getState().reopen(
+                currentDialog.id,
+                currentDialog.parentDialogId || '',
+                '',
+              )
+            }}
+            className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-700 px-2 py-1 rounded-lg font-medium transition-colors"
+          >
+            📂 打开子对话面板
           </button>
           {!isMerged && (
             <button

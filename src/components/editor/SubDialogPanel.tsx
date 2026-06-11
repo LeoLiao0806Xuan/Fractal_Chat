@@ -13,6 +13,7 @@ export default function SubDialogPanel() {
   const [input, setInput] = useState('')
   const [showMerge, setShowMerge] = useState(false)
   const [sending, setSending] = useState(false)
+  const [subError, setSubError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
   // Selection → nested sub-dialog
@@ -89,12 +90,19 @@ export default function SubDialogPanel() {
   const handleSend = async () => {
     const text = input.trim()
     if (!text || !subDialogId || sending) return
+    setSubError(null)
 
     const activeConfig = configs.find(c => c.id === activeModelId)
-    if (!activeConfig) return
+    if (!activeConfig) {
+      setSubError('请先在 ⚙️ 中配置 API Key')
+      return
+    }
 
     const apiKey = getSessionKey(activeConfig.id)
-    if (!apiKey) return
+    if (!apiKey) {
+      setSubError('API Key 已过期，请在 ⚙️ 中重新配置')
+      return
+    }
 
     // Add user message
     addMessage(subDialogId, {
@@ -298,6 +306,15 @@ export default function SubDialogPanel() {
           )}
           {sending && <div className="text-xs text-blue-500 text-center animate-pulse">AI 回复中...</div>}
         </div>
+
+        {/* Error banner */}
+        {subError && (
+          <div className="shrink-0 px-3 py-2 bg-red-50 border-t border-red-200 flex items-center gap-2 text-sm">
+            <span className="text-red-500 shrink-0">⚠️</span>
+            <span className="text-red-700 text-xs flex-1">{subError}</span>
+            <button onClick={() => setSubError(null)} className="text-red-400 hover:text-red-600 shrink-0 text-xs">✕</button>
+          </div>
+        )}
 
         {/* Input */}
         <div className="p-3 border-t border-gray-200 bg-white shrink-0">
