@@ -13,32 +13,45 @@ export function AppLayout() {
   const subDialogOpen = useSubDialogStore(s => s.isOpen)
 
   return (
-    <div className="h-screen w-screen flex overflow-hidden bg-white">
-      {/* Sidebar (CSS hide to preserve mounted state) */}
-      <div className={leftPanelOpen ? 'w-64 shrink-0' : 'w-0 overflow-hidden'}>
-        <Sidebar />
+    <div className="h-screen w-screen flex overflow-hidden bg-gray-50">
+      {/* ── Sidebar ── */}
+      <div
+        className={`shrink-0 overflow-hidden border-r border-gray-200 bg-white transition-all duration-300 ease-in-out ${
+          leftPanelOpen ? 'w-64 opacity-100' : 'w-0 opacity-0'
+        }`}
+      >
+        <div className="w-64 h-full">
+          <Sidebar />
+        </div>
       </div>
 
-      {/* Toggle sidebar button (always rendered, positioned differently) */}
+      {/* ── Toggle button at the seam ── */}
       <button
         onClick={() => setLeftPanel(!leftPanelOpen)}
-        className={`absolute top-3 z-10 bg-white border border-gray-300 rounded-lg p-1.5
-                   hover:bg-gray-100 shadow-sm transition-all duration-200
-                   ${leftPanelOpen ? 'left-[248px]' : 'left-3'}`}
-        title={leftPanelOpen ? '关闭侧边栏' : '打开侧边栏'}
+        className="shrink-0 w-5 border-r border-gray-200 bg-white hover:bg-gray-50
+                   flex items-center justify-center cursor-pointer group
+                   transition-colors"
+        title={leftPanelOpen ? '收起侧边栏' : '展开侧边栏'}
       >
-        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        <svg
+          className={`w-3 h-3 text-gray-300 group-hover:text-gray-500 transition-transform duration-300 ${
+            leftPanelOpen ? '' : 'rotate-180'
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
 
-      {/* Main area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* ── Main area ── */}
+      <div className="flex-1 flex flex-col min-w-0 bg-white">
         <MessageList />
         <ChatInput />
       </div>
 
-      {/* Sub-dialog panel (slides in from right) */}
+      {/* ── Sub-dialog panel ── */}
       {subDialogOpen && (
         <Suspense fallback={<div className="w-96 border-l border-gray-200 bg-gray-50 animate-pulse" />}>
           <SubDialogPanel />
