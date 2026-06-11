@@ -58,14 +58,12 @@ export default function SubDialogPanel() {
     })
   }
 
-  // ── Create sub-dialog ──
+  // ── Effect 1: Create sub-dialog with system message ──
   useEffect(() => {
     if (!isOpen || !parentDialogId || subDialogId) return
 
-    const existing = useDialogStore.getState().dialogs.find((d: { parentDialogId: string | null; messages: { role: string }[] }) =>
-      d.parentDialogId === parentDialogId &&
-      !d.messages.some((m: { role: string }) => m.role === 'user' || m.role === 'assistant')
-    )
+    // Check if a dialog for this parent already exists (handles StrictMode double-fire)
+    const existing = useDialogStore.getState().dialogs.find(d => d.parentDialogId === parentDialogId)
     if (existing) { setSubDialogId(existing.id); return }
 
     const parentDialog = dialogs.find(d => d.id === parentDialogId)
@@ -76,7 +74,6 @@ export default function SubDialogPanel() {
       parentDialogId, rootId, false,
     )
 
-    // System message
     const modeLabel: Record<string, string> = {
       'deep-dive': '深入分析', 'debug': '代码审查', 'ask-other': '换模型追问', 'anchor': '锚定引用',
     }
@@ -90,29 +87,35 @@ export default function SubDialogPanel() {
       useDialogStore.getState().updateDialog(id, { contextAnchor: { messageId: parentMessageId, selectedText } })
     }
 
-    // ── Auto-send for deep-dive / debug ──
-    if (mode === 'deep-dive' || mode === 'debug') {
-      const autoContent = mode === 'debug'
-        ? `请审查以下代码，找出所有 bug、安全漏洞、性能问题，并给出具体的修复建议：\n\`\`\`\n${selectedText}\n\`\`\``
-        : `请对以下内容进行深入分析，从多个角度展开讨论：\n\n${selectedText}`
-
-      addMessage(id, {
-        role: 'user', content: autoContent,
-        parentId: null, branchId: 'main', status: 'complete',
-      })
-
-      const aid = addMessage(id, {
-        role: 'assistant', content: '', parentId: null, branchId: 'main', status: 'streaming', model: '',
-      })
-      setSubDialogId(id)
-
-      sendToAI(id, aid, new AbortController().signal).catch((err: Error) => {
-        useDialogStore.getState().updateMessage(id, aid, { content: `错误: ${err.message}`, status: 'error' })
-      })
-    } else {
-      setSubDialogId(id)
-    }
+    setSubDialogId(id)
   }, [isOpen, subDialogId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Effect 2: Auto-send for deep-dive / debug (runs after subDialogId is set) ──
+  useEffect(() => {
+    if (!subDialogId || !isOpen) return
+    if (mode !== 'deep-dive' && mode !== 'debug') return
+
+    const dialog = useDialogStore.getState().dialogs.find(d => d.id === subDialogId)
+    // Already has messages beyond system? → StrictMode double-fire guard
+    if (!dialog || dialog.messages.length > 1) return
+
+    const autoContent = mode === 'debug'
+      ? `审查这段代码，找出 bug、安全漏洞和性能问题，给出修复建议：\n\n${selectedText}`
+      : `深入分析这段内容：\n\n${selectedText}`
+
+    addMessage(subDialogId, {
+      role: 'user', content: autoContent,
+      parentId: null, branchId: 'main', status: 'complete',
+    })
+
+    const aid = addMessage(subDialogId, {
+      role: 'assistant', content: '', parentId: null, branchId: 'main', status: 'streaming', model: '',
+    })
+
+    sendToAI(subDialogId, aid, new AbortController().signal).catch((err: Error) => {
+      useDialogStore.getState().updateMessage(subDialogId, aid, { content: `错误: ${err.message}`, status: 'error' })
+    })
+  }, [subDialogId, isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const subDialog = dialogs.find(d => d.id === subDialogId)
   const messages = subDialog?.messages || []
