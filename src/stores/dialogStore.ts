@@ -151,7 +151,7 @@ export const useDialogStore = create<DialogState>((set, get) => ({
   tagDialog: (id, tag) => {
     set(state => ({
       dialogs: state.dialogs.map(d =>
-        d.id === id ? { ...d, tags: [...(d.tags || []), tag], updatedAt: getTimestamp() } : d
+        d.id === id ? { ...d, tags: [...new Set([...(d.tags || []), tag])], updatedAt: getTimestamp() } : d
       ),
     }))
   },
