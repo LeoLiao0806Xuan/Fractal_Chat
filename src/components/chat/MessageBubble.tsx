@@ -60,7 +60,11 @@ export function MessageBubble({ message }: Props) {
             />
           )}
           {message.model && !isUser && (
-            <div className="text-xs text-gray-500 mt-1 select-none">{message.model}</div>
+            <div className="mt-1.5 flex items-center gap-1.5 select-none">
+              <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-600 leading-tight">
+                {message.model}
+              </span>
+            </div>
           )}
           {message.mergedFromSubDialogId && !isUser && (
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">

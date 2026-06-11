@@ -17,6 +17,8 @@ export function ChatInput() {
   const updateMessage = useDialogStore(s => s.updateMessage)
   const configs = useModelStore(s => s.configs)
   const activeModelId = useModelStore(s => s.activeModelId)
+  const compareMode = useModelStore(s => s.compareMode)
+  const selectedModelIds = useModelStore(s => s.selectedModelIds)
 
   // Auto-resize textarea
   useEffect(() => {
@@ -27,100 +29,103 @@ export function ChatInput() {
     }
   }, [input])
 
+  /** Validate a model config and return decrypted API key */
+  function validateAndGetKey(cfg: typeof configs[0]): string | null {
+    const url = cfg.apiUrl.replace(/\/+$/, '')
+    if (url.includes('platform.deepseek.com') || url.includes('chat.deepseek.com')) return null
+    if (!url.match(/^https?:\/\/.+\..+/)) return null
+    return getSessionKey(cfg.id) || null
+  }
+
+  /** Send to a single model and update its assistant message */
+  async function callOneModel(
+    dialogId: string,
+    assistantId: string,
+    cfg: typeof configs[0],
+    apiKey: string,
+    signal: AbortSignal,
+  ) {
+    const state = useDialogStore.getState()
+    const dialog = state.dialogs.find((d: { id: string }) => d.id === dialogId)
+    const ctx = dialog?.messages
+      .filter((m: { id: string }) => m.id !== assistantId)
+      .map((m: { role: string; content: string }) => ({
+        role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
+        content: m.content,
+      })) || []
+
+    await callModel({
+      apiUrl: cfg.apiUrl, apiKey, model: cfg.modelName,
+      messages: ctx, signal,
+      onChunk: (t) => state.updateMessage(dialogId, assistantId, { content: t }),
+      onDone: (t) => state.updateMessage(dialogId, assistantId, { content: t, status: 'complete' }),
+    })
+  }
+
   const handleSend = async () => {
     const text = input.trim()
     if (!text || !currentDialogId || sending) return
     setError(null)
 
-    const activeConfig = configs.find(c => c.id === activeModelId)
-    if (!activeConfig || !activeConfig.apiKey) {
+    // Determine which models to use
+    let targets: typeof configs = []
+    if (compareMode && selectedModelIds.length > 0) {
+      targets = selectedModelIds.map(id => configs.find(c => c.id === id)).filter(Boolean) as typeof configs
+    } else {
+      const cfg = configs.find(c => c.id === activeModelId)
+      if (cfg) targets = [cfg]
+    }
+    if (targets.length === 0) {
       setError('请先在 ⚙️ 中配置 API Key')
       return
     }
 
-    // Validate API URL
-    const apiUrl = activeConfig.apiUrl.replace(/\/+$/, '')
-    if (apiUrl.includes('platform.deepseek.com') || apiUrl.includes('chat.deepseek.com')) {
-      setError('API URL 填的是网站地址，应该填 api.deepseek.com（API 接口地址）')
-      return
-    }
-    if (!apiUrl.match(/^https?:\/\/.+\..+/)) {
-      setError('API URL 格式不正确，应以 https:// 开头')
-      return
+    // Validate all targets
+    const keyMap = new Map<string, string>()
+    for (const cfg of targets) {
+      const key = validateAndGetKey(cfg)
+      if (!key) {
+        setError(`${cfg.name}: API Key 无效或已过期，请在 ⚙️ 中重新配置`)
+        return
+      }
+      keyMap.set(cfg.id, key)
     }
 
-    // 1. Add user message
+    // Add user message once
     addMessage(currentDialogId, {
-      role: 'user',
-      content: text,
-      parentId: null,
-      branchId: 'main',
-      status: 'complete',
+      role: 'user', content: text,
+      parentId: null, branchId: 'main', status: 'complete',
     })
     setInput('')
 
-    // 2. Create placeholder assistant message
-    const assistantId = addMessage(currentDialogId, {
-      role: 'assistant',
-      content: '',
-      parentId: null,
-      branchId: 'main',
-      status: 'streaming',
-      model: activeConfig.name,
-    })
+    // Create one assistant placeholder per model
+    const assistants = targets.map(cfg => ({
+      id: addMessage(currentDialogId, {
+        role: 'assistant', content: '', parentId: null, branchId: 'main',
+        status: 'streaming', model: cfg.name,
+      }),
+      cfg,
+      key: keyMap.get(cfg.id)!,
+    }))
 
-    abortRef.current = new AbortController()
+    const controller = new AbortController()
+    abortRef.current = controller
     setSending(true)
 
     try {
-      // 3. Get decrypted API key from session memory
-      const apiKey = getSessionKey(activeConfig.id)
-      if (!apiKey) {
-        throw new Error('API Key 已从会话中过期，请在 ⚙️ 中重新配置')
-      }
-
-      // 4. Build message context — use getState() for fresh data
-      const freshState = useDialogStore.getState()
-      const dialog = freshState.dialogs.find(d => d.id === currentDialogId)
-      const contextMessages = dialog?.messages
-        .filter(m => m.id !== assistantId)
-        .map(m => ({
-          role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
-          content: m.content,
-        })) || []
-
-      if (contextMessages.length === 0) {
-        throw new Error('没有消息可发送，请检查对话框状态')
-      }
-
-      // 5. Call API via unified layer (auto-detects provider, CORS-safe)
-      await callModel({
-        apiUrl: activeConfig.apiUrl,
-        apiKey,
-        model: activeConfig.modelName,
-        messages: contextMessages,
-        signal: abortRef.current.signal,
-        onChunk: (fullText) => {
-          updateMessage(currentDialogId, assistantId, { content: fullText })
-        },
-        onDone: (fullText) => {
-          updateMessage(currentDialogId, assistantId, { content: fullText, status: 'complete' })
-        },
-      })
-    } catch (err: unknown) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        updateMessage(currentDialogId, assistantId, {
-          content: '⚠️ 已取消发送',
-          status: 'error',
-        })
-        return
-      }
-      const msg = err instanceof Error ? err.message : '调用失败'
-      updateMessage(currentDialogId, assistantId, {
-        content: `错误: ${msg}`,
-        status: 'error',
-      })
-      setError(msg)
+      await Promise.all(
+        assistants.map(({ id, cfg, key }) =>
+          callOneModel(currentDialogId, id, cfg, key, controller.signal)
+            .catch((err: Error) => {
+              if (err.name === 'AbortError') {
+                updateMessage(currentDialogId, id, { content: '⚠️ 已取消', status: 'error' })
+                return
+              }
+              updateMessage(currentDialogId, id, { content: `错误: ${err.message}`, status: 'error' })
+              setError(`${cfg.name}: ${err.message}`)
+            })
+        ),
+      )
     } finally {
       setSending(false)
       abortRef.current = null

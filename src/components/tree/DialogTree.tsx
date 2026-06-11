@@ -1,6 +1,7 @@
 import { useMemo, useState, useRef, useEffect } from 'react'
 import { useDialogStore } from '../../stores/dialogStore'
 import { useSubDialogStore } from '../../stores/subDialogStore'
+import { exportDialogToMarkdown, exportDialogToJSON } from '../../lib/exporter'
 
 interface TreeNode {
   id: string
@@ -247,24 +248,28 @@ export function DialogTree() {
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Filter tree by search query (keeps matching nodes + ancestor chain)
+  // Filter tree by search query (searches title + message content)
   const filteredTree = useMemo(() => {
     if (!searchQuery.trim()) return tree
     const q = searchQuery.toLowerCase()
 
     const filterNode = (node: TreeNode): TreeNode | null => {
       const nameMatch = node.name.toLowerCase().includes(q)
+      const previewMatch = node.preview.toLowerCase().includes(q)
+      // Full-text search: check all message content
+      const dialog = dialogs.find(d => d.id === node.id)
+      const contentMatch = dialog?.messages.some(m => m.content.toLowerCase().includes(q))
       const filteredChildren = node.children
         .map(child => filterNode(child))
         .filter((n): n is TreeNode => n !== null)
-      if (nameMatch || filteredChildren.length > 0) {
+      if (nameMatch || previewMatch || contentMatch || filteredChildren.length > 0) {
         return { ...node, children: filteredChildren }
       }
       return null
     }
 
     return tree.map(root => filterNode(root)).filter((n): n is TreeNode => n !== null)
-  }, [tree, searchQuery])
+  }, [tree, searchQuery, dialogs])
 
   // Focus search on Ctrl+F / Cmd+F
   useEffect(() => {
@@ -534,6 +539,28 @@ export function DialogTree() {
           >
             🔗 复制对话引用
           </button>
+          <div className="border-t border-gray-100 my-1" />
+          <button
+            onClick={() => {
+              const d = dialogs.find(dd => dd.id === contextMenu.id)
+              if (d) exportDialogToMarkdown(d, dialogs)
+              setContextMenu(null)
+            }}
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 text-gray-600 flex items-center gap-2"
+          >
+            📥 导出 Markdown
+          </button>
+          <button
+            onClick={() => {
+              const d = dialogs.find(dd => dd.id === contextMenu.id)
+              if (d) exportDialogToJSON(d, dialogs)
+              setContextMenu(null)
+            }}
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 text-gray-600 flex items-center gap-2"
+          >
+            📥 导出 JSON
+          </button>
+          <div className="border-t border-gray-100 my-1" />
           <button
             onClick={() => { handleDelete(null, contextMenu.id); setContextMenu(null) }}
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-red-50 hover:text-red-700 flex items-center gap-2"
