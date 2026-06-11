@@ -147,34 +147,47 @@ export default function SubDialogPanel() {
   }
 
   const handleMerge = (mergeMode: MergeMode) => {
-    if (!subDialog || !parentMessageId || !parentDialogId) return
+    if (!subDialog || !parentDialogId) return
+
+    // Find parentMessageId: from store, contextAnchor, or parent dialog references
+    let targetMsgId = parentMessageId
+    if (!targetMsgId && subDialog.contextAnchor?.messageId) {
+      targetMsgId = subDialog.contextAnchor.messageId
+    }
+    if (!targetMsgId) {
+      const pd = dialogs.find(d => d.id === parentDialogId)
+      const ref = pd?.messages.find(m => m.mergedFromSubDialogId === subDialogId)
+      if (ref) targetMsgId = ref.id
+    }
+    if (!targetMsgId) return // can't find parent message
+
     const conclusion = buildConclusion(subDialog)
 
     if (mergeMode === 'replace' || mergeMode === 'footnote') {
       const parentDialog = dialogs.find(d => d.id === parentDialogId)
-      const parentMsg = parentDialog?.messages.find(m => m.id === parentMessageId)
+      const parentMsg = parentDialog?.messages.find(m => m.id === targetMsgId)
       if (parentMsg && subDialogId) {
         // Save snapshot for undo BEFORE modifying
         useDialogStore.getState().updateDialog(subDialogId, {
           mergeSnapshot: {
-            parentMessageId,
+            parentMessageId: targetMsgId,
             originalContent: parentMsg.content,
             originalTitle: subDialog.title,
             mergeMode,
             mergedAt: getTimestamp(),
           },
         })
-        updateMessage(parentDialogId, parentMessageId, {
+        updateMessage(parentDialogId, targetMsgId, {
           content: parentMsg.content + formatMergeContent(conclusion, mergeMode),
-          mergedFromSubDialogId: subDialogId, // link back to sub-dialog
+          mergedFromSubDialogId: subDialogId,
         })
       }
-    } else {
+    } else if (targetMsgId) {
       // keep-child: save snapshot with no content change
       if (subDialogId) {
         useDialogStore.getState().updateDialog(subDialogId, {
           mergeSnapshot: {
-            parentMessageId,
+            parentMessageId: targetMsgId,
             originalContent: '',
             originalTitle: subDialog.title,
             mergeMode,

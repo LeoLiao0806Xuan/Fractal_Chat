@@ -45,14 +45,21 @@ export function MessageList() {
           >
             ↩ 返回「{parentDialog?.title || '父对话'}」
           </button>
-          {!isMerged && currentDialog.contextAnchor?.messageId && (
+          {!isMerged && (
             <button
               onClick={() => {
-                const anchor = currentDialog.contextAnchor!
+                // Try contextAnchor first (for new sub-dialogs)
+                const anchor = currentDialog.contextAnchor
+                // Fallback: try to find the parent message by mergedFromSubDialogId
+                let parentMsgId = anchor?.messageId || ''
+                if (!parentMsgId && parentDialog) {
+                  const found = parentDialog.messages.find(m => m.mergedFromSubDialogId === currentDialog.id)
+                  if (found) parentMsgId = found.id
+                }
                 useSubDialogStore.getState().reopen(
                   currentDialog.id,
                   currentDialog.parentDialogId || '',
-                  anchor.messageId,
+                  parentMsgId,
                 )
               }}
               className="ml-auto text-xs bg-green-100 hover:bg-green-200 text-green-700 px-2.5 py-1 rounded-lg font-medium transition-colors"
