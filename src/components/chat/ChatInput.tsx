@@ -153,6 +153,13 @@ export function ChatInput() {
           <ModelSelector />
           <div className="flex items-center gap-2">
             {sending && (
+              <div className="flex items-center gap-1.5 text-xs text-blue-400 mr-2">
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse-soft" />
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse-soft" style={{ animationDelay: '0.3s' }} />
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse-soft" style={{ animationDelay: '0.6s' }} />
+              </div>
+            )}
+            {sending && (
               <button onClick={handleCancel}
                 className="text-xs text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-1 rounded-lg transition-colors">
                 取消

@@ -18,10 +18,11 @@ export function MessageList() {
 
   if (!currentDialog) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-400 select-none min-h-0">
-        <div className="text-center">
-          <div className="text-5xl mb-3">💬</div>
-          <div className="text-lg">选择一个对话或新建一个开始</div>
+      <div className="flex-1 flex items-center justify-center select-none min-h-0">
+        <div className="text-center px-6">
+          <div className="text-6xl mb-4 opacity-30">💬</div>
+          <h2 className="text-lg font-semibold text-gray-400 mb-1">选择一个对话</h2>
+          <p className="text-sm text-gray-300">从左侧选择一个对话，或新建一个开始</p>
         </div>
       </div>
     )
@@ -90,8 +91,8 @@ export function MessageList() {
         {currentDialog.messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             <div className="text-center">
-              <div className="text-4xl mb-2">✨</div>
-              <div>发送第一条消息开始对话</div>
+              <div className="text-4xl mb-3 opacity-40">✍️</div>
+              <p className="text-sm">发送第一条消息开始对话</p>
             </div>
           </div>
         ) : (

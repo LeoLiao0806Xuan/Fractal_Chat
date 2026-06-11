@@ -290,7 +290,14 @@ export default function SubDialogPanel() {
               </div>
             ))
           )}
-          {sending && <div className="text-xs text-blue-500 text-center animate-pulse">AI 回复中...</div>}
+          {sending && (
+            <div className="flex items-center justify-center gap-1.5 py-3 text-blue-400 text-xs">
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse-soft" />
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse-soft" style={{ animationDelay: '0.3s' }} />
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse-soft" style={{ animationDelay: '0.6s' }} />
+              <span className="ml-1">AI 回复中</span>
+            </div>
+          )}
         </div>
 
         {/* Error banner */}
