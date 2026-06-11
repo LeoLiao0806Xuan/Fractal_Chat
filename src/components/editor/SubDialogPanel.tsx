@@ -51,15 +51,23 @@ export default function SubDialogPanel() {
 
     const parentDialog = dialogs.find(d => d.id === parentDialogId)
     const rootId = parentDialog?.rootDialogId || parentDialogId
+    const modeLabels: Record<string, string> = {
+      'deep-dive': '深入探讨',
+      'debug': '代码调试',
+      'ask-other': '换模型追问',
+      'anchor': '锚定引用',
+    }
+    const modeLabel = modeLabels[mode] || '深入探讨'
+    const shortTitle = selectedText.slice(0, 22).replace(/\n/g, ' ')
     const id = createDialog(
-      `子对话: ${selectedText.slice(0, 30)}...`,
+      shortTitle + (selectedText.length > 22 ? '…' : ''),
       parentDialogId,
       rootId,
-      false, // don't switch main area to sub-dialog
+      false,
     )
     addMessage(id, {
       role: 'system',
-      content: `以下是用户选中的上下文，请基于此进行深入探讨：\n\n"""\n${selectedText}\n"""\n\n模式: ${mode === 'deep-dive' ? '深入探讨' : mode === 'debug' ? '代码调试' : mode === 'ask-other' ? '多模型追问' : '锚定引用'}`,
+      content: `基于选中内容${modeLabel}：「${selectedText}」`,
       parentId: null,
       branchId: 'main',
       status: 'complete',
