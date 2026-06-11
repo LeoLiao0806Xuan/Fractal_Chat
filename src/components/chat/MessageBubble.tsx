@@ -14,6 +14,7 @@ export function MessageBubble({ message }: Props) {
   const [selectionInfo, setSelectionInfo] = useState<{ text: string; rect: DOMRect } | null>(null)
   const openSubDialog = useSubDialogStore(s => s.open)
   const currentDialogId = useDialogStore(s => s.currentDialogId)
+  const dialogs = useDialogStore(s => s.dialogs)
 
   const handleSelection = (text: string, rect: DOMRect) => {
     if (isUser) return
@@ -62,12 +63,25 @@ export function MessageBubble({ message }: Props) {
             <div className="text-xs text-gray-500 mt-1 select-none">{message.model}</div>
           )}
           {message.mergedFromSubDialogId && !isUser && (
-            <button
-              onClick={handleJumpToSubDialog}
-              className="text-xs text-blue-500 hover:text-blue-700 hover:underline mt-1.5 flex items-center gap-1 transition-colors"
-            >
-              ↩ 跳转子对话
-            </button>
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <button
+                onClick={handleJumpToSubDialog}
+                className="text-xs text-blue-500 hover:text-blue-700 hover:underline flex items-center gap-1 transition-colors"
+              >
+                ↩ 跳转子对话
+              </button>
+              {dialogs.find(d => d.id === message.mergedFromSubDialogId)?.mergeSnapshot && (
+                <button
+                  onClick={() => {
+                    const subId = message.mergedFromSubDialogId
+                    if (subId) useDialogStore.getState().undoMerge(subId)
+                  }}
+                  className="text-xs text-orange-500 hover:text-orange-700 hover:underline flex items-center gap-1 transition-colors"
+                >
+                  ↩️ 撤销合并
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>

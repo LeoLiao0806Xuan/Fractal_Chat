@@ -422,7 +422,16 @@ export function DialogTree() {
                 <span className="truncate cursor-pointer hover:text-blue-600">{node.name}</span>
               )}
               {node.isMerged && (
-                <span className="text-xs text-green-600 shrink-0">已合并</span>
+                <>
+                  <span className="text-xs text-green-600 shrink-0">已合并</span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); useDialogStore.getState().undoMerge(node.id) }}
+                    className="text-xs text-orange-400 hover:text-orange-600 shrink-0 hover:underline ml-0.5"
+                    title="撤销合并"
+                  >
+                    ↩
+                  </button>
+                </>
               )}
             </div>
             {node.preview && renamingId !== node.id && (
@@ -565,6 +574,14 @@ export function DialogTree() {
           >
             ✏️ 重命名
           </button>
+          {dialogs.find(d => d.id === contextMenu.id)?.mergeSnapshot && (
+            <button
+              onClick={() => { useDialogStore.getState().undoMerge(contextMenu.id); setContextMenu(null) }}
+              className="w-full text-left px-3 py-1.5 text-sm hover:bg-orange-50 hover:text-orange-700 flex items-center gap-2"
+            >
+              ↩️ 撤销合并
+            </button>
+          )}
           <button
             onClick={() => { handleDelete(null, contextMenu.id); setContextMenu(null) }}
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-red-50 hover:text-red-700 flex items-center gap-2"

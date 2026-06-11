@@ -7,6 +7,7 @@ import { callModel } from '../../services/api'
 import { buildConclusion, formatMergeContent, type MergeMode } from '../../lib/mergeUtils'
 import { TiptapRenderer } from './TiptapRenderer'
 import { SelectionMenu } from './SelectionMenu'
+import { getTimestamp } from '../../lib/utils'
 
 export default function SubDialogPanel() {
   const [input, setInput] = useState('')
@@ -147,9 +148,32 @@ export default function SubDialogPanel() {
       const parentDialog = dialogs.find(d => d.id === parentDialogId)
       const parentMsg = parentDialog?.messages.find(m => m.id === parentMessageId)
       if (parentMsg && subDialogId) {
+        // Save snapshot for undo BEFORE modifying
+        useDialogStore.getState().updateDialog(subDialogId, {
+          mergeSnapshot: {
+            parentMessageId,
+            originalContent: parentMsg.content,
+            originalTitle: subDialog.title,
+            mergeMode,
+            mergedAt: getTimestamp(),
+          },
+        })
         updateMessage(parentDialogId, parentMessageId, {
           content: parentMsg.content + formatMergeContent(conclusion, mergeMode),
           mergedFromSubDialogId: subDialogId, // link back to sub-dialog
+        })
+      }
+    } else {
+      // keep-child: save snapshot with no content change
+      if (subDialogId) {
+        useDialogStore.getState().updateDialog(subDialogId, {
+          mergeSnapshot: {
+            parentMessageId,
+            originalContent: '',
+            originalTitle: subDialog.title,
+            mergeMode,
+            mergedAt: getTimestamp(),
+          },
         })
       }
     }

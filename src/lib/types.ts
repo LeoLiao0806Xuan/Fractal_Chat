@@ -14,6 +14,15 @@ export interface Message {
   mergedFromSubDialogId?: string  // set when merged — links back to the sub-dialog
 }
 
+/** Snapshot saved before a merge, enabling undo */
+export interface MergeSnapshot {
+  parentMessageId: string
+  originalContent: string
+  originalTitle: string
+  mergeMode: 'replace' | 'footnote' | 'keep-child'
+  mergedAt: string
+}
+
 export interface Dialog {
   id: string
   title: string
@@ -27,6 +36,7 @@ export interface Dialog {
     messageId: string
     selectedText: string
   }
+  mergeSnapshot?: MergeSnapshot   // saved before merge, cleared on undo
 }
 
 export interface ModelConfig {

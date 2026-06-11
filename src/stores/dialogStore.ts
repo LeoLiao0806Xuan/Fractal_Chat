@@ -15,11 +15,15 @@ interface DialogState {
   setCurrentDialog: (id: string) => void
   deleteDialog: (id: string) => void
   updateDialogTitle: (id: string, title: string) => void
+  updateDialog: (id: string, updates: Partial<Dialog>) => void
 
   // Messages
   addMessage: (dialogId: string, msg: Omit<Message, 'id' | 'createdAt'>) => string
   updateMessage: (dialogId: string, msgId: string, updates: Partial<Message>) => void
   clearMessages: (dialogId: string) => void
+
+  // Merge
+  undoMerge: (subDialogId: string) => void
 }
 
 export const useDialogStore = create<DialogState>((set, get) => ({
@@ -81,6 +85,12 @@ export const useDialogStore = create<DialogState>((set, get) => ({
     }))
   },
 
+  updateDialog: (id, updates) => {
+    set(state => ({
+      dialogs: state.dialogs.map(d => d.id === id ? { ...d, ...updates } : d),
+    }))
+  },
+
   addMessage: (dialogId, msg) => {
     const msgId = generateId()
     const fullMsg: Message = { ...msg, id: msgId, createdAt: getTimestamp() }
@@ -116,5 +126,37 @@ export const useDialogStore = create<DialogState>((set, get) => ({
         d.id === dialogId ? { ...d, messages: [], updatedAt: getTimestamp() } : d
       ),
     }))
+  },
+
+  undoMerge: (subDialogId) => {
+    set(state => {
+      const subDialog = state.dialogs.find(d => d.id === subDialogId)
+      if (!subDialog?.mergeSnapshot) return state
+
+      const { parentMessageId, originalContent, originalTitle } = subDialog.mergeSnapshot
+      const parentDialogId = subDialog.parentDialogId
+      if (!parentDialogId) return state
+
+      return {
+        dialogs: state.dialogs.map(d => {
+          // Restore parent message content
+          if (d.id === parentDialogId) {
+            return {
+              ...d,
+              messages: d.messages.map(m =>
+                m.id === parentMessageId
+                  ? { ...m, content: originalContent, mergedFromSubDialogId: undefined }
+                  : m
+              ),
+            }
+          }
+          // Restore sub-dialog title and clear snapshot
+          if (d.id === subDialogId) {
+            return { ...d, title: originalTitle, mergeSnapshot: undefined }
+          }
+          return d
+        }),
+      }
+    })
   },
 }))
