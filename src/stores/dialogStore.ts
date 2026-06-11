@@ -22,6 +22,9 @@ interface DialogState {
   updateMessage: (dialogId: string, msgId: string, updates: Partial<Message>) => void
   clearMessages: (dialogId: string) => void
 
+  // Status
+  archiveDialog: (id: string) => void
+
   // Merge
   undoMerge: (subDialogId: string) => void
 }
@@ -124,6 +127,14 @@ export const useDialogStore = create<DialogState>((set, get) => ({
     set(state => ({
       dialogs: state.dialogs.map(d =>
         d.id === dialogId ? { ...d, messages: [], updatedAt: getTimestamp() } : d
+      ),
+    }))
+  },
+
+  archiveDialog: (id) => {
+    set(state => ({
+      dialogs: state.dialogs.map(d =>
+        d.id === id ? { ...d, status: d.status === 'archived' ? 'active' : 'archived', updatedAt: getTimestamp() } : d
       ),
     }))
   },

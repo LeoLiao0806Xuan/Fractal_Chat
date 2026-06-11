@@ -14,6 +14,7 @@ interface TreeNode {
   parentId: string | null
   isMerged: boolean
   mergeIcon: string
+  status: string
 }
 
 export function DialogTree() {
@@ -217,7 +218,7 @@ export function DialogTree() {
           .filter(d => d.parentDialogId === parentId)
           .map(child => ({
           id: child.id,
-          name: child.title.replace(/^[✏️📎🌿]\s*/, ''), // strip merge status emoji from name
+          name: child.title.replace(/^[✏️📎🌿]\s*/, ''),
           messageCount: child.messages.length,
           preview: getPreview(child.messages),
           hasSubDialogs: dialogs.some(d => d.parentDialogId === child.id),
@@ -226,6 +227,7 @@ export function DialogTree() {
           children: buildSubTree(child.id),
           isMerged: child.title.startsWith('✏️') || child.title.startsWith('📎') || child.title.startsWith('🌿'),
           mergeIcon: child.title.startsWith('✏️') ? '🔀' : child.title.startsWith('📎') ? '📎' : child.title.startsWith('🌿') ? '🌿' : '',
+          status: child.status,
         })))
 
     return sortNodes(
@@ -242,15 +244,27 @@ export function DialogTree() {
         children: buildSubTree(root.id),
         isMerged: false,
         mergeIcon: '',
+        status: root.status,
       })))
   }, [dialogs, dialogOrder])
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
+  const [showArchived, setShowArchived] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Filter tree by search query (searches title + message content)
   const filteredTree = useMemo(() => {
-    if (!searchQuery.trim()) return tree
+    let nodes = tree
+    // Hide archived dialogs by default
+    if (!showArchived) {
+      const hideArchived = (node: TreeNode): TreeNode | null => {
+        if (node.status === 'archived') return null
+        const children = node.children.map(hideArchived).filter((n): n is TreeNode => n !== null)
+        return { ...node, children }
+      }
+      nodes = tree.map(hideArchived).filter((n): n is TreeNode => n !== null)
+    }
+    if (!searchQuery.trim()) return nodes
     const q = searchQuery.toLowerCase()
 
     const filterNode = (node: TreeNode): TreeNode | null => {
@@ -269,7 +283,7 @@ export function DialogTree() {
     }
 
     return tree.map(root => filterNode(root)).filter((n): n is TreeNode => n !== null)
-  }, [tree, searchQuery, dialogs])
+  }, [tree, searchQuery, dialogs, showArchived])
 
   // Focus search on Ctrl+F / Cmd+F
   useEffect(() => {
@@ -416,6 +430,9 @@ export function DialogTree() {
                   </button>
                 </>
               )}
+              {node.status === 'archived' && (
+                <span className="text-xs text-gray-400 shrink-0">已归档</span>
+              )}
             </div>
             {node.preview && renamingId !== node.id && (
               <div className="text-xs text-gray-400 truncate mt-0.5">{node.preview}</div>
@@ -488,6 +505,17 @@ export function DialogTree() {
             </button>
           )}
         </div>
+        {/* Archived toggle */}
+        <button
+          onClick={() => setShowArchived(!showArchived)}
+          className={`text-xs w-full text-left px-2 py-1 rounded-lg transition-colors ${
+            showArchived
+              ? 'bg-gray-100 text-gray-600'
+              : 'text-gray-400 hover:text-gray-500 hover:bg-gray-50'
+          }`}
+        >
+          {showArchived ? '📂 显示全部' : '📦 隐藏已归档'}
+        </button>
       </div>
 
       {/* Tree */}
@@ -559,6 +587,15 @@ export function DialogTree() {
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 text-gray-600 flex items-center gap-2"
           >
             📥 导出 JSON
+          </button>
+          <button
+            onClick={() => {
+              useDialogStore.getState().archiveDialog(contextMenu.id)
+              setContextMenu(null)
+            }}
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 text-gray-600 flex items-center gap-2"
+          >
+            {dialogs.find(d => d.id === contextMenu.id)?.status === 'archived' ? '📂 取消归档' : '📦 归档'}
           </button>
           <div className="border-t border-gray-100 my-1" />
           <button
