@@ -22,7 +22,6 @@ export default function SubDialogPanel() {
   const handleSubDialogFromSelection = (text: string, mode: string) => {
     if (!selectionInfo || !subDialogId) return
     setSelectionInfo(null)
-    // Open a nested sub-dialog under the current sub-dialog
     useSubDialogStore.getState().open(text, mode, selectionInfo.messageId, subDialogId)
   }
 
@@ -30,56 +29,89 @@ export default function SubDialogPanel() {
   const createDialog = useDialogStore(s => s.createDialog)
   const addMessage = useDialogStore(s => s.addMessage)
   const updateMessage = useDialogStore(s => s.updateMessage)
-  const configs = useModelStore(s => s.configs)
-  const activeModelId = useModelStore(s => s.activeModelId)
 
   const { selectedText, mode, parentMessageId, parentDialogId, subDialogId, close, setSubDialogId } = useSubDialogStore()
   const isOpen = useSubDialogStore(s => s.isOpen)
 
-  // Create sub-dialog when panel opens
+  // ── Shared AI call ──
+  async function sendToAI(dialogId: string, assistantId: string, signal: AbortSignal) {
+    const cfg = useModelStore.getState().configs.find(c => c.id === useModelStore.getState().activeModelId)
+    if (!cfg) throw new Error('请先在 ⚙️ 中配置 API Key')
+
+    const key = getSessionKey(cfg.id)
+    if (!key) throw new Error('API Key 已过期，请在 ⚙️ 中重新配置')
+
+    const state = useDialogStore.getState()
+    const dialog = state.dialogs.find((d: { id: string }) => d.id === dialogId)
+    const ctx = dialog?.messages
+      .filter((m: { id: string }) => m.id !== assistantId)
+      .map((m: { role: string; content: string }) => ({
+        role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
+        content: m.content,
+      })) || []
+
+    await callModel({
+      apiUrl: cfg.apiUrl, apiKey: key, model: cfg.modelName,
+      messages: ctx, signal,
+      onChunk: (t) => state.updateMessage(dialogId, assistantId, { content: t }),
+      onDone: (t) => state.updateMessage(dialogId, assistantId, { content: t, status: 'complete' }),
+    })
+  }
+
+  // ── Create sub-dialog ──
   useEffect(() => {
     if (!isOpen || !parentDialogId || subDialogId) return
 
-    // Guard: check if a dialog for this parent already exists (handles StrictMode)
     const existing = useDialogStore.getState().dialogs.find((d: { parentDialogId: string | null; messages: { role: string }[] }) =>
       d.parentDialogId === parentDialogId &&
       !d.messages.some((m: { role: string }) => m.role === 'user' || m.role === 'assistant')
     )
-    if (existing) {
-      setSubDialogId(existing.id)
-      return
-    }
+    if (existing) { setSubDialogId(existing.id); return }
 
     const parentDialog = dialogs.find(d => d.id === parentDialogId)
     const rootId = parentDialog?.rootDialogId || parentDialogId
-    const modeLabels: Record<string, string> = {
-      'deep-dive': '深入探讨',
-      'debug': '代码调试',
-      'ask-other': '换模型追问',
-      'anchor': '锚定引用',
-    }
-    const modeLabel = modeLabels[mode] || '深入探讨'
     const shortTitle = selectedText.slice(0, 22).replace(/\n/g, ' ')
     const id = createDialog(
       shortTitle + (selectedText.length > 22 ? '…' : ''),
-      parentDialogId,
-      rootId,
-      false,
+      parentDialogId, rootId, false,
     )
+
+    // System message
+    const modeLabel: Record<string, string> = {
+      'deep-dive': '深入分析', 'debug': '代码审查', 'ask-other': '换模型追问', 'anchor': '锚定引用',
+    }
     addMessage(id, {
       role: 'system',
-      content: `基于选中内容${modeLabel}：「${selectedText}」`,
-      parentId: null,
-      branchId: 'main',
-      status: 'complete',
+      content: `基于选中内容${modeLabel[mode] || '深入分析'}：「${selectedText}」`,
+      parentId: null, branchId: 'main', status: 'complete',
     })
-    // Store anchor info so merge works from main area too
+
     if (parentMessageId) {
-      useDialogStore.getState().updateDialog(id, {
-        contextAnchor: { messageId: parentMessageId, selectedText },
-      })
+      useDialogStore.getState().updateDialog(id, { contextAnchor: { messageId: parentMessageId, selectedText } })
     }
-    setSubDialogId(id)
+
+    // ── Auto-send for deep-dive / debug ──
+    if (mode === 'deep-dive' || mode === 'debug') {
+      const autoContent = mode === 'debug'
+        ? `请审查以下代码，找出所有 bug、安全漏洞、性能问题，并给出具体的修复建议：\n\`\`\`\n${selectedText}\n\`\`\``
+        : `请对以下内容进行深入分析，从多个角度展开讨论：\n\n${selectedText}`
+
+      addMessage(id, {
+        role: 'user', content: autoContent,
+        parentId: null, branchId: 'main', status: 'complete',
+      })
+
+      const aid = addMessage(id, {
+        role: 'assistant', content: '', parentId: null, branchId: 'main', status: 'streaming', model: '',
+      })
+      setSubDialogId(id)
+
+      sendToAI(id, aid, new AbortController().signal).catch((err: Error) => {
+        useDialogStore.getState().updateMessage(id, aid, { content: `错误: ${err.message}`, status: 'error' })
+      })
+    } else {
+      setSubDialogId(id)
+    }
   }, [isOpen, subDialogId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const subDialog = dialogs.find(d => d.id === subDialogId)
@@ -92,80 +124,44 @@ export default function SubDialogPanel() {
     if (!text || !subDialogId || sending) return
     setSubError(null)
 
-    const activeConfig = configs.find(c => c.id === activeModelId)
-    if (!activeConfig) {
-      setSubError('请先在 ⚙️ 中配置 API Key')
-      return
-    }
+    const cfg = useModelStore.getState().configs.find(c => c.id === useModelStore.getState().activeModelId)
+    if (!cfg) { setSubError('请先在 ⚙️ 中配置 API Key'); return }
 
-    const apiKey = getSessionKey(activeConfig.id)
-    if (!apiKey) {
-      setSubError('API Key 已过期，请在 ⚙️ 中重新配置')
-      return
-    }
+    const key = getSessionKey(cfg.id)
+    if (!key) { setSubError('API Key 已过期'); return }
 
-    // Add user message
     addMessage(subDialogId, {
       role: 'user', content: text,
       parentId: null, branchId: 'main', status: 'complete',
     })
     setInput('')
 
-    // Create placeholder
     const assistantId = addMessage(subDialogId, {
-      role: 'assistant', content: '',
-      parentId: null, branchId: 'main', status: 'streaming',
-      model: activeConfig.name,
+      role: 'assistant', content: '', parentId: null, branchId: 'main', status: 'streaming', model: cfg.name,
     })
 
     const controller = new AbortController()
     abortRef.current = controller
     setSending(true)
-
     try {
-      const freshState = useDialogStore.getState()
-      const dialog = freshState.dialogs.find((d: { id: string | null }) => d.id === subDialogId)
-      const contextMessages = dialog?.messages
-        .filter((m: { id: string }) => m.id !== assistantId)
-        .map((m: { role: string; content: string }) => ({
-          role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
-          content: m.content,
-        })) || []
-
-      await callModel({
-        apiUrl: activeConfig.apiUrl,
-        apiKey,
-        model: activeConfig.modelName,
-        messages: contextMessages,
-        signal: controller.signal,
-        onChunk: (fullText) => {
-          updateMessage(subDialogId, assistantId, { content: fullText })
-        },
-        onDone: (fullText) => {
-          updateMessage(subDialogId, assistantId, { content: fullText, status: 'complete' })
-        },
-      })
+      await sendToAI(subDialogId, assistantId, controller.signal)
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') {
         updateMessage(subDialogId, assistantId, { content: '⚠️ 已取消', status: 'error' })
         return
       }
-      const msg = err instanceof Error ? err.message : '调用失败'
-      updateMessage(subDialogId, assistantId, { content: `错误: ${msg}`, status: 'error' })
+      updateMessage(subDialogId, assistantId, { content: `错误: ${(err as Error).message}`, status: 'error' })
     } finally {
       setSending(false)
       if (abortRef.current === controller) abortRef.current = null
     }
   }
 
-  const handleCancel = () => {
-    abortRef.current?.abort()
-  }
+  const handleCancel = () => { abortRef.current?.abort() }
 
   const handleMerge = (mergeMode: MergeMode) => {
     if (!subDialog || !parentDialogId) return
 
-    // Find parentMessageId: from store, contextAnchor, or parent dialog references
     let targetMsgId = parentMessageId
     if (!targetMsgId && subDialog.contextAnchor?.messageId) {
       targetMsgId = subDialog.contextAnchor.messageId
@@ -175,7 +171,7 @@ export default function SubDialogPanel() {
       const ref = pd?.messages.find(m => m.mergedFromSubDialogId === subDialogId)
       if (ref) targetMsgId = ref.id
     }
-    if (!targetMsgId) return // can't find parent message
+    if (!targetMsgId) return
 
     const conclusion = buildConclusion(subDialog)
 
@@ -183,14 +179,10 @@ export default function SubDialogPanel() {
       const parentDialog = dialogs.find(d => d.id === parentDialogId)
       const parentMsg = parentDialog?.messages.find(m => m.id === targetMsgId)
       if (parentMsg && subDialogId) {
-        // Save snapshot for undo BEFORE modifying
         useDialogStore.getState().updateDialog(subDialogId, {
           mergeSnapshot: {
-            parentMessageId: targetMsgId,
-            originalContent: parentMsg.content,
-            originalTitle: subDialog.title,
-            mergeMode,
-            mergedAt: getTimestamp(),
+            parentMessageId: targetMsgId, originalContent: parentMsg.content,
+            originalTitle: subDialog.title, mergeMode, mergedAt: getTimestamp(),
           },
         })
         updateMessage(parentDialogId, targetMsgId, {
@@ -198,26 +190,18 @@ export default function SubDialogPanel() {
           mergedFromSubDialogId: subDialogId,
         })
       }
-    } else if (targetMsgId) {
-      // keep-child: save snapshot with no content change
-      if (subDialogId) {
-        useDialogStore.getState().updateDialog(subDialogId, {
-          mergeSnapshot: {
-            parentMessageId: targetMsgId,
-            originalContent: '',
-            originalTitle: subDialog.title,
-            mergeMode,
-            mergedAt: getTimestamp(),
-          },
-        })
-      }
+    } else if (targetMsgId && subDialogId) {
+      useDialogStore.getState().updateDialog(subDialogId, {
+        mergeSnapshot: {
+          parentMessageId: targetMsgId, originalContent: '',
+          originalTitle: subDialog.title, mergeMode, mergedAt: getTimestamp(),
+        },
+      })
     }
 
     if (subDialogId) {
       const labels: Record<MergeMode, string> = {
-        replace: '✏️ 已替换',
-        footnote: '📎 已追加',
-        'keep-child': '🌿 已保留',
+        replace: '✏️ 已替换', footnote: '📎 已追加', 'keep-child': '🌿 已保留',
       }
       useDialogStore.getState().updateDialogTitle(subDialogId, `${labels[mergeMode]}: ${subDialog.title}`)
     }
@@ -230,8 +214,7 @@ export default function SubDialogPanel() {
     'deep-dive': '🔍', 'debug': '🐛', 'ask-other': '🤖', 'anchor': '📌',
   }
   const modeTitle: Record<string, string> = {
-    'deep-dive': '深入探讨', 'debug': 'Code Debug',
-    'ask-other': '追问其他模型', 'anchor': '锚定引用',
+    'deep-dive': '深入分析', 'debug': '代码审查', 'ask-other': '换模型追问', 'anchor': '锚定引用',
   }
 
   if (!isOpen) return null
@@ -260,7 +243,7 @@ export default function SubDialogPanel() {
           </div>
         </div>
 
-        {/* Breadcrumb: parent → sub-dialog */}
+        {/* Breadcrumb */}
         {parentDialogId && (() => {
           const parent = dialogs.find(d => d.id === parentDialogId)
           return parent ? (
@@ -272,7 +255,7 @@ export default function SubDialogPanel() {
           ) : null
         })()}
 
-        {/* Context reference */}
+        {/* Context */}
         <div className="px-3 py-2 border-b border-gray-100 shrink-0">
           <div className="flex items-start gap-2">
             <span className="text-xs text-gray-400 mt-0.5 shrink-0">📎</span>
@@ -350,8 +333,6 @@ export default function SubDialogPanel() {
                 将子对话的结论合并到「{dialogs.find(d => d.id === parentDialogId)?.title || '父对话'}」中
               </p>
             </div>
-
-            {/* Preview of the conclusion text */}
             {(subDialog.messages.length > 1) && (
               <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
                 <div className="text-xs text-gray-500 mb-1.5">📝 结论预览：</div>
@@ -360,7 +341,6 @@ export default function SubDialogPanel() {
                 </div>
               </div>
             )}
-
             <div className="p-4 space-y-2">
               <button onClick={() => handleMerge('footnote')}
                 className="w-full text-left p-3 rounded-xl border border-blue-500 bg-blue-50 ring-2 ring-blue-200">
@@ -387,7 +367,6 @@ export default function SubDialogPanel() {
         </div>
       )}
 
-      {/* Selection menu for nested sub-dialog creation */}
       {selectionInfo && (
         <SelectionMenu
           selectedText={selectionInfo.text}
