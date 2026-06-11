@@ -13,6 +13,7 @@ export interface Message {
   tags?: string[]
   mergedFromSubDialogId?: string  // set when merged — links back to the sub-dialog
   editedAt?: string        // ISO timestamp of last edit
+  previousVersions?: { content: string; editedAt: string }[]
 }
 
 /** Snapshot saved before a merge, enabling undo */
@@ -38,6 +39,7 @@ export interface Dialog {
     selectedText: string
   }
   mergeSnapshot?: MergeSnapshot   // saved before merge, cleared on undo
+  tags?: string[]                // user-assigned tags
 }
 
 export interface ModelConfig {

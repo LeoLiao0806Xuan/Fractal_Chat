@@ -143,7 +143,7 @@ export function MessageBubble({ message }: Props) {
               {formatTime(message.createdAt)}
               {message.editedAt && ' · 已编辑'}
             </span>
-          </div>
+            </div>
 
           {/* Merge navigation */}
           {message.mergedFromSubDialogId && !isUser && (

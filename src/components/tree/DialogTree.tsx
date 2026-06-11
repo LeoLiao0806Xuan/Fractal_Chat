@@ -16,6 +16,7 @@ interface TreeNode {
   mergeIcon: string
   status: string
   updatedAt: string
+  tags: string[]
 }
 
 export function DialogTree() {
@@ -232,6 +233,7 @@ export function DialogTree() {
           mergeIcon: child.title.startsWith('✏️') ? '🔀' : child.title.startsWith('📎') ? '📎' : child.title.startsWith('🌿') ? '🌿' : '',
           status: child.status,
           updatedAt: child.updatedAt,
+          tags: child.tags || [],
         })))
 
     return sortNodes(
@@ -250,6 +252,7 @@ export function DialogTree() {
         mergeIcon: '',
         status: root.status,
         updatedAt: root.updatedAt,
+        tags: root.tags || [],
       })))
   }, [dialogs, dialogOrder])
   // Search state
@@ -593,6 +596,26 @@ export function DialogTree() {
           >
             📥 导出 JSON
           </button>
+          <div className="border-t border-gray-100 my-1" />
+          <button
+            onClick={() => {
+              const tag = prompt('输入标签名称：')
+              if (tag && tag.trim()) useDialogStore.getState().tagDialog(contextMenu.id, tag.trim())
+              setContextMenu(null)
+            }}
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 text-gray-600 flex items-center gap-2"
+          >
+            🏷️ 添加标签
+          </button>
+          <div className="flex flex-wrap gap-1 px-3 py-1.5">
+            {(dialogs.find(d => d.id === contextMenu.id)?.tags || []).map(tag => (
+              <span key={tag} className="inline-flex items-center gap-1 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">
+                {tag}
+                <button onClick={(e) => { e.stopPropagation(); useDialogStore.getState().untagDialog(contextMenu.id, tag); setContextMenu(null) }} className="text-gray-400 hover:text-red-500 ml-0.5">✕</button>
+              </span>
+            ))}
+          </div>
+          <div className="border-t border-gray-100 my-1" />
           <button
             onClick={() => {
               useDialogStore.getState().archiveDialog(contextMenu.id)

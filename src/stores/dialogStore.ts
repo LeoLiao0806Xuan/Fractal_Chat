@@ -24,6 +24,8 @@ interface DialogState {
 
   // Status
   archiveDialog: (id: string) => void
+  tagDialog: (id: string, tag: string) => void
+  untagDialog: (id: string, tag: string) => void
 
   // Merge
   undoMerge: (subDialogId: string) => void
@@ -114,7 +116,14 @@ export const useDialogStore = create<DialogState>((set, get) => ({
           ? {
               ...d,
               messages: d.messages.map(m =>
-                m.id === msgId ? { ...m, ...updates } : m
+                m.id === msgId
+                  ? { ...m, ...updates,
+                      previousVersions:
+                        m.content !== updates.content && updates.content
+                          ? [...(m.previousVersions || []), { content: m.content, editedAt: getTimestamp() }]
+                          : m.previousVersions,
+                    }
+                  : m
               ),
               updatedAt: getTimestamp(),
             }
@@ -135,6 +144,22 @@ export const useDialogStore = create<DialogState>((set, get) => ({
     set(state => ({
       dialogs: state.dialogs.map(d =>
         d.id === id ? { ...d, status: d.status === 'archived' ? 'active' : 'archived', updatedAt: getTimestamp() } : d
+      ),
+    }))
+  },
+
+  tagDialog: (id, tag) => {
+    set(state => ({
+      dialogs: state.dialogs.map(d =>
+        d.id === id ? { ...d, tags: [...(d.tags || []), tag], updatedAt: getTimestamp() } : d
+      ),
+    }))
+  },
+
+  untagDialog: (id, tag) => {
+    set(state => ({
+      dialogs: state.dialogs.map(d =>
+        d.id === id ? { ...d, tags: (d.tags || []).filter(t => t !== tag), updatedAt: getTimestamp() } : d
       ),
     }))
   },
