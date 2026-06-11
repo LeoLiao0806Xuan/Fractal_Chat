@@ -60,6 +60,3 @@ export interface SubDialog {
   mergedAt?: string
 }
 
-export type DialogTree = Dialog & {
-  children: DialogTree[]
-}

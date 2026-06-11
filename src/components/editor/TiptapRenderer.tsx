@@ -11,45 +11,48 @@ interface Props {
   editable?: boolean
 }
 
-// ── Marked config ──
-marked.setOptions({ breaks: true, gfm: true })
+// ── Marked config (one-time init) ──
+let markedInitialized = false
+function ensureMarkedExtensions() {
+  if (markedInitialized) return
+  markedInitialized = true
 
-// ── Math formula extensions for marked ──
-// Renders $...$ and $$...$$ as styled inline/block code so they're at least readable
-marked.use({
-  gfm: true,
-  breaks: true,
-  extensions: [
-    {
-      name: 'blockMath',
-      level: 'block',
-      start(src: string) { return src.indexOf('$$'); },
-      tokenizer(src: string) {
-        const match = src.match(/^\$\$([\s\S]*?)\$\$/);
-        if (match) {
-          return { type: 'blockMath', raw: match[0], text: match[1].trim() };
-        }
+  marked.setOptions({ breaks: true, gfm: true })
+  marked.use({
+    gfm: true,
+    breaks: true,
+    extensions: [
+      {
+        name: 'blockMath',
+        level: 'block',
+        start(src: string) { return src.indexOf('$$'); },
+        tokenizer(src: string) {
+          const match = src.match(/^\$\$([\s\S]*?)\$\$/);
+          if (match) {
+            return { type: 'blockMath', raw: match[0], text: match[1].trim() };
+          }
+        },
+        renderer(token: any) {
+          return `<div class="math-block bg-gray-50 rounded-lg p-3 my-2 text-xs font-mono border border-gray-200 overflow-x-auto">${token.text}</div>`;
+        },
       },
-      renderer(token: any) {
-        return `<div class="math-block bg-gray-50 rounded-lg p-3 my-2 text-xs font-mono border border-gray-200 overflow-x-auto">${token.text}</div>`;
+      {
+        name: 'inlineMath',
+        level: 'inline',
+        start(src: string) { return src.indexOf('$'); },
+        tokenizer(src: string) {
+          const match = src.match(/^\$([^\n$]+?)\$/);
+          if (match) {
+            return { type: 'inlineMath', raw: match[0], text: match[1] };
+          }
+        },
+        renderer(token: any) {
+          return `<code class="math-inline bg-gray-100 text-purple-700 px-1 rounded text-xs font-mono">${token.text}</code>`;
+        },
       },
-    },
-    {
-      name: 'inlineMath',
-      level: 'inline',
-      start(src: string) { return src.indexOf('$'); },
-      tokenizer(src: string) {
-        const match = src.match(/^\$([^\n$]+?)\$/);
-        if (match) {
-          return { type: 'inlineMath', raw: match[0], text: match[1] };
-        }
-      },
-      renderer(token: any) {
-        return `<code class="math-inline bg-gray-100 text-purple-700 px-1 rounded text-xs font-mono">${token.text}</code>`;
-      },
-    },
-  ],
-})
+    ],
+  })
+}
 
 export function TiptapRenderer({ content, className, onSelection, editable = false }: Props) {
   const editorRef = useRef<HTMLDivElement>(null)
@@ -57,6 +60,7 @@ export function TiptapRenderer({ content, className, onSelection, editable = fal
   // Convert markdown to HTML
   const html = useMemo(() => {
     if (!content) return '<p></p>'
+    ensureMarkedExtensions()
     try {
       const result = marked.parse(content)
       return typeof result === 'string' ? result : result.toString()

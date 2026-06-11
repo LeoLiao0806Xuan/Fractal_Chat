@@ -42,14 +42,6 @@ export function getSessionKey(modelId: string): string | undefined {
   return sessionKeyStore.get(modelId)
 }
 
-export function removeSessionKey(modelId: string) {
-  sessionKeyStore.delete(modelId)
-}
-
-export function clearAllSessionKeys() {
-  sessionKeyStore.clear()
-}
-
 // Session password (used to encrypt new keys)
 let sessionPassword: string | null = null
 

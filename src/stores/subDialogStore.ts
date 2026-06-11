@@ -1,10 +1,4 @@
 import { create } from 'zustand'
-import type { MergeMode } from '../lib/mergeUtils'
-
-export interface MergeInfo {
-  mode: MergeMode
-  mergedAt: string
-}
 
 export interface SubDialogState {
   /** Whether sub-dialog panel is open */

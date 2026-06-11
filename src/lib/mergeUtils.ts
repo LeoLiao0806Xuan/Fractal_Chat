@@ -2,12 +2,6 @@ import type { Dialog } from './types'
 
 export type MergeMode = 'replace' | 'footnote' | 'keep-child'
 
-export interface MergeResult {
-  mode: MergeMode
-  mergedAt: string
-  conclusionText: string
-}
-
 /**
  * Build the conclusion text from a sub-dialog's messages.
  * Skips system messages, formats user/assistant exchange.
