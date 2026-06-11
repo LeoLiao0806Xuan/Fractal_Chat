@@ -15,6 +15,7 @@ interface TreeNode {
   isMerged: boolean
   mergeIcon: string
   status: string
+  updatedAt: string
 }
 
 export function DialogTree() {
@@ -206,8 +207,10 @@ export function DialogTree() {
   }, [renamingId])
 
   // Sort helper: use stored order map, fallback to created time
-  const sortNodes = (items: TreeNode[]) => {
-    return [...items].sort((a, b) => (dialogOrder[a.id] ?? Number.MAX_SAFE_INTEGER) - (dialogOrder[b.id] ?? Number.MAX_SAFE_INTEGER))
+  const sortNodes = (items: TreeNode[], sortByDate = false) => {
+    return [...items].sort((a, b) => sortByDate
+      ? new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      : (dialogOrder[a.id] ?? Number.MAX_SAFE_INTEGER) - (dialogOrder[b.id] ?? Number.MAX_SAFE_INTEGER))
   }
 
   // Build tree from flat dialog list (memoized)
@@ -228,6 +231,7 @@ export function DialogTree() {
           isMerged: child.title.startsWith('✏️') || child.title.startsWith('📎') || child.title.startsWith('🌿'),
           mergeIcon: child.title.startsWith('✏️') ? '🔀' : child.title.startsWith('📎') ? '📎' : child.title.startsWith('🌿') ? '🌿' : '',
           status: child.status,
+          updatedAt: child.updatedAt,
         })))
 
     return sortNodes(
@@ -245,6 +249,7 @@ export function DialogTree() {
         isMerged: false,
         mergeIcon: '',
         status: root.status,
+        updatedAt: root.updatedAt,
       })))
   }, [dialogs, dialogOrder])
   // Search state

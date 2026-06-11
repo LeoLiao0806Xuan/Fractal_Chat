@@ -12,6 +12,7 @@ export interface Message {
   status?: 'streaming' | 'complete' | 'error'
   tags?: string[]
   mergedFromSubDialogId?: string  // set when merged — links back to the sub-dialog
+  editedAt?: string        // ISO timestamp of last edit
 }
 
 /** Snapshot saved before a merge, enabling undo */
