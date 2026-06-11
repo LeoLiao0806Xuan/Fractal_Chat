@@ -264,11 +264,13 @@ export default function SubDialogPanel() {
           ) : null
         })()}
 
-        {/* Context */}
-        <div className="p-3 border-b border-gray-200 bg-yellow-50 shrink-0">
-          <div className="text-xs text-gray-500 mb-1">选中上下文：</div>
-          <div className="text-xs text-gray-700 bg-white rounded p-2 border border-gray-200 max-h-20 overflow-y-auto leading-relaxed">
-            <span className="text-yellow-600">"</span>{selectedText}<span className="text-yellow-600">"</span>
+        {/* Context reference */}
+        <div className="px-3 py-2 border-b border-gray-100 shrink-0">
+          <div className="flex items-start gap-2">
+            <span className="text-xs text-gray-400 mt-0.5 shrink-0">📎</span>
+            <div className="text-xs text-gray-500 leading-relaxed line-clamp-3 min-w-0">
+              <span className="text-gray-400">「</span>{selectedText}<span className="text-gray-400">」</span>
+            </div>
           </div>
         </div>
 

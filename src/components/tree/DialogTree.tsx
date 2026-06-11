@@ -2,6 +2,7 @@ import { useMemo, useState, useRef, useEffect } from 'react'
 import { useDialogStore } from '../../stores/dialogStore'
 import { useSubDialogStore } from '../../stores/subDialogStore'
 import { useModelStore } from '../../stores/modelStore'
+import { ModelConfigPanel } from '../model/ModelConfigPanel'
 
 interface TreeNode {
   id: string
@@ -158,6 +159,7 @@ export function DialogTree() {
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
   const modelButtonRef = useRef<HTMLButtonElement>(null)
   const modelDropdownRef = useRef<HTMLDivElement>(null)
+  const [showConfigPanel, setShowConfigPanel] = useState(false)
 
   // Close model dropdown on click outside
   useEffect(() => {
@@ -519,16 +521,26 @@ export function DialogTree() {
       </div>
 
       {/* Model selector footer */}
-      <div className="border-t border-gray-200 p-2 shrink-0 relative">
-        <button
-          onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
-          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs
-                     hover:bg-gray-100 transition-colors text-gray-600"
-        >
-          <span>🤖</span>
-          <span className="truncate flex-1 text-left">{activeModel?.name || '未配置模型'}</span>
-          <span className="text-gray-400">{modelDropdownOpen ? '▼' : '▲'}</span>
-        </button>
+      <div className="border-t border-gray-100 p-2 shrink-0 relative">
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
+            className="flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs
+                       hover:bg-gray-100 transition-colors text-gray-500 min-w-0"
+          >
+            <span>🤖</span>
+            <span className="truncate flex-1 text-left">{activeModel?.name || '未配置模型'}</span>
+            <span className="text-gray-300 shrink-0">{modelDropdownOpen ? '▼' : '▲'}</span>
+          </button>
+          <button
+            onClick={() => setShowConfigPanel(true)}
+            className="shrink-0 px-1.5 py-1.5 rounded-lg text-xs text-gray-400
+                       hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            title="管理模型配置"
+          >
+            ⚙️
+          </button>
+        </div>
 
         {modelDropdownOpen && (
                   <div className="fixed z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-1 animate-fade-in min-w-[180px]"
@@ -603,6 +615,9 @@ export function DialogTree() {
           </button>
         </div>
       )}
+
+      {/* Model config panel (modal overlay) */}
+      {showConfigPanel && <ModelConfigPanel onClose={() => setShowConfigPanel(false)} />}
     </div>
   )
 }
