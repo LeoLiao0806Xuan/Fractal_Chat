@@ -583,6 +583,19 @@ export function DialogTree() {
             </button>
           )}
           <button
+            onClick={() => {
+              const d = dialogs.find(dd => dd.id === contextMenu.id)
+              if (d) {
+                const ref = `→[${d.title.replace(/^[✏️📎🌿]\s*/, '')}](fc-dialog://${d.id})`
+                navigator.clipboard.writeText(ref).catch(() => {})
+              }
+              setContextMenu(null)
+            }}
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
+          >
+            🔗 复制对话引用
+          </button>
+          <button
             onClick={() => { handleDelete(null, contextMenu.id); setContextMenu(null) }}
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-red-50 hover:text-red-700 flex items-center gap-2"
           >

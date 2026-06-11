@@ -13,7 +13,11 @@ export default defineConfig({
         codeSplitting: true,
       },
     },
-    chunkSizeWarningLimit: 1000, // Tiptap + marked are heavy; gzip ~216KB which is fine
+    chunkSizeWarningLimit: 1000,
+  },
+  test: {
+    environment: 'jsdom',
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
   },
   plugins: [
     react(),

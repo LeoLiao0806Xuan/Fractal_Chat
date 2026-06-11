@@ -2,6 +2,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useEffect, useRef, useCallback, useMemo } from 'react'
 import { marked } from 'marked'
+import { useDialogStore } from '../../stores/dialogStore'
 
 interface Props {
   content: string
@@ -104,10 +105,23 @@ export function TiptapRenderer({ content, className, onSelection, editable = fal
     }
   }, [onSelection])
 
+  // Handle click on fc-dialog:// links → navigate to dialog
+  const handleRefClick = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    const link = target.closest('a[href^="fc-dialog://"]')
+    if (!link) return
+    e.preventDefault()
+    e.stopPropagation()
+    const href = link.getAttribute('href')
+    if (!href) return
+    const dialogId = href.replace('fc-dialog://', '')
+    useDialogStore.getState().setCurrentDialog(dialogId)
+  }, [])
+
   if (!editor) return null
 
   return (
-    <div ref={editorRef} onMouseUp={handleMouseUp} className={className}>
+    <div ref={editorRef} onMouseUp={handleMouseUp} onClick={handleRefClick} className={className}>
       <EditorContent editor={editor} />
     </div>
   )
