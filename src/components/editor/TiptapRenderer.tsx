@@ -3,11 +3,13 @@ import StarterKit from '@tiptap/starter-kit'
 import { useEffect, useRef, useCallback, useMemo } from 'react'
 import { marked } from 'marked'
 import { useDialogStore } from '../../stores/dialogStore'
+import { analyzeSelection } from '../../services/selectionEngine'
+import type { SelectionResult } from '../../services/selectionEngine'
 
 interface Props {
   content: string
   className?: string
-  onSelection?: (text: string, rect: DOMRect) => void
+  onSelection?: (result: SelectionResult) => void
   editable?: boolean
 }
 
@@ -78,7 +80,8 @@ export function TiptapRenderer({ content, className, onSelection, editable = fal
     editable,
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none',
+        class: 'prose prose-sm max-w-full focus:outline-none',
+        style: 'max-width: 100%; width: 100%;',
       },
     },
   })
@@ -96,17 +99,16 @@ export function TiptapRenderer({ content, className, onSelection, editable = fal
     }
   }, [html, editor, editable])
 
-  // Handle mouseup to detect text selection
+  // Handle mouseup to detect text selection — uses SelectionEngine
   const handleMouseUp = useCallback(() => {
     const selection = window.getSelection()
-    if (!selection || selection.isCollapsed || !selection.toString().trim()) return
+    if (!selection) return
 
     const container = editorRef.current
-    if (container && container.contains(selection.anchorNode)) {
-      const range = selection.getRangeAt(0)
-      const rect = range.getBoundingClientRect()
-      onSelection?.(selection.toString().trim(), rect)
-    }
+    if (!container || !container.contains(selection.anchorNode)) return
+
+    const result = analyzeSelection(selection)
+    if (result) onSelection?.(result)
   }, [onSelection])
 
   // Handle click on fc-dialog:// links → navigate to dialog

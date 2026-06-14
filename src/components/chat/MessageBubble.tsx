@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { Message } from '../../lib/types'
 import { TiptapRenderer } from '../editor/TiptapRenderer'
 import { SelectionMenu } from '../editor/SelectionMenu'
+import type { SelectionResult } from '../../services/selectionEngine'
 import { useSubDialogStore } from '../../stores/subDialogStore'
 import { useDialogStore } from '../../stores/dialogStore'
 import { getTimestamp } from '../../lib/utils'
@@ -19,7 +20,7 @@ function formatTime(iso: string): string {
 
 export function MessageBubble({ message }: Props) {
   const isUser = message.role === 'user'
-  const [selectionInfo, setSelectionInfo] = useState<{ text: string; rect: DOMRect } | null>(null)
+  const [selectionResult, setSelectionResult] = useState<SelectionResult | null>(null)
   const [editing, setEditing] = useState(false)
   const [editText, setEditText] = useState('')
   const editRef = useRef<HTMLTextAreaElement>(null)
@@ -34,13 +35,13 @@ export function MessageBubble({ message }: Props) {
     }
   }, [editing])
 
-  const handleSelection = (text: string, rect: DOMRect) => {
+  const handleSelection = (result: SelectionResult) => {
     if (isUser) return
-    setSelectionInfo({ text, rect })
+    setSelectionResult(result)
   }
 
   const handleSubDialog = (text: string, mode: string) => {
-    setSelectionInfo(null)
+    setSelectionResult(null)
     if (currentDialogId) {
       openSubDialog(text, mode, message.id, currentDialogId)
     }
@@ -67,110 +68,156 @@ export function MessageBubble({ message }: Props) {
     setEditing(false)
   }
 
-  const cancelEdit = () => {
-    setEditing(false)
-  }
+  const cancelEdit = () => setEditing(false)
+
+  const showStreaming = message.status === 'streaming'
+  const hasMerge = message.mergedFromSubDialogId && !isUser
+  const mergedDialog = hasMerge ? dialogs.find(d => d.id === message.mergedFromSubDialogId) : null
 
   return (
     <>
-      <div data-msg-id={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 relative group`}>
-        <div
-          className={`
-            max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed relative
-            ${isUser
-              ? 'bg-blue-600 text-white rounded-br-md'
-              : 'bg-gray-100 text-gray-900 rounded-bl-md'
-            }
-            ${message.status === 'streaming' ? 'animate-pulse' : ''}
-          `}
-        >
-          {/* Edit button (user messages only, on hover) */}
-          {isUser && !editing && message.status === 'complete' && (
-            <button
-              onClick={startEdit}
-              className="absolute -left-8 top-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-500 transition-all text-xs p-1"
-              title="编辑消息"
-            >
-              ✏️
-            </button>
-          )}
-
-          {editing ? (
-            <div className="space-y-2">
-              <textarea
-                ref={editRef}
-                value={editText}
-                onChange={e => setEditText(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && e.shiftKey) { e.preventDefault(); saveEdit() }
-                  if (e.key === 'Escape') cancelEdit()
-                }}
-                className="w-full bg-white text-gray-900 rounded-lg border border-blue-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                rows={3}
-              />
-              <div className="flex gap-2 justify-end">
-                <button onClick={cancelEdit}
-                  className="text-xs px-2.5 py-1 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-200 transition-colors">
-                  取消
-                </button>
-                <button onClick={saveEdit}
-                  className="text-xs px-2.5 py-1 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-                  保存
-                </button>
-              </div>
+      <div
+        data-msg-id={message.id}
+        className={`flex items-end ${isUser ? 'justify-end' : 'justify-start'} mb-5 group message-enter`}
+      >
+        {/* Assistant avatar */}
+        {!isUser && (
+          <div className="shrink-0 mr-2.5 mb-0.5">
+            <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600
+                            flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
+              AI
             </div>
-          ) : isUser ? (
-            <div className="whitespace-pre-wrap">{message.content}</div>
-          ) : (
-            <TiptapRenderer
-              content={message.content}
-              onSelection={handleSelection}
-            />
-          )}
+          </div>
+        )}
 
-          {/* Model badge */}
-          {message.model && !isUser && (
-            <div className="mt-1.5 flex items-center gap-1.5 select-none">
-              <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-600 leading-tight">
-                {message.model}
-              </span>
-            </div>
-          )}
-
-          {/* Timestamp + edited indicator */}
-          <div className={`flex items-center gap-2 mt-1 select-none ${isUser ? 'justify-end' : 'justify-start'}`}>
-            <span className="text-[10px] opacity-50 text-inherit">
-              {formatTime(message.createdAt)}
-              {message.editedAt && ' · 已编辑'}
-            </span>
-            </div>
-
-          {/* Merge navigation */}
-          {message.mergedFromSubDialogId && !isUser && (
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <button onClick={handleJumpToSubDialog}
-                className="text-xs text-blue-500 hover:text-blue-700 hover:underline flex items-center gap-1 transition-colors">
-                ↩ 跳转子对话
+        <div className={`${isUser ? '' : ''} max-w-[90%] min-w-0`}>
+          {/* Bubble */}
+          <div
+            className={`
+              relative rounded-2xl px-4 py-2.5 text-sm leading-relaxed
+              ${isUser
+                ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-br-sm shadow-md'
+                : 'bg-white text-[#171717] rounded-bl-sm border border-[#f0eff5] shadow-sm'
+              }
+              ${showStreaming ? 'shadow-indigo-200/30' : ''}
+              transition-shadow hover:shadow-md
+            `}
+          >
+            {/* Edit button (user messages, hover) */}
+            {isUser && !editing && message.status === 'complete' && (
+              <button
+                onClick={startEdit}
+                className="absolute -left-9 top-2 opacity-0 group-hover:opacity-100
+                           text-gray-400 hover:text-indigo-500 transition-all text-xs p-1
+                           bg-white rounded-lg shadow-sm border border-gray-100
+                           hover:border-indigo-200 hover:shadow-md"
+                title="编辑消息"
+              >
+                ✏️
               </button>
-              {dialogs.find(d => d.id === message.mergedFromSubDialogId)?.mergeSnapshot && (
-                <button onClick={() => {
-                  const subId = message.mergedFromSubDialogId
-                  if (subId) useDialogStore.getState().undoMerge(subId)
-                }}
-                  className="text-xs text-orange-500 hover:text-orange-700 hover:underline flex items-center gap-1 transition-colors">
-                  ↩️ 撤销合并
+            )}
+
+            {editing ? (
+              <div className="space-y-2 min-w-[300px]">
+                <textarea
+                  ref={editRef}
+                  value={editText}
+                  onChange={e => setEditText(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && e.shiftKey) { e.preventDefault(); saveEdit() }
+                    if (e.key === 'Escape') cancelEdit()
+                  }}
+                  className="w-full bg-white text-gray-900 rounded-xl border border-indigo-200
+                             px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2
+                             focus:ring-indigo-400 focus:border-transparent shadow-sm"
+                  rows={4}
+                />
+                <div className="flex gap-2 justify-end">
+                  <button onClick={cancelEdit}
+                    className="text-xs px-3 py-1.5 rounded-lg text-gray-500 hover:text-gray-700
+                               hover:bg-gray-100 transition-colors font-medium">
+                    取消
+                  </button>
+                  <button onClick={saveEdit}
+                    className="text-xs px-3 py-1.5 rounded-lg text-white font-medium shadow-sm
+                               bg-gradient-to-r from-indigo-500 to-purple-600
+                               hover:from-indigo-600 hover:to-purple-700 transition-all">
+                    保存 <span className="opacity-70">⌘⏎</span>
+                  </button>
+                </div>
+              </div>
+            ) : isUser ? (
+              <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-white/95">{message.content}</div>
+            ) : (
+              <div>
+                <TiptapRenderer content={message.content} onSelection={handleSelection} />
+              </div>
+            )}
+
+            {/* Bottom bar */}
+            {!editing && (
+              <div className={`flex items-center gap-2 mt-1.5 select-none flex-wrap ${
+                isUser ? 'justify-end' : 'justify-start'
+              }`}>
+                {message.model && !isUser && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md
+                                   text-[10px] font-medium bg-indigo-50 text-indigo-600
+                                   leading-tight border border-indigo-100/50">
+                    {message.model}
+                  </span>
+                )}
+                <span className={`text-[10px] ${isUser ? 'text-white/60' : 'text-gray-400'}`}>
+                  {formatTime(message.createdAt)}
+                  {message.editedAt && ' · 已编辑'}
+                </span>
+                {showStreaming && (
+                  <span className="inline-flex items-center gap-[3px] px-1">
+                    {[0, 0.2, 0.4].map(delay => (
+                      <span key={delay}
+                        className="w-1 h-1 rounded-full bg-indigo-400 animate-pulse-dot"
+                        style={{ animationDelay: `${delay}s` }}
+                      />
+                    ))}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Merge navigation link */}
+          {hasMerge && (
+            <div className="flex items-center gap-2 mt-1.5 px-1">
+              <button onClick={handleJumpToSubDialog}
+                className="text-[11px] text-indigo-500 hover:text-indigo-700 hover:underline
+                           flex items-center gap-1 transition-colors font-medium">
+                <span className="text-xs">↩</span> 查看子对话
+              </button>
+              {mergedDialog?.mergeSnapshot && (
+                <button onClick={() => useDialogStore.getState().undoMerge(message.mergedFromSubDialogId!)}
+                  className="text-[11px] text-amber-600 hover:text-amber-700 hover:underline
+                             flex items-center gap-1 transition-colors font-medium">
+                  <span className="text-xs">↩️</span> 撤销合并
                 </button>
               )}
             </div>
           )}
         </div>
+
+        {/* User avatar */}
+        {isUser && (
+          <div className="shrink-0 ml-2.5 mb-0.5">
+            <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-gray-600 to-gray-700
+                            flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
+              U
+            </div>
+          </div>
+        )}
       </div>
 
-      {selectionInfo && !isUser && (
+      {selectionResult && !isUser && (
         <SelectionMenu
-          selectedText={selectionInfo.text}
-          rect={selectionInfo.rect}
-          onClose={() => setSelectionInfo(null)}
+          selectionResult={selectionResult}
+          onClose={() => setSelectionResult(null)}
           onSubDialog={handleSubDialog}
         />
       )}

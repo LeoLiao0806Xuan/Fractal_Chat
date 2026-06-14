@@ -28,52 +28,37 @@ export function DialogTree() {
   const subDialogOpen = useSubDialogStore(s => s.isOpen)
   const currentSubId = useSubDialogStore(s => s.subDialogId)
 
-  // Rename state
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const renameInputRef = useRef<HTMLInputElement>(null)
 
-  // Collapse state: set of collapsed node IDs, persisted to localStorage
   const COLLAPSED_KEY = 'fractal-chat-collapsed'
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
 
-  // Load collapsed state from localStorage on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(COLLAPSED_KEY)
-      if (saved) setCollapsed(new Set(JSON.parse(saved)))
-    } catch { /* ignore */ }
+    try { const s = localStorage.getItem(COLLAPSED_KEY); if (s) setCollapsed(new Set(JSON.parse(s))) } catch {}
   }, [])
 
-  // Save collapsed state to localStorage
   useEffect(() => {
-    try {
-      localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed]))
-    } catch { /* ignore */ }
+    try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed])) } catch {}
   }, [collapsed])
 
   const toggleCollapse = (e: React.MouseEvent, id: string) => {
     e.stopPropagation()
     setCollapsed(prev => {
       const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
+      if (next.has(id)) next.delete(id); else next.add(id)
       return next
     })
   }
 
-  // ── Dialog order (drag-and-drop reordering) ──
   const ORDER_KEY = 'fractal-chat-order'
   const [dialogOrder, setDialogOrder] = useState<Record<string, number>>(() => {
     try { return JSON.parse(localStorage.getItem(ORDER_KEY) || '{}') } catch { return {} }
   })
 
-  // Persist dialog order to localStorage
-  useEffect(() => {
-    localStorage.setItem(ORDER_KEY, JSON.stringify(dialogOrder))
-  }, [dialogOrder])
+  useEffect(() => { localStorage.setItem(ORDER_KEY, JSON.stringify(dialogOrder)) }, [dialogOrder])
 
-  // Clean up orphaned order entries when dialogs are deleted
   useEffect(() => {
     const validIds = new Set(dialogs.map(d => d.id))
     const orphaned = Object.keys(dialogOrder).filter(id => !validIds.has(id))
@@ -84,8 +69,6 @@ export function DialogTree() {
     }
   }, [dialogs])
 
-
-  // Drag-and-drop state
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const [dropPosition, setDropPosition] = useState<'before' | 'after'>('after')
@@ -100,380 +83,223 @@ export function DialogTree() {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
     if (id === dragId) return
-
-    // Determine drop position (before/after based on mouse Y)
     const rect = (e.target as HTMLElement).closest('[data-node-id]')?.getBoundingClientRect()
     if (!rect) return
-    const midY = rect.top + rect.height / 2
-    const pos = e.clientY < midY ? 'before' : 'after'
-
+    setDropPosition(e.clientY < rect.top + rect.height / 2 ? 'before' : 'after')
     setDragOverId(id)
-    setDropPosition(pos)
   }
 
-  const handleDragLeave = () => {
-    setDragOverId(null)
-  }
+  const handleDragLeave = () => setDragOverId(null)
 
   const handleDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault()
     const sourceId = e.dataTransfer.getData('text/plain')
     if (!sourceId || sourceId === targetId) { setDragId(null); setDragOverId(null); return }
-
-    // Get siblings (same parent level) for both source and target
     const source = dialogs.find(d => d.id === sourceId)
     const target = dialogs.find(d => d.id === targetId)
-    if (!source || !target) { setDragId(null); setDragOverId(null); return }
+    if (!source || !target || source.parentDialogId !== target.parentDialogId) { setDragId(null); setDragOverId(null); return }
 
-    const parentId = source.parentDialogId
-    if (parentId !== target.parentDialogId) { setDragId(null); setDragOverId(null); return }
-
-    const siblings = dialogs.filter(d => d.parentDialogId === parentId)
+    const siblings = dialogs.filter(d => d.parentDialogId === source.parentDialogId)
     const sorted = [...siblings].sort((a, b) => (dialogOrder[a.id] ?? 0) - (dialogOrder[b.id] ?? 0))
     const sourceIdx = sorted.findIndex(d => d.id === sourceId)
-
-    // Remove source from sorted list
     sorted.splice(sourceIdx, 1)
-    const targetNewIdx = sorted.findIndex(d => d.id === targetId)
-    const insertAt = dropPosition === 'before' ? targetNewIdx : targetNewIdx + 1
+    const insertAt = sorted.findIndex(d => d.id === targetId) + (dropPosition === 'after' ? 1 : 0)
     sorted.splice(insertAt, 0, source)
 
-    // Reassign orders
-    const newOrder: Record<string, number> = { ...dialogOrder }
+    const newOrder: Record<string, number> = {}
     sorted.forEach((d, i) => { newOrder[d.id] = i })
     setDialogOrder(newOrder)
-    setDragId(null)
-    setDragOverId(null)
+    setDragId(null); setDragOverId(null)
   }
 
-  const handleDragEnd = () => {
-    setDragId(null)
-    setDragOverId(null)
-  }
+  const handleDragEnd = () => setDragId(null)
 
-  // Order managed by dialogOrder state
-
-  // Right-click context menu
   const [contextMenu, setContextMenu] = useState<{ id: string; x: number; y: number } | null>(null)
   const contextMenuRef = useRef<HTMLDivElement>(null)
 
   const handleContextMenu = (e: React.MouseEvent, id: string) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault(); e.stopPropagation()
     setContextMenu({ id, x: e.clientX, y: e.clientY })
   }
 
-  // Close context menu on click outside or Escape
   useEffect(() => {
     if (!contextMenu) return
-    const handleClick = (e: MouseEvent) => {
-      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
-        setContextMenu(null)
-      }
-    }
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setContextMenu(null)
-    }
-    const id = setTimeout(() => document.addEventListener('mousedown', handleClick), 0)
-    document.addEventListener('keydown', handleKey)
-    return () => {
-      clearTimeout(id)
-      document.removeEventListener('mousedown', handleClick)
-      document.removeEventListener('keydown', handleKey)
-    }
+    const h = (e: MouseEvent) => { if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) setContextMenu(null) }
+    const k = (e: KeyboardEvent) => { if (e.key === 'Escape') setContextMenu(null) }
+    const id = setTimeout(() => document.addEventListener('mousedown', h), 0)
+    document.addEventListener('keydown', k)
+    return () => { clearTimeout(id); document.removeEventListener('mousedown', h); document.removeEventListener('keydown', k) }
   }, [contextMenu])
 
-  const startRenaming = (id: string, currentName: string) => {
-    setRenamingId(id)
-    setRenameValue(currentName)
-  }
+  const startRenaming = (id: string, name: string) => { setRenamingId(id); setRenameValue(name) }
+  const confirmRename = () => { if (renamingId && renameValue.trim()) updateDialogTitle(renamingId, renameValue.trim()); setRenamingId(null) }
+  const cancelRename = () => setRenamingId(null)
 
-  const confirmRename = () => {
-    if (renamingId && renameValue.trim()) {
-      updateDialogTitle(renamingId, renameValue.trim())
-    }
-    setRenamingId(null)
-  }
-
-  const cancelRename = () => {
-    setRenamingId(null)
-  }
-
-  // Auto focus the rename input when it appears
   useEffect(() => {
-    if (renamingId && renameInputRef.current) {
-      renameInputRef.current.focus()
-      renameInputRef.current.select()
-    }
+    if (renamingId && renameInputRef.current) { renameInputRef.current.focus(); renameInputRef.current.select() }
   }, [renamingId])
 
-  // Sort helper: use stored order map, fallback to created time
-  const sortNodes = (items: TreeNode[], sortByDate = false) => {
-    return [...items].sort((a, b) => sortByDate
+  const sortNodes = (items: TreeNode[], byDate = false) =>
+    [...items].sort((a, b) => byDate
       ? new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
       : (dialogOrder[a.id] ?? Number.MAX_SAFE_INTEGER) - (dialogOrder[b.id] ?? Number.MAX_SAFE_INTEGER))
-  }
 
-  // Build tree from flat dialog list (memoized)
   const tree = useMemo((): TreeNode[] => {
-    const buildSubTree = (parentId: string): TreeNode[] =>
-      sortNodes(
-        dialogs
-          .filter(d => d.parentDialogId === parentId)
-          .map(child => ({
-          id: child.id,
-          name: child.title.replace(/^[✏️📎🌿]\s*/, ''),
-          messageCount: child.messages.length,
-          preview: getPreview(child.messages),
-          hasSubDialogs: dialogs.some(d => d.parentDialogId === child.id),
-          isSubDialog: true,
-          parentId,
-          children: buildSubTree(child.id),
-          isMerged: child.title.startsWith('✏️') || child.title.startsWith('📎') || child.title.startsWith('🌿'),
-          mergeIcon: child.title.startsWith('✏️') ? '🔀' : child.title.startsWith('📎') ? '📎' : child.title.startsWith('🌿') ? '🌿' : '',
-          status: child.status,
-          updatedAt: child.updatedAt,
-          tags: child.tags || [],
-        })))
-
-    return sortNodes(
-      dialogs
-        .filter(d => !d.parentDialogId)
-        .map(root => ({
-        id: root.id,
-        name: root.title,
-        messageCount: root.messages.length,
-        preview: getPreview(root.messages),
-        hasSubDialogs: dialogs.some(d => d.parentDialogId === root.id),
-        isSubDialog: false,
-        parentId: null,
-        children: buildSubTree(root.id),
-        isMerged: false,
-        mergeIcon: '',
-        status: root.status,
-        updatedAt: root.updatedAt,
-        tags: root.tags || [],
+    const build = (pid: string): TreeNode[] =>
+      sortNodes(dialogs.filter(d => d.parentDialogId === pid).map(c => ({
+        id: c.id,
+        name: c.title.replace(/^[✏️📎🌿]\s*/, ''),
+        messageCount: c.messages.length,
+        preview: getPreview(c.messages),
+        hasSubDialogs: dialogs.some(d => d.parentDialogId === c.id),
+        isSubDialog: true, parentId: pid,
+        children: build(c.id),
+        isMerged: /^[✏️📎🌿]/.test(c.title),
+        mergeIcon: c.title.startsWith('✏️') ? '🔀' : c.title.startsWith('📎') ? '📎' : '🌿',
+        status: c.status, updatedAt: c.updatedAt, tags: c.tags || [],
       })))
+
+    return sortNodes(dialogs.filter(d => !d.parentDialogId).map(r => ({
+      id: r.id, name: r.title, messageCount: r.messages.length,
+      preview: getPreview(r.messages), hasSubDialogs: dialogs.some(d => d.parentDialogId === r.id),
+      isSubDialog: false, parentId: null, children: build(r.id),
+      isMerged: false, mergeIcon: '', status: r.status, updatedAt: r.updatedAt, tags: r.tags || [],
+    })))
   }, [dialogs, dialogOrder])
-  // Search state
+
   const [searchQuery, setSearchQuery] = useState('')
   const [showArchived, setShowArchived] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Filter tree by search query (searches title + message content)
   const filteredTree = useMemo(() => {
     let nodes = tree
-    // Hide archived dialogs by default
     if (!showArchived) {
-      const hideArchived = (node: TreeNode): TreeNode | null => {
-        if (node.status === 'archived') return null
-        const children = node.children.map(hideArchived).filter((n): n is TreeNode => n !== null)
-        return { ...node, children }
+      const hide = (n: TreeNode): TreeNode | null => {
+        if (n.status === 'archived') return null
+        const children = n.children.map(hide).filter((x): x is TreeNode => x !== null)
+        return { ...n, children }
       }
-      nodes = tree.map(hideArchived).filter((n): n is TreeNode => n !== null)
+      nodes = tree.map(hide).filter((x): x is TreeNode => x !== null)
     }
     if (!searchQuery.trim()) return nodes
     const q = searchQuery.toLowerCase()
-
-    const filterNode = (node: TreeNode): TreeNode | null => {
-      const nameMatch = node.name.toLowerCase().includes(q)
-      const previewMatch = node.preview.toLowerCase().includes(q)
-      // Full-text search: check all message content
-      const dialog = dialogs.find(d => d.id === node.id)
-      const contentMatch = dialog?.messages.some(m => m.content.toLowerCase().includes(q))
-      const filteredChildren = node.children
-        .map(child => filterNode(child))
-        .filter((n): n is TreeNode => n !== null)
-      if (nameMatch || previewMatch || contentMatch || filteredChildren.length > 0) {
-        return { ...node, children: filteredChildren }
-      }
-      return null
+    const filter = (n: TreeNode): TreeNode | null => {
+      const nameM = n.name.toLowerCase().includes(q)
+      const prevM = n.preview.toLowerCase().includes(q)
+      const dialog = dialogs.find(d => d.id === n.id)
+      const contM = dialog?.messages.some(m => m.content.toLowerCase().includes(q))
+      const children = n.children.map(filter).filter((x): x is TreeNode => x !== null)
+      return (nameM || prevM || contM || children.length > 0) ? { ...n, children } : null
     }
-
-    return tree.map(root => filterNode(root)).filter((n): n is TreeNode => n !== null)
+    return tree.map(r => filter(r)).filter((x): x is TreeNode => x !== null)
   }, [tree, searchQuery, dialogs, showArchived])
 
-  // Focus search on Ctrl+F / Cmd+F
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'f' && !e.shiftKey) {
-        if (document.activeElement?.tagName !== 'INPUT') {
-          e.preventDefault()
-          searchInputRef.current?.focus()
-        }
+        if (document.activeElement?.tagName !== 'INPUT') { e.preventDefault(); searchInputRef.current?.focus() }
       }
-      // Ctrl+Shift+D / Cmd+Shift+D: create sub-dialog from selection
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
-        // Guard: don't fire when focus is in input/textarea
-        const tag = document.activeElement?.tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-        // Guard: don't fire if sub-dialog panel is already open
-        if (useSubDialogStore.getState().isOpen) return;
+        if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return
+        if (useSubDialogStore.getState().isOpen) return
         e.preventDefault()
         const sel = window.getSelection()
         if (!sel || sel.isCollapsed || !sel.toString().trim()) return
         const text = sel.toString().trim()
         const range = sel.getRangeAt(0)
-
-        // Find the dialog containing this selection
         const msgEl = range.commonAncestorContainer?.parentElement?.closest('[data-msg-id]')
         if (!msgEl) return
-        const messageId = msgEl.getAttribute('data-msg-id')
-        // Find parent dialog from the closest message list
-        const listEl = msgEl.closest('[data-dialog-id]')
-        const dialogId = listEl?.getAttribute('data-dialog-id')
-
-        if (messageId && dialogId) {
-          // If we're in a sub-dialog, use its ID as parent
-          const subDialogOpen = useSubDialogStore.getState().isOpen
-          const subDialogId = useSubDialogStore.getState().subDialogId
-          const parentDialogId = (subDialogOpen && subDialogId) ? subDialogId : dialogId
-          useSubDialogStore.getState().open(text, 'deep-dive', messageId, parentDialogId)
-        }
+        const mid = msgEl.getAttribute('data-msg-id')
+        const did = msgEl.closest('[data-dialog-id]')?.getAttribute('data-dialog-id')
+        if (mid && did) useSubDialogStore.getState().open(text, 'deep-dive', mid, did)
       }
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [])
 
-  const handleNewDialog = () => {
-    createDialog('新对话')
-  }
+  const handleNew = () => createDialog('新对话')
+  const handleDelete = (e: React.MouseEvent | null, id: string) => { e?.stopPropagation(); useDialogStore.getState().deleteDialog(id) }
 
-  const handleDelete = (e: React.MouseEvent | null, id: string) => {
-    e?.stopPropagation()
-    useDialogStore.getState().deleteDialog(id)
-  }
-
-  const renderNode = (node: TreeNode, depth: number = 0) => {
-    const isActive = node.id === currentDialogId
-    const hasChildren = node.children.length > 0
-    const isDragOver = dragOverId === node.id
-    const showBefore = isDragOver && dropPosition === 'before'
-    const showAfter = isDragOver && dropPosition === 'after'
+  const renderNode = (node: TreeNode, depth = 0) => {
+    const active = node.id === currentDialogId
+    const hasKids = node.children.length > 0
+    const expanded = !collapsed.has(node.id)
+    const isOver = dragOverId === node.id
+    const indent = node.isSubDialog ? `${Math.min(depth, 8) * 14 + 8}px` : '12px'
 
     return (
       <div key={node.id}>
-        <div
-          className={`
-            flex items-start gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm
-            transition-all group relative
-            ${node.isSubDialog
-              ? 'ml-3 border-l-2 ' + (isActive ? 'border-blue-400 bg-blue-50/50' : 'border-gray-200 hover:border-gray-300')
-              : ''
-            }
-            ${isActive && !node.isSubDialog
-              ? 'bg-blue-100 text-blue-800 font-medium'
-              : node.isSubDialog
-                ? 'hover:bg-gray-50 text-gray-700'
-                : 'hover:bg-gray-100 text-gray-800'
-            }
-          `}
-          data-node-id={node.id}
+        {isOver && dropPosition === 'before' && <div className="h-0.5 bg-indigo-400 rounded-full mx-3" />}
+        <div data-node-id={node.id}
           draggable={renamingId !== node.id}
-          onDragStart={(e) => handleDragStart(e, node.id)}
-          onDragOver={(e) => handleDragOver(e, node.id)}
+          onDragStart={e => handleDragStart(e, node.id)}
+          onDragOver={e => handleDragOver(e, node.id)}
           onDragLeave={handleDragLeave}
-          onDrop={(e) => handleDrop(e, node.id)}
+          onDrop={e => handleDrop(e, node.id)}
           onDragEnd={handleDragEnd}
-          style={{ paddingLeft: `${node.isSubDialog ? 8 : 12}px` }}
-          onContextMenu={(e) => handleContextMenu(e, node.id)}
-          onClick={() => {
-            // Don't navigate main area to sub-dialog if the panel is already open
-            if (subDialogOpen && currentSubId === node.id) return
-            setCurrentDialog(node.id)
-          }}
-        >
-          {/* Collapse toggle (only for nodes with children) */}
-          {hasChildren ? (
-            <button
-              onClick={(e) => toggleCollapse(e, node.id)}
-              className="shrink-0 mt-0.5 text-xs w-4 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {collapsed.has(node.id) ? '▶' : '▼'}
+          onContextMenu={e => handleContextMenu(e, node.id)}
+          onClick={() => { if (!(subDialogOpen && currentSubId === node.id)) setCurrentDialog(node.id) }}
+          className={`flex items-start gap-1.5 px-3 py-2 rounded-lg cursor-pointer text-sm
+                      transition-all duration-150 group relative select-none
+                      ${active
+                        ? 'bg-gradient-to-r from-indigo-50 to-purple-50/50 text-indigo-700 font-medium shadow-sm'
+                        : 'text-[#52525b] hover:bg-[#f1f0ff]'
+                      }
+                      ${node.isSubDialog ? 'border-l-[2.5px] border-l-[#e4e3ed]' : ''}
+                      ${active && node.isSubDialog ? '!border-l-indigo-400' : ''}
+                      ${isOver ? 'ring-2 ring-indigo-300 ring-inset' : ''}`}
+          style={{ paddingLeft: indent }}>
+          {hasKids ? (
+            <button onClick={e => toggleCollapse(e, node.id)}
+              className="shrink-0 mt-0.5 w-4 text-[10px] text-[#a3a3a3] hover:text-[#6366f1] transition-colors">
+              {expanded ? '▼' : '▶'}
             </button>
-          ) : (
-            <span className="shrink-0 w-4" />
-          )}
-
-          {/* Status icon */}
+          ) : <span className="shrink-0 w-4" />}
           <span className="shrink-0 mt-0.5 text-sm">
             {node.isSubDialog
-              ? node.isMerged ? node.mergeIcon : '↳'
-              : hasChildren ? '📁' : '💬'
+              ? node.isMerged
+                ? <span className="text-emerald-500">{node.mergeIcon}</span>
+                : <span className="text-[#a3a3a3]">↳</span>
+              : hasKids
+                ? <span className="text-amber-500">📁</span>
+                : <span className="text-indigo-400">💬</span>
             }
           </span>
-
-          {/* Title + preview */}
           <div className="flex-1 min-w-0">
-            <div className="truncate flex items-center gap-1" onDoubleClick={(e) => { e.stopPropagation(); startRenaming(node.id, node.name) }}>
+            <div className="flex items-center gap-1" onDoubleClick={e => { e.stopPropagation(); startRenaming(node.id, node.name) }}>
               {renamingId === node.id ? (
-                <input
-                  ref={renameInputRef}
-                  type="text"
-                  value={renameValue}
+                <input ref={renameInputRef} type="text" value={renameValue}
                   onChange={e => setRenameValue(e.target.value)}
-                  onKeyDown={e => {
-                    e.stopPropagation()
-                    if (e.key === 'Enter') confirmRename()
-                    else if (e.key === 'Escape') cancelRename()
-                  }}
-                  onBlur={confirmRename}
-                  onClick={e => e.stopPropagation()}
-                  className="w-full px-1 py-0.5 text-sm border border-blue-400 rounded
-                             outline-none focus:ring-1 focus:ring-blue-300 bg-white"
-                />
+                  onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter') confirmRename(); else if (e.key === 'Escape') cancelRename() }}
+                  onBlur={confirmRename} onClick={e => e.stopPropagation()}
+                  className="w-full px-1.5 py-0.5 text-sm border border-indigo-400 rounded-md
+                             outline-none focus:ring-2 focus:ring-indigo-300 bg-white shadow-sm"
+                  autoFocus />
               ) : (
-                <span className="truncate cursor-pointer hover:text-blue-600">{node.name}</span>
+                <span className={`truncate ${active ? 'text-indigo-700' : ''}`}>{node.name}</span>
               )}
-              {node.isMerged && (
-                <>
-                  <span className="text-xs text-green-600 shrink-0">已合并</span>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); useDialogStore.getState().undoMerge(node.id) }}
-                    className="text-xs text-orange-400 hover:text-orange-600 shrink-0 hover:underline ml-0.5"
-                    title="撤销合并"
-                  >
-                    ↩
-                  </button>
-                </>
-              )}
-              {node.status === 'archived' && (
-                <span className="text-xs text-gray-400 shrink-0">已归档</span>
-              )}
+              {node.isMerged && <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-medium shrink-0">已合并</span>}
+              {node.status === 'archived' && <span className="text-[10px] text-[#a3a3a3] shrink-0">📦</span>}
             </div>
             {node.preview && renamingId !== node.id && (
-              <div className="text-xs text-gray-400 truncate mt-0.5">{node.preview}</div>
+              <div className={`text-xs truncate mt-0.5 ${active ? 'text-indigo-400/70' : 'text-[#a3a3a3]'}`}>{node.preview}</div>
             )}
           </div>
-
-          {/* Message count badge */}
           {node.messageCount > 0 && (
-            <span className="text-xs text-gray-400 shrink-0 mt-0.5">{node.messageCount}</span>
+            <span className={`text-[10px] shrink-0 mt-0.5 ${active ? 'text-indigo-400' : 'text-[#a3a3a3]'}`}>
+              {node.messageCount}
+            </span>
           )}
-
-          {/* Delete button (show on hover) */}
-          <button
-            onClick={(e) => handleDelete(e, node.id)}
-            className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs shrink-0 mt-0.5 transition-opacity"
-            title="删除"
-          >
-            ✕
-          </button>
+          <button onClick={e => handleDelete(e, node.id)}
+            className="opacity-0 group-hover:opacity-100 text-[#a3a3a3] hover:text-red-500
+                       text-xs shrink-0 mt-0.5 transition-all"
+            title="删除">✕</button>
         </div>
-
-        {/* Children (sub-dialogs) */}
-        {/* Drag-over indicator: line above */}
-        {showBefore && <div className="h-0.5 bg-blue-400 rounded-full mx-2" />}
-
-        {hasChildren && !collapsed.has(node.id) && (
-          <div className="animate-slide-down">
-            {node.children.map(child => renderNode(child, depth + 1))}
-          </div>
+        {hasKids && expanded && (
+          <div className="animate-slide-down">{node.children.map(c => renderNode(c, depth + 1))}</div>
         )}
-
-        {/* Drag-over indicator: line below */}
-        {showAfter && <div className="h-0.5 bg-blue-400 rounded-full mx-2" />}
+        {isOver && dropPosition === 'after' && <div className="h-0.5 bg-indigo-400 rounded-full mx-3" />}
       </div>
     )
   }
@@ -481,174 +307,106 @@ export function DialogTree() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-3 border-b border-gray-200 space-y-2">
-        <button
-          onClick={handleNewDialog}
-          className="w-full bg-blue-600 text-white rounded-lg px-3 py-2 text-sm font-medium
-                     hover:bg-blue-700 transition-colors"
-        >
+      <div className="p-3 border-b border-[#f0eff5] space-y-2">
+        <button onClick={handleNew}
+          className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl
+                     px-3 py-2.5 text-sm font-medium hover:from-indigo-600 hover:to-purple-700
+                     transition-all shadow-sm hover:shadow-md active:scale-[0.98]">
           + 新建对话
         </button>
 
-        {/* Search input */}
         <div className="relative">
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">🔍</span>
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#a3a3a3] text-xs leading-none">🔍</span>
+          <input ref={searchInputRef} type="text" value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={e => { if (e.key === 'Escape') { setSearchQuery(''); searchInputRef.current?.blur() } }}
             placeholder="搜索对话..."
-            className="w-full pl-7 pr-2 py-1.5 text-xs border border-gray-200 rounded-lg
-                       focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300
-                       bg-gray-50"
-          />
+            className="w-full pl-8 pr-7 py-1.5 text-xs border border-[#e4e3ed] rounded-lg
+                       focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300
+                       bg-[#f8f7fc] focus:bg-white transition-all placeholder:text-[#a3a3a3]" />
           {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
-            >
-              ✕
-            </button>
+            <button onClick={() => setSearchQuery('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-[#a3a3a3] hover:text-gray-600 text-xs">✕</button>
           )}
         </div>
-        {/* Archived toggle */}
-        <button
-          onClick={() => setShowArchived(!showArchived)}
-          className={`text-xs w-full text-left px-2 py-1 rounded-lg transition-colors ${
-            showArchived
-              ? 'bg-gray-100 text-gray-600'
-              : 'text-gray-400 hover:text-gray-500 hover:bg-gray-50'
-          }`}
-        >
+
+        <button onClick={() => setShowArchived(!showArchived)}
+          className={`text-xs w-full text-left px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5
+            ${showArchived ? 'bg-[#f1f0ff] text-indigo-600' : 'text-[#a3a3a3] hover:text-gray-500 hover:bg-gray-50'}`}>
           {showArchived ? '📂 显示全部' : '📦 隐藏已归档'}
         </button>
       </div>
 
       {/* Tree */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
+      <div className="flex-1 overflow-y-auto py-1 px-1.5 space-y-0.5">
         {filteredTree.length === 0 ? (
-          <div className="text-center text-gray-400 text-sm py-8">
-            {searchQuery ? '未找到匹配的对话' : '暂无对话'}
+          <div className="text-center text-[#a3a3a3] text-sm py-12 px-4">
+            <div className="text-2xl mb-2 opacity-50">{searchQuery ? '🔍' : '💬'}</div>
+            <p>{searchQuery ? '未找到匹配的对话' : '暂无对话'}</p>
           </div>
-        ) : (
-          filteredTree.map(node => renderNode(node, 0))
-        )}
+        ) : filteredTree.map(n => renderNode(n, 0))}
       </div>
 
-      {/* Right-click context menu */}
+      {/* Context menu */}
       {contextMenu && (
-        <div
-          ref={contextMenuRef}
-          className="fixed z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-1 min-w-[120px] animate-fade-in"
-          style={{ left: contextMenu.x, top: contextMenu.y }}
-        >
-          <button
-            onClick={() => {
-              const dialog = dialogs.find(d => d.id === contextMenu.id)
-              startRenaming(contextMenu.id, dialog?.title?.replace(/^[✏️📎🌿]\s*/, '') || '')
+        <div ref={contextMenuRef}
+          className="fixed z-[9999] bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl
+                     border border-[#f0eff5]/80 py-1.5 min-w-[160px] animate-fade-in overflow-hidden"
+          style={{ left: contextMenu.x, top: contextMenu.y }}>
+          {[
+            { label: '✏️ 重命名', action: () => {
+              const d = dialogs.find(x => x.id === contextMenu.id)
+              startRenaming(contextMenu.id, d?.title?.replace(/^[✏️📎🌿]\s*/, '') || '')
               setContextMenu(null)
-            }}
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2"
-          >
-            ✏️ 重命名
-          </button>
-          {dialogs.find(d => d.id === contextMenu.id)?.mergeSnapshot && (
-            <button
-              onClick={() => { useDialogStore.getState().undoMerge(contextMenu.id); setContextMenu(null) }}
-              className="w-full text-left px-3 py-1.5 text-sm hover:bg-orange-50 hover:text-orange-700 flex items-center gap-2"
-            >
-              ↩️ 撤销合并
-            </button>
+            }, hover: 'hover:bg-indigo-50 hover:text-indigo-700' },
+            ...(dialogs.find(d => d.id === contextMenu.id)?.mergeSnapshot
+              ? [{ label: '↩️ 撤销合并', action: () => { useDialogStore.getState().undoMerge(contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-amber-50 hover:text-amber-700' }] : []),
+            { label: '🔗 复制引用', action: () => {
+              const d = dialogs.find(x => x.id === contextMenu.id)
+              if (d) navigator.clipboard.writeText(`→[${d.title.replace(/^[✏️📎🌿]\s*/, '')}](fc-dialog://${d.id})`).catch(() => {})
+              setContextMenu(null)
+            }, hover: 'hover:bg-purple-50 hover:text-purple-700' },
+            null,
+            { label: '📥 导出 MD', action: () => { const d = dialogs.find(x => x.id === contextMenu.id); if (d) exportDialogToMarkdown(d, dialogs); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true },
+            { label: '📥 导出 JSON', action: () => { const d = dialogs.find(x => x.id === contextMenu.id); if (d) exportDialogToJSON(d, dialogs); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true },
+            null,
+            { label: '🏷️ 添加标签', action: () => { const tag = prompt('输入标签：'); if (tag?.trim()) useDialogStore.getState().tagDialog(contextMenu.id, tag.trim()); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true },
+            ...(dialogs.find(d => d.id === contextMenu.id)?.tags?.length
+              ? [{ tags: dialogs.find(d => d.id === contextMenu.id)?.tags || [] }] : []),
+            null,
+            (dialogs.find(d => d.id === contextMenu.id)?.status === 'archived'
+              ? { label: '📂 取消归档', action: () => { useDialogStore.getState().archiveDialog(contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true }
+              : { label: '📦 归档', action: () => { useDialogStore.getState().archiveDialog(contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true }),
+            null,
+            { label: '🗑️ 删除', action: () => { handleDelete(null, contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-red-50 hover:text-red-700', danger: true },
+          ].filter(Boolean).map((item: any, i) =>
+            item === null ? <div key={i} className="border-t border-[#f0eff5] my-1" /> :
+            item.tags ? (
+              <div key={i} className="flex flex-wrap gap-1 px-3 py-1.5">
+                {item.tags.map((t: string) => (
+                  <span key={t} className="inline-flex items-center gap-1 text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-full">
+                    {t}
+                    <button onClick={() => { useDialogStore.getState().untagDialog(contextMenu.id, t); setContextMenu(null) }}
+                      className="text-indigo-400 hover:text-red-500 ml-0.5">✕</button>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <button key={i} onClick={item.action}
+                className={`w-full text-left px-3 py-1.5 text-sm flex items-center gap-2 transition-colors ${item.hover || 'hover:bg-gray-50'}`}>
+                {item.label}
+              </button>
+            )
           )}
-          <button
-            onClick={() => {
-              const d = dialogs.find(dd => dd.id === contextMenu.id)
-              if (d) {
-                const ref = `→[${d.title.replace(/^[✏️📎🌿]\s*/, '')}](fc-dialog://${d.id})`
-                navigator.clipboard.writeText(ref).catch(() => {})
-              }
-              setContextMenu(null)
-            }}
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
-          >
-            🔗 复制对话引用
-          </button>
-          <div className="border-t border-gray-100 my-1" />
-          <button
-            onClick={() => {
-              const d = dialogs.find(dd => dd.id === contextMenu.id)
-              if (d) exportDialogToMarkdown(d, dialogs)
-              setContextMenu(null)
-            }}
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 text-gray-600 flex items-center gap-2"
-          >
-            📥 导出 Markdown
-          </button>
-          <button
-            onClick={() => {
-              const d = dialogs.find(dd => dd.id === contextMenu.id)
-              if (d) exportDialogToJSON(d, dialogs)
-              setContextMenu(null)
-            }}
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 text-gray-600 flex items-center gap-2"
-          >
-            📥 导出 JSON
-          </button>
-          <div className="border-t border-gray-100 my-1" />
-          <button
-            onClick={() => {
-              const tag = prompt('输入标签名称：')
-              if (tag && tag.trim()) useDialogStore.getState().tagDialog(contextMenu.id, tag.trim())
-              setContextMenu(null)
-            }}
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 text-gray-600 flex items-center gap-2"
-          >
-            🏷️ 添加标签
-          </button>
-          <div className="flex flex-wrap gap-1 px-3 py-1.5">
-            {(dialogs.find(d => d.id === contextMenu.id)?.tags || []).map(tag => (
-              <span key={tag} className="inline-flex items-center gap-1 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">
-                {tag}
-                <button onClick={(e) => { e.stopPropagation(); useDialogStore.getState().untagDialog(contextMenu.id, tag); setContextMenu(null) }} className="text-gray-400 hover:text-red-500 ml-0.5">✕</button>
-              </span>
-            ))}
-          </div>
-          <div className="border-t border-gray-100 my-1" />
-          <button
-            onClick={() => {
-              useDialogStore.getState().archiveDialog(contextMenu.id)
-              setContextMenu(null)
-            }}
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 text-gray-600 flex items-center gap-2"
-          >
-            {dialogs.find(d => d.id === contextMenu.id)?.status === 'archived' ? '📂 取消归档' : '📦 归档'}
-          </button>
-          <div className="border-t border-gray-100 my-1" />
-          <button
-            onClick={() => { handleDelete(null, contextMenu.id); setContextMenu(null) }}
-            className="w-full text-left px-3 py-1.5 text-sm hover:bg-red-50 hover:text-red-700 flex items-center gap-2"
-          >
-            🗑️ 删除
-          </button>
         </div>
       )}
-
-      {/* Model config panel (modal overlay) */}
     </div>
   )
 }
 
-/** Extract first user or assistant message as preview text */
 function getPreview(messages: { role: string; content: string }[]): string {
   const first = messages.find(m => m.role === 'user' || m.role === 'assistant')
   if (!first) return ''
-  const text = first.content
-    .replace(/<[^>]+>/g, '')    // strip HTML
-    .replace(/```[\s\S]*?```/g, '') // strip code blocks
-    .replace(/#{1,6}\s/g, '')   // strip markdown headers
-    .replace(/\n+/g, ' ')       // collapse newlines
-    .trim()
+  const text = first.content.replace(/<[^>]+>/g, '').replace(/```[\s\S]*?```/g, '').replace(/#{1,6}\s/g, '').replace(/\n+/g, ' ').trim()
   return text.length > 60 ? text.slice(0, 60) + '…' : text
 }

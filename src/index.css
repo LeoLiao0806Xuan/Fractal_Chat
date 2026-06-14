@@ -1,50 +1,199 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ═══════════════════════════════════════════════════
+   Fractal Chat — Design System
+   ═══════════════════════════════════════════════════ */
+
+:root {
+  /* ── Brand ── */
+  --brand-hue: 245;
+  --brand-primary: #6366f1;
+  --brand-primary-hover: #4f46e5;
+  --brand-primary-light: #eef2ff;
+  --brand-secondary: #8b5cf6;
+  --brand-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+
+  /* ── Surfaces ── */
+  --bg-app: #f8f7fc;
+  --bg-surface: #ffffff;
+  --bg-sidebar: #faf9fe;
+  --bg-sidebar-hover: #f1f0ff;
+  --bg-input: #f8f7fc;
+
+  /* ── Text ── */
+  --text-primary: #171717;
+  --text-secondary: #737373;
+  --text-tertiary: #a3a3a3;
+  --text-inverse: #ffffff;
+  --text-link: #6366f1;
+  --text-link-hover: #4f46e5;
+
+  /* ── Borders ── */
+  --border-light: #f0eff5;
+  --border-medium: #e4e3ed;
+  --border-strong: #d4d4d8;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+
+  /* ── Radius ── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  /* ── Font ── */
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", "Noto Sans SC", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Consolas", monospace;
 }
 
-/* ── ProseMirror / Tiptap ── */
-.ProseMirror {
-  outline: none;
-  min-height: 1em;
-}
-.ProseMirror p { margin: 0; }
-.ProseMirror code {
-  background: #f3f4f6;
-  border-radius: 3px;
-  padding: 1px 4px;
-  font-size: 0.875em;
-}
-.ProseMirror pre code {
-  background: none;
-  padding: 0;
+/* ── Base ── */
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 /* ── Selection ── */
-::selection { background: #93c5fd; }
+::selection { background: rgba(99, 102, 241, 0.2); }
+.ProseMirror ::selection { background: rgba(99, 102, 241, 0.25); }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
+  background: var(--border-medium);
+  border-radius: 2px;
+  transition: background 0.2s;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+/* ═══════════════════════════════════════════════════
+   ProseMirror / Tiptap 排版
+   ═══════════════════════════════════════════════════ */
+
+.ProseMirror {
+  outline: none;
+  min-height: 1em;
+  line-height: 1.7;
+}
+.ProseMirror p { margin: 0; }
+.ProseMirror > * + * { margin-top: 0.5em; }
+
+.ProseMirror code {
+  background: #f1f0ff;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.85em;
+  font-family: var(--font-mono);
+  color: #7c3aed;
 }
 
-/* ── Animations ── */
+.ProseMirror pre {
+  background: #0f0d1a;
+  color: #e2e0ed;
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  margin: 0.75em 0;
+  font-family: var(--font-mono);
+}
+.ProseMirror pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid var(--brand-primary-light);
+  padding-left: 14px;
+  color: var(--text-secondary);
+  margin: 0.5em 0;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.4em;
+}
+.ProseMirror li { margin: 0.15em 0; }
+
+.ProseMirror h1, .ProseMirror h2, .ProseMirror h3 {
+  line-height: 1.35;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.ProseMirror h1 { font-size: 1.4em; margin: 0.6em 0 0.25em; }
+.ProseMirror h2 { font-size: 1.2em; margin: 0.5em 0 0.2em; }
+.ProseMirror h3 { font-size: 1.05em; margin: 0.35em 0 0.15em; }
+
+.ProseMirror img { max-width: 100%; border-radius: var(--radius-md); }
+
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid var(--border-light);
+  margin: 1em 0;
+}
+
+.ProseMirror a {
+  color: var(--text-link);
+  text-decoration: none;
+}
+.ProseMirror a:hover {
+  text-decoration: underline;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5em 0;
+}
+.ProseMirror th, .ProseMirror td {
+  border: 1px solid var(--border-medium);
+  padding: 6px 10px;
+  text-align: left;
+}
+.ProseMirror th {
+  background: var(--bg-sidebar);
+  font-weight: 600;
+}
+
+/* ── Math blocks ── */
+.math-block {
+  background: #f8f7fc;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin: 0.5em 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  border: 1px solid var(--border-light);
+  overflow-x: auto;
+}
+.math-inline {
+  background: #f1f0ff;
+  color: #7c3aed;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* ═══════════════════════════════════════════════════
+   Animations (refined)
+   ═══════════════════════════════════════════════════ */
 
 @keyframes slide-in-right {
   from { transform: translateX(100%); opacity: 0; }
@@ -52,8 +201,13 @@ body {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-down {
@@ -66,17 +220,31 @@ body {
   to   { opacity: 1; transform: scale(1); }
 }
 
-@keyframes pulse-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
 .animate-slide-in-right {
-  animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slide-in-right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-fade-in {
   animation: fade-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-slide-down {
@@ -88,8 +256,25 @@ body {
   animation: fade-in-scale 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.animate-pulse-soft {
-  animation: pulse-soft 2s ease-in-out infinite;
+.animate-pulse-dot {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ── Message enter animation ── */
+.message-enter {
+  animation: fade-in-up 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Skeleton loading ── */
+.skeleton {
+  background: linear-gradient(90deg, #f0eff5 25%, #e8e7f0 50%, #f0eff5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
 }
 
 /* ── Typography helpers ── */

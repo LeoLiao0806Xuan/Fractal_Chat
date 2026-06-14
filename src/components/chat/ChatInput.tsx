@@ -20,7 +20,6 @@ export function ChatInput() {
   const compareMode = useModelStore(s => s.compareMode)
   const selectedModelIds = useModelStore(s => s.selectedModelIds)
 
-  // Auto-resize textarea
   useEffect(() => {
     const el = textareaRef.current
     if (el) {
@@ -47,18 +46,19 @@ export function ChatInput() {
   ) {
     const state = useDialogStore.getState()
     const dialog = state.dialogs.find((d: { id: string }) => d.id === dialogId)
-    const ctx = dialog?.messages
+    if (!dialog) return
+    const ctx = dialog.messages
       .filter((m: { id: string }) => m.id !== assistantId)
       .map((m: { role: string; content: string }) => ({
         role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
         content: m.content,
-      })) || []
+      }))
 
     await callModel({
       apiUrl: cfg.apiUrl, apiKey, model: cfg.modelName,
       messages: ctx, signal,
-      onChunk: (t) => state.updateMessage(dialogId, assistantId, { content: t }),
-      onDone: (t) => state.updateMessage(dialogId, assistantId, { content: t, status: 'complete' }),
+      onChunk: (t) => updateMessage(dialogId, assistantId, { content: t }),
+      onDone: (t) => updateMessage(dialogId, assistantId, { content: t, status: 'complete' }),
     })
   }
 
@@ -67,7 +67,7 @@ export function ChatInput() {
     if (!text || !currentDialogId || sending) return
     setError(null)
 
-    // Determine which models to use
+    // Determine which models to target
     let targets: typeof configs = []
     if (compareMode && selectedModelIds.length > 0) {
       targets = selectedModelIds.map(id => configs.find(c => c.id === id)).filter(Boolean) as typeof configs
@@ -80,7 +80,7 @@ export function ChatInput() {
       return
     }
 
-    // Validate all targets
+    // Validate all targets' API keys upfront
     const keyMap = new Map<string, string>()
     for (const cfg of targets) {
       const key = validateAndGetKey(cfg)
@@ -98,7 +98,7 @@ export function ChatInput() {
     })
     setInput('')
 
-    // Create one assistant placeholder per model
+    // Create one assistant placeholder per target model
     const assistants = targets.map(cfg => ({
       id: addMessage(currentDialogId, {
         role: 'assistant', content: '', parentId: null, branchId: 'main',
@@ -123,7 +123,7 @@ export function ChatInput() {
               }
               updateMessage(currentDialogId, id, { content: `错误: ${err.message}`, status: 'error' })
               setError(`${cfg.name}: ${err.message}`)
-            })
+            }),
         ),
       )
     } finally {
@@ -132,36 +132,37 @@ export function ChatInput() {
     }
   }
 
-  const handleCancel = () => {
-    abortRef.current?.abort()
-  }
+  const handleCancel = () => abortRef.current?.abort()
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
 
   if (!currentDialogId) return null
 
   return (
-    <div className="border-t border-gray-200 bg-white px-4 py-3">
-      <div className="max-w-4xl mx-auto space-y-2">
+    <div className="border-t border-[#f0eff5] bg-white px-4 py-3">
+      <div className="max-w-4xl mx-auto space-y-2.5">
         {/* Model selector bar */}
         <div className="flex items-center justify-between">
           <ModelSelector />
           <div className="flex items-center gap-2">
             {sending && (
-              <div className="flex items-center gap-1.5 text-xs text-blue-400 mr-2">
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse-soft" />
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse-soft" style={{ animationDelay: '0.3s' }} />
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse-soft" style={{ animationDelay: '0.6s' }} />
+              <div className="flex items-center gap-1 mr-1">
+                <span className="text-xs text-[#a3a3a3]">生成中</span>
+                <span className="inline-flex items-center gap-[3px] px-1">
+                  {[0, 0.2, 0.4].map(d => (
+                    <span key={d} className="w-1 h-1 rounded-full bg-indigo-400 animate-pulse-dot"
+                          style={{ animationDelay: `${d}s` }} />
+                  ))}
+                </span>
               </div>
             )}
             {sending && (
               <button onClick={handleCancel}
-                className="text-xs text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-1 rounded-lg transition-colors">
+                className="text-xs text-red-500 hover:text-white hover:bg-red-500
+                           bg-red-50/50 px-2.5 py-1.5 rounded-lg transition-all font-medium
+                           border border-red-200/60 hover:border-red-400">
                 取消
               </button>
             )}
@@ -170,35 +171,53 @@ export function ChatInput() {
 
         {/* Error banner */}
         {error && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-sm">
-            <span className="text-red-500 shrink-0">⚠️</span>
-            <span className="text-red-700 flex-1">{error}</span>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 shrink-0">✕</button>
+          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-red-50/90 backdrop-blur-sm
+                          border border-red-200/60 rounded-xl text-sm animate-fade-in shadow-sm">
+            <span className="text-red-500 shrink-0 text-base">⚠️</span>
+            <span className="text-red-700 flex-1 text-[13px]">{error}</span>
+            <button onClick={() => setError(null)}
+              className="text-red-400 hover:text-red-600 shrink-0 text-xs font-medium
+                         bg-red-100/50 hover:bg-red-200/50 rounded-lg px-1.5 py-0.5 transition-colors">
+              ✕
+            </button>
           </div>
         )}
 
         {/* Input area */}
         <div className="flex gap-2 items-end">
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="输入消息... (Enter 发送, Shift+Enter 换行)"
-            rows={1}
-            disabled={sending}
-            className="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-2.5 text-sm
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                       placeholder-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
-          />
+          <div className="flex-1 relative">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="输入消息..."
+              rows={1}
+              disabled={sending}
+              className="w-full resize-none rounded-xl border border-[#e4e3ed] bg-[#f8f7fc]
+                         px-4 py-2.5 pr-10 text-sm text-[#171717]
+                         focus:outline-none focus:ring-2 focus:ring-indigo-400/40
+                         focus:border-indigo-400 focus:bg-white
+                         placeholder:text-[#a3a3a3] disabled:bg-gray-50
+                         disabled:cursor-not-allowed transition-all"
+            />
+            {!input.trim() && !sending && (
+              <span className="absolute right-3 bottom-3 text-[10px] text-[#d4d4d8] select-none font-mono">
+                ⏎
+              </span>
+            )}
+          </div>
           <button
             onClick={handleSend}
             disabled={!input.trim() || sending}
-            className="bg-blue-600 text-white rounded-xl px-4 py-2.5 text-sm font-medium
-                       hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed
-                       transition-colors"
+            className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl
+                       px-5 py-2.5 text-sm font-medium
+                       hover:from-indigo-600 hover:to-purple-700 disabled:opacity-30
+                       disabled:cursor-not-allowed transition-all shadow-sm
+                       hover:shadow-md active:scale-[0.97]
+                       disabled:shadow-none"
           >
-            {sending ? '...' : '发送'}
+            {sending ? '…' : '发送'}
           </button>
         </div>
       </div>

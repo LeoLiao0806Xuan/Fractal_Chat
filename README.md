@@ -1,73 +1,184 @@
-# React + TypeScript + Vite
+<div align="center">
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# 🌿 Fractal Chat
 
-Currently, two official plugins are available:
+**A recursive conversation tree for multi-model AI chat**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+> Select any text → branch into a focused sub-dialogue → compare answers from GPT-4o, Claude, DeepSeek, and more — side by side.
 
-## React Compiler
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF)](https://vitejs.dev/)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+</div>
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## ✨ Features
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 🧬 Recursive Sub-Dialogue Tree
+Select any part of a response → right-click → create a focused sub-dialogue. Each sub-dialogue is a new branch where you can keep digging deeper, then merge insights back into the parent conversation.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+![Sub-dialogue demo](https://placehold.co/800x450/6366f1/ffffff?text=Select+%E2%86%92+Sub-dialogue+%E2%86%92+Merge)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 🔄 Multi-Model Parallel Comparison
+Send the same prompt to multiple LLMs at once and watch their responses stream in real-time, side by side. No more manual copy-paste between tabs.
+
+![Multi-model comparison](https://placehold.co/800x450/7c3aed/ffffff?text=Multi-Model+Parallel+Comparison)
+
+### 🌲 Visual Conversation Tree
+Navigate your entire conversation history as an interactive tree. Fold, expand, search, drag to reorder — your context never gets lost.
+
+- **Full-text search** across all messages
+- **Drag & drop** to reorder dialogues
+- **Collapse/expand** for focus
+- **Right-click context menu** for quick actions
+
+### 🏷️ Organize & Export
+- **Tags** and **archiving** for conversation management
+- **Export** single dialogues or full trees as Markdown / JSON
+- **Cross-dialogue @references** — link to any conversation
+
+### ✏️ Edit & Version
+- **Message editing** with version history
+- **"Edited" timestamps** for transparency
+- **Merge undo** — revert merged sub-dialogues with one click
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Clone
+git clone https://github.com/YOUR_USERNAME/fractal-chat.git
+cd fractal-chat
+
+# Install
+npm install
+
+# Start dev server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open `http://localhost:5173` — no backend, no database, no signup.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Configure a model
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Click ⚙️ in the input bar
+2. Add your API endpoint (OpenAI / Anthropic / DeepSeek / any OpenAI-compatible)
+3. Enter your API key (encrypted in-browser with AES-256-GCM)
+4. Start chatting!
+
+> **💡 Tip:** Add multiple models and click **⊕ 对比** to toggle comparison mode — select which models to compare and send one prompt to all of them.
+
+---
+
+## 🖼️ Screenshots
+
+| Conversation Tree | Multi-Model Compare |
+|---|---|
+| ![Tree](https://placehold.co/600x400/8b5cf6/ffffff?text=Conversation+Tree) | ![Compare](https://placehold.co/600x400/6366f1/ffffff?text=Multi-Model+Compare) |
+
+| Sub-Dialogue | Export |
+|---|---|
+| ![Sub](https://placehold.co/600x400/7c3aed/ffffff?text=Sub-Dialogue) | ![Export](https://placehold.co/600x400/a855f7/ffffff?text=Export+Menu) |
+
+---
+
+## 🏗️ Architecture
+
+Fractal Chat is a **pure client-side** application. No backend, no user accounts, no data leaves your browser unless it's sent to the LLM APIs you configure.
+
 ```
+┌──────────────────────────────────────┐
+│          React 19 + TypeScript        │
+│  ┌─────────┐  ┌───────────────────┐  │
+│  │ Dialog  │  │  Chat Input       │  │
+│  │ Tree    │  │  + ModelSelector  │  │
+│  │ (递归)  │  │  (多模型对比)      │  │
+│  └────┬────┘  └────────┬──────────┘  │
+│       │                │             │
+│  ┌────▼────────────────▼──────────┐  │
+│  │         Zustand Stores         │  │
+│  │  dialogStore · modelStore      │  │
+│  └────────────┬───────────────────┘  │
+│       │                │             │
+│  ┌────▼────┐   ┌──────▼────────┐   │
+│  │IndexedDB│   │  API Layer    │   │
+│  │ (idb)   │   │ callModel()   │   │
+│  │持久化   │   │ OAI/Anthropic │   │
+│  └─────────┘   └──────┬────────┘   │
+│                       │            │
+│              ┌────────▼────────┐   │
+│              │  LLM Providers  │   │
+│              │  (your API key) │   │
+│              └─────────────────┘   │
+└──────────────────────────────────────┘
+```
+
+### Key decisions
+
+| Choice | Why |
+|--------|-----|
+| **Pure client-side** | Zero ops, zero cost, complete privacy |
+| **IndexedDB** via `idb` | Survives page refresh, no server needed |
+| **Zustand** | Lightweight state — no boilerplate, no providers |
+| **Tiptap** | Rich text rendering with Markdown support |
+| **AES-256-GCM** | API keys encrypted before touching IndexedDB |
+
+---
+
+## 🧪 Testing
+
+```bash
+npm test        # Run tests (Vitest)
+npm run build   # Type-check + production build
+```
+
+Current: **24 tests** across modelStore, dialogStore, and mergeUtils — all passing.
+
+---
+
+## 🗺️ Roadmap
+
+- [x] Phase 0 — Prototype: API unification, persistence, error boundaries
+- [x] Phase 1 — MVP: Sub-dialogues, tree navigation, search, export, tags
+- [x] Multi-model parallel comparison
+- [ ] Phase 2 — Core differentiation
+  - [ ] Real-time collaboration (Yjs)
+  - [ ] Mobile adaptation
+  - [ ] Virtual scrolling for long conversations
+  - [ ] Message-level auto-tagging
+- [ ] Community
+  - [ ] GitHub Discussions
+  - [ ] i18n
+  - [ ] Plugin system
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to open an issue or submit a PR.
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/amazing`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push (`git push origin feature/amazing`)
+5. Open a Pull Request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+
+---
+
+## 📄 License
+
+[Apache 2.0](LICENSE) — Free for personal and commercial use.
+
+---
+
+<div align="center">
+
+**Built with ❤️ for people who talk to AI a lot.**
+
+</div>

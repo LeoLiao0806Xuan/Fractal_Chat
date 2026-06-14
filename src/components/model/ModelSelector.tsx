@@ -14,32 +14,34 @@ export function ModelSelector() {
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         {compareMode ? (
-          /* ── Multi-select mode ── */
-          <div className="flex items-center gap-1 text-xs text-gray-500">
-            <span className="text-blue-500 font-medium">对比</span>
+          /* ── Multi-select compare mode ── */
+          <div className="flex items-center gap-1 text-xs text-[#52525b]">
+            <span className="text-indigo-500 font-medium shrink-0">对比</span>
             {configs.length === 0 ? (
-              <span className="text-gray-400">未配置模型</span>
+              <span className="text-[#a3a3a3]">未配置模型</span>
             ) : (
-              configs.map(c => (
-                <label
-                  key={c.id}
-                  className={`flex items-center gap-1 px-2 py-1 rounded cursor-pointer transition-colors ${
-                    selectedModelIds.includes(c.id)
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'hover:bg-gray-100 text-gray-600'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedModelIds.includes(c.id)}
-                    onChange={() => toggleModelSelection(c.id)}
-                    className="w-3 h-3 accent-blue-500"
-                  />
-                  <span className="whitespace-nowrap">{c.name}</span>
-                </label>
-              ))
+              <div className="flex items-center gap-1 flex-wrap">
+                {configs.map(c => (
+                  <label
+                    key={c.id}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-lg cursor-pointer transition-all ${
+                      selectedModelIds.includes(c.id)
+                        ? 'bg-indigo-100 text-indigo-700 shadow-sm'
+                        : 'hover:bg-[#f0eff5] text-[#52525b]'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedModelIds.includes(c.id)}
+                      onChange={() => toggleModelSelection(c.id)}
+                      className="w-3 h-3 accent-indigo-500"
+                    />
+                    <span className="whitespace-nowrap">{c.name}</span>
+                  </label>
+                ))}
+              </div>
             )}
           </div>
         ) : (
@@ -47,39 +49,35 @@ export function ModelSelector() {
           <select
             value={activeModelId || ''}
             onChange={e => setActiveModel(e.target.value || null)}
-            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-700
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="text-xs border border-[#e4e3ed] rounded-lg px-2 py-1.5 bg-white text-[#52525b]
+                       focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:border-indigo-400
+                       transition-all"
           >
-            {configs.length === 0 && (
-              <option value="">未配置模型</option>
-            )}
+            {configs.length === 0 && <option value="">未配置模型</option>}
             {configs.map(c => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({c.modelName})
-              </option>
+              <option key={c.id} value={c.id}>{c.name} ({c.modelName})</option>
             ))}
           </select>
         )}
 
-        {/* Compare mode toggle */}
+        {/* Compare mode toggle (visible when ≥2 models configured) */}
         {configs.length >= 2 && (
           <button
             onClick={() => setCompareMode(!compareMode)}
-            className={`text-xs px-2 py-1.5 rounded-lg transition-colors ${
+            className={`text-xs px-2 py-1.5 rounded-lg transition-all ${
               compareMode
-                ? 'bg-blue-100 text-blue-600 font-medium'
-                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                ? 'bg-indigo-100 text-indigo-600 font-medium shadow-sm'
+                : 'text-[#a3a3a3] hover:text-[#6366f1] hover:bg-[#f8f7fc]'
             }`}
             title={compareMode ? '退出对比模式' : '多模型对比'}
           >
-            {compareMode ? '✕ 退出对比' : '⊕ 对比'}
+            {compareMode ? '✕ 退出' : '⊕ 对比'}
           </button>
         )}
 
-        {/* Settings button */}
         <button
           onClick={() => setShowPanel(true)}
-          className="text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 px-1.5 py-1.5 rounded-lg transition-colors"
+          className="text-xs text-[#a3a3a3] hover:text-[#6366f1] hover:bg-[#f8f7fc] px-1.5 py-1.5 rounded-lg transition-colors"
           title="管理模型配置"
         >
           ⚙️

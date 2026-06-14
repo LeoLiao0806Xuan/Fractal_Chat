@@ -7,9 +7,9 @@ import { ChatInput } from '../chat/ChatInput'
 
 const SubDialogPanel = lazy(() => import('../editor/SubDialogPanel'))
 
-const SIDEBAR_MIN = 180
+const SIDEBAR_MIN = 200
 const SIDEBAR_MAX = 400
-const SIDEBAR_DEFAULT = 256
+const SIDEBAR_DEFAULT = 272
 
 export function AppLayout() {
   const leftPanelOpen = useUIStore(s => s.leftPanelOpen)
@@ -26,8 +26,7 @@ export function AppLayout() {
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!resizing.current) return
-    const w = Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, e.clientX))
-    setSidebarWidth(w)
+    setSidebarWidth(Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, e.clientX)))
   }, [])
 
   const handleMouseUp = useCallback(() => {
@@ -47,10 +46,11 @@ export function AppLayout() {
   }, [handleMouseMove, handleMouseUp])
 
   return (
-    <div className="h-screen w-screen flex overflow-hidden bg-gray-50">
+    <div className="h-screen w-screen flex overflow-hidden bg-[#f8f7fc]">
       {/* ── Sidebar ── */}
       <div
-        className="shrink-0 overflow-hidden border-r border-gray-200 bg-white transition-[width,opacity] duration-300 ease-in-out"
+        className="shrink-0 overflow-hidden border-r border-[#f0eff5] bg-[#faf9fe]
+                   transition-[width,opacity] duration-350 ease-out"
         style={{
           width: leftPanelOpen ? sidebarWidth : 0,
           opacity: leftPanelOpen ? 1 : 0,
@@ -65,27 +65,25 @@ export function AppLayout() {
       {leftPanelOpen && (
         <div
           onMouseDown={handleMouseDown}
-          className="shrink-0 w-1 cursor-col-resize bg-transparent hover:bg-blue-300 active:bg-blue-400 transition-colors"
-          title="拖拽调整宽度"
-        />
+          className="shrink-0 w-[3px] cursor-col-resize bg-transparent
+                     hover:bg-indigo-300/40 active:bg-indigo-400/50
+                     transition-colors relative z-10"
+        >
+          <div className="absolute inset-y-0 -left-1 -right-1" />
+        </div>
       )}
 
-      {/* ── Toggle button at the seam ── */}
+      {/* ── Sidebar toggle ── */}
       <button
         onClick={() => setLeftPanel(!leftPanelOpen)}
-        className="shrink-0 w-5 border-r border-gray-200 bg-white hover:bg-gray-50
+        className="shrink-0 w-6 border-r border-[#f0eff5] bg-white hover:bg-[#faf9fe]
                    flex items-center justify-center cursor-pointer group
-                   transition-colors"
+                   transition-colors relative z-10"
         title={leftPanelOpen ? '收起侧边栏' : '展开侧边栏'}
       >
-        <svg
-          className={`w-3 h-3 text-gray-300 group-hover:text-gray-500 transition-transform duration-300 ${
-            leftPanelOpen ? '' : 'rotate-180'
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className={`w-3 h-3 text-[#a3a3a3] group-hover:text-[#6366f1]
+                         transition-all duration-300 ${leftPanelOpen ? '' : 'rotate-180'}`}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
@@ -98,7 +96,16 @@ export function AppLayout() {
 
       {/* ── Sub-dialog panel ── */}
       {subDialogOpen && (
-        <Suspense fallback={<div className="w-96 border-l border-gray-200 bg-gray-50 animate-pulse" />}>
+        <Suspense
+          fallback={
+            <div className="w-[420px] border-l border-[#f0eff5] bg-white/80 flex items-center justify-center">
+              <div className="text-center space-y-3">
+                <div className="w-8 h-8 mx-auto rounded-full skeleton" />
+                <div className="text-xs text-[#a3a3a3]">加载中...</div>
+              </div>
+            </div>
+          }
+        >
           <SubDialogPanel />
         </Suspense>
       )}
