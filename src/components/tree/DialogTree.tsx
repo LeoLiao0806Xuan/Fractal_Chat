@@ -23,7 +23,7 @@ interface TreeNode {
 }
 
 export function DialogTree() {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const dialogs = useDialogStore(s => s.dialogs)
   const currentDialogId = useDialogStore(s => s.currentDialogId)
   const setCurrentDialog = useDialogStore(s => s.setCurrentDialog)
@@ -374,6 +374,28 @@ export function DialogTree() {
     )
   }
 
+  // Re-translate demo dialogs when language changes
+  useEffect(() => {
+    if (!hasDemoDialogs) return
+    const store = useDialogStore.getState()
+    const hasDemo = store.dialogs.some(d => d.tags?.includes('demo'))
+    if (!hasDemo) return
+    const fresh = generateSampleDialogs(locale)
+    const updated = store.dialogs.map(d => {
+      const replacement = d.tags?.includes('demo') ? fresh.find(f => f.id === d.id) : null
+      if (!replacement) return d
+      return {
+        ...d,
+        title: replacement.title,
+        messages: d.messages.map((msg, i) => {
+          const newMsg = replacement.messages[i]
+          return newMsg ? { ...msg, content: newMsg.content } : msg
+        }),
+      }
+    })
+    useDialogStore.setState({ dialogs: updated })
+  }, [locale])
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -482,7 +504,7 @@ export function DialogTree() {
             <p>{searchQuery ? t('tree.no_match') : t('tree.empty')}</p>
             {!searchQuery && hasDemoDialogs && (
               <button onClick={() => {
-                const samples = generateSampleDialogs();
+                const samples = generateSampleDialogs(locale);
                 useDialogStore.setState({ dialogs: samples, currentDialogId: samples[0].id });
                 saveAllDialogs(samples);
               }}
@@ -497,7 +519,7 @@ export function DialogTree() {
         {!hasDemoDialogs && filteredTree.length > 0 && (
           <div className="sticky bottom-0 px-3 pt-1 pb-2 bg-gradient-to-t from-[#faf9fe] via-[#faf9fe] to-transparent">
             <button onClick={() => {
-              const samples = generateSampleDialogs();
+              const samples = generateSampleDialogs(locale);
               useDialogStore.setState({ dialogs: samples, currentDialogId: samples[0].id });
               saveAllDialogs(samples);
             }}

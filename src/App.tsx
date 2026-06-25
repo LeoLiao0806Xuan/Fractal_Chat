@@ -58,7 +58,7 @@ function AppContent() {
 
       // First-time user with no API keys → load demo sample data
       if (useModelStore.getState().configs.length === 0) {
-        const samples = generateSampleDialogs()
+        const samples = generateSampleDialogs(locale)
         useDialogStore.setState({ dialogs: samples, currentDialogId: samples[0].id })
         // Save demo data to IndexedDB so it survives refresh
         saveAllDialogs(samples)
