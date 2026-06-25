@@ -8,7 +8,7 @@ import { ModelSelector } from '../model/ModelSelector'
 import { useTranslation } from '../../i18n'
 
 export function ChatInput() {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -90,14 +90,14 @@ export function ChatInput() {
     if (targets.length === 0) {
       const assistantId = addMessage(currentDialogId, {
         role: 'assistant', content: '', parentId: null, branchId: 'main',
-        status: 'streaming', model: '🤖 Mock AI',
+        status: 'streaming', model: `🤖 ${locale === 'en' ? 'Mock AI' : '模拟 AI'}`,
       })
       const controller = new AbortController()
       abortRef.current = controller
       setSending(true)
       try {
         let buffer = ''
-        for await (const chunk of streamMockResponse(text)) {
+        for await (const chunk of streamMockResponse(text, locale)) {
           if (controller.signal.aborted) break
           buffer += chunk
           updateMessage(currentDialogId, assistantId, { content: buffer })
