@@ -1,118 +1,75 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f8f7fc"/>
-      <stop offset="100%" stop-color="#f0eeff"/>
-    </linearGradient>
-    <linearGradient id="gpt" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#10a37f"/>
-      <stop offset="100%" stop-color="#0d8c6d"/>
-    </linearGradient>
-    <linearGradient id="ds" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#4f46e5"/>
-      <stop offset="100%" stop-color="#4338ca"/>
-    </linearGradient>
-    <linearGradient id="cl" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#d97706"/>
-      <stop offset="100%" stop-color="#b45309"/>
-    </linearGradient>
-  </defs>
-  <rect width="800" height="440" fill="url(#bg)" rx="12"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <rect width="800" height="420" fill="#f8f7fc" rx="12"/>
 
-  <!-- Title -->
-  <text x="400" y="32" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#1f1b2e">Multi-Model Parallel Comparison</text>
-  <text x="400" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#6b6580">One prompt → three models respond simultaneously in real time</text>
+  <text x="400" y="30" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="bold" fill="#1f1b2e">Multi-Model Parallel Comparison</text>
+  <text x="400" y="48" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#6b6580">One prompt sent to three models simultaneously</text>
 
   <!-- Input area -->
-  <rect x="40" y="70" width="720" height="50" rx="12" fill="#fff" stroke="#e0dcec" stroke-width="1"/>
-  <text x="60" y="98" font-family="system-ui, sans-serif" font-size="13" fill="#6366f1" font-weight="500">"Implement a debounce function in TypeScript"</text>
-  <rect x="680" y="78" width="65" height="34" rx="8" fill="url(#gpt)"/>
-  <text x="712" y="99" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#fff" font-weight="600">Send</text>
+  <rect x="40" y="65" width="720" height="46" rx="10" fill="#fff" stroke="#d4d0e4" stroke-width="1"/>
+  <text x="60" y="93" font-family="sans-serif" font-size="14" fill="#6366f1" font-weight="500">"Implement a debounce function in TypeScript"</text>
+  <rect x="680" y="73" width="65" height="30" rx="7" fill="#10a37f"/>
+  <text x="712" y="93" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#fff" font-weight="bold">Send</text>
 
   <!-- Labels row -->
-  <text x="60" y="145" font-family="system-ui, sans-serif" font-size="11" fill="#6b6580">Selected models:</text>
-  <rect x="170" y="133" width="85" height="22" rx="6" fill="#10a37f" opacity="0.1"/>
-  <text x="212" y="148" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#10a37f" font-weight="600">GPT-4.1</text>
-  <rect x="265" y="133" width="95" height="22" rx="6" fill="#4f46e5" opacity="0.1"/>
-  <text x="312" y="148" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#4f46e5" font-weight="600">DeepSeek R1</text>
-  <rect x="370" y="133" width="105" height="22" rx="6" fill="#d97706" opacity="0.1"/>
-  <text x="422" y="148" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#d97706" font-weight="600">Claude Opus 4.8</text>
+  <text x="60" y="138" font-family="sans-serif" font-size="11" fill="#6b6580">Selected models:</text>
+  <rect x="170" y="125" width="85" height="22" rx="5" fill="#10a37f" opacity="0.1"/>
+  <text x="212" y="140" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#10a37f" font-weight="bold">GPT-4.1</text>
+  <rect x="265" y="125" width="95" height="22" rx="5" fill="#4f46e5" opacity="0.1"/>
+  <text x="312" y="140" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4f46e5" font-weight="bold">DeepSeek R1</text>
+  <rect x="370" y="125" width="110" height="22" rx="5" fill="#d97706" opacity="0.1"/>
+  <text x="425" y="140" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#d97706" font-weight="bold">Claude Opus 4.8</text>
 
-  <!-- Column backgrounds -->
-  <rect x="40" y="170" width="230" height="245" rx="10" fill="#fff" stroke="#e0dcec" stroke-width="0.5"/>
-  <rect x="285" y="170" width="230" height="245" rx="10" fill="#fff" stroke="#e0dcec" stroke-width="0.5"/>
-  <rect x="530" y="170" width="230" height="245" rx="10" fill="#fff" stroke="#e0dcec" stroke-width="0.5"/>
+  <!-- Column 1: GPT-4.1 -->
+  <rect x="40" y="162" width="230" height="235" rx="10" fill="#fff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <rect x="40" y="162" width="230" height="30" rx="10" fill="#10a37f"/>
+  <text x="155" y="182" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#fff" font-weight="bold">GPT-4.1</text>
 
-  <!-- Column headers -->
-  <rect x="40" y="170" width="230" height="32" rx="10" fill="#10a37f"/>
-  <rect x="40" y="192" width="230" height="10" fill="#10a37f"/>
-  <circle cx="60" cy="186" r="6" fill="#fff" opacity="0.3"/>
-  <text x="155" y="190" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#fff" font-weight="600">GPT-4.1</text>
+  <text x="55" y="212" font-family="sans-serif" font-size="10" fill="#10a37f">// typing...</text>
+  <text x="55" y="232" font-family="sans-serif" font-size="11" fill="#555">function debounce(fn, delay) {</text>
+  <text x="65" y="250" font-family="sans-serif" font-size="11" fill="#555">let timer;</text>
+  <text x="65" y="268" font-family="sans-serif" font-size="11" fill="#555">return (...args) =&gt; {</text>
+  <text x="75" y="286" font-family="sans-serif" font-size="11" fill="#555">clearTimeout(timer);</text>
+  <text x="75" y="304" font-family="sans-serif" font-size="11" fill="#555">timer = setTimeout(</text>
+  <text x="85" y="322" font-family="sans-serif" font-size="11" fill="#555">() =&gt; fn(...args), delay</text>
+  <text x="65" y="340" font-family="sans-serif" font-size="11" fill="#555">);</text>
+  <text x="55" y="358" font-family="sans-serif" font-size="11" fill="#555">};</text>
 
-  <rect x="285" y="170" width="230" height="32" rx="10" fill="#4f46e5"/>
-  <rect x="285" y="192" width="230" height="10" fill="#4f46e5"/>
-  <circle cx="305" cy="186" r="6" fill="#fff" opacity="0.3"/>
-  <text x="400" y="190" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#fff" font-weight="600">DeepSeek R1</text>
+  <circle cx="55" cy="378" r="3" fill="#10a37f" opacity="0.6"/>
 
-  <rect x="530" y="170" width="230" height="32" rx="10" fill="#d97706"/>
-  <rect x="530" y="192" width="230" height="10" fill="#d97706"/>
-  <circle cx="550" cy="186" r="6" fill="#fff" opacity="0.3"/>
-  <text x="645" y="190" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#fff" font-weight="600">Claude Opus 4.8</text>
+  <!-- Column 2: DeepSeek R1 -->
+  <rect x="285" y="162" width="230" height="235" rx="10" fill="#fff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <rect x="285" y="162" width="230" height="30" rx="10" fill="#4f46e5"/>
+  <text x="400" y="182" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#fff" font-weight="bold">DeepSeek R1</text>
 
-  <!-- ===== Column 1: GPT-4.1 ===== -->
-  <text x="55" y="218" font-family="system-ui, sans-serif" font-size="9" fill="#10a37f" opacity="0.6">// typing...</text>
-  <rect x="55" y="228" width="200" height="8" rx="4" fill="#e0dcec" opacity="0.3"/>
-  <rect x="55" y="244" width="185" height="8" rx="4" fill="#e0dcec" opacity="0.5"/>
-  <rect x="55" y="260" width="195" height="8" rx="4" fill="#e0dcec" opacity="0.45"/>
-  <text x="55" y="282" font-family="monospace, monospace" font-size="8.5" fill="#10a37f">function debounce<T>(</text>
-  <text x="60" y="296" font-family="monospace, monospace" font-size="8.5" fill="#10a37f">fn: (...args: T[])</text>
-  <text x="60" y="310" font-family="monospace, monospace" font-size="8.5" fill="#10a37f">=&gt; void, delay: number</text>
-  <text x="55" y="324" font-family="monospace, monospace" font-size="8.5" fill="#10a37f">) { ... }</text>
-  <rect x="55" y="336" width="50" height="14" rx="3" fill="#10a37f" opacity="0.1"/>
-  <text x="80" y="346" text-anchor="middle" font-family="system-ui, sans-serif" font-size="7" fill="#10a37f">TypeScript</text>
+  <text x="300" y="212" font-family="sans-serif" font-size="10" fill="#4f46e5">// thinking...</text>
+  <text x="300" y="232" font-family="sans-serif" font-size="11" fill="#555">/** Debounce with leading</text>
+  <text x="300" y="250" font-family="sans-serif" font-size="11" fill="#555"> * option */</text>
+  <text x="300" y="272" font-family="sans-serif" font-size="11" fill="#555">function debounce(fn, delay,</text>
+  <text x="310" y="290" font-family="sans-serif" font-size="11" fill="#555">leading = false) {</text>
+  <text x="310" y="308" font-family="sans-serif" font-size="11" fill="#555">let timer, lastArgs;</text>
+  <text x="300" y="326" font-family="sans-serif" font-size="11" fill="#555">return function(...args) {</text>
+  <text x="310" y="344" font-family="sans-serif" font-size="11" fill="#555">// implementation</text>
+  <text x="300" y="362" font-family="sans-serif" font-size="11" fill="#555">};</text>
 
-  <rect x="55" y="360" width="200" height="8" rx="4" fill="#e0dcec" opacity="0.3"/>
-  <rect x="55" y="376" width="170" height="8" rx="4" fill="#e0dcec" opacity="0.25"/>
+  <circle cx="300" cy="378" r="3" fill="#4f46e5" opacity="0.6"/>
+  <circle cx="312" cy="378" r="3" fill="#4f46e5" opacity="0.3"/>
 
-  <!-- GPT streaming dots subtle -->
-  <circle cx="55" cy="398" r="2.5" fill="#10a37f" opacity="0.6"/>
+  <!-- Column 3: Claude Opus 4.8 -->
+  <rect x="530" y="162" width="230" height="235" rx="10" fill="#fff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <rect x="530" y="162" width="230" height="30" rx="10" fill="#d97706"/>
+  <text x="645" y="182" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#fff" font-weight="bold">Claude Opus 4.8</text>
 
-  <!-- ===== Column 2: DeepSeek R1 ===== -->
-  <text x="300" y="218" font-family="system-ui, sans-serif" font-size="9" fill="#4f46e5" opacity="0.6">// thinking...</text>
-  <rect x="300" y="228" width="200" height="8" rx="4" fill="#e0dcec" opacity="0.3"/>
-  <rect x="300" y="244" width="190" height="8" rx="4" fill="#e0dcec" opacity="0.5"/>
-  <rect x="300" y="260" width="205" height="8" rx="4" fill="#e0dcec" opacity="0.45"/>
-  <rect x="300" y="276" width="175" height="8" rx="4" fill="#e0dcec" opacity="0.4"/>
-  <text x="300" y="298" font-family="monospace, monospace" font-size="8.5" fill="#4f46e5">/**</text>
-  <text x="300" y="312" font-family="monospace, monospace" font-size="8.5" fill="#4f46e5"> * Debounce with</text>
-  <text x="300" y="326" font-family="monospace, monospace" font-size="8.5" fill="#4f46e5"> * leading option */</text>
-  <text x="300" y="340" font-family="monospace, monospace" font-size="8.5" fill="#4f46e5">function debounce...</text>
-  <rect x="300" y="352" width="40" height="14" rx="3" fill="#4f46e5" opacity="0.1"/>
-  <text x="320" y="362" text-anchor="middle" font-family="system-ui, sans-serif" font-size="7" fill="#4f46e5">JSDoc</text>
+  <text x="545" y="212" font-family="sans-serif" font-size="10" fill="#d97706">// generating...</text>
+  <text x="545" y="232" font-family="sans-serif" font-size="11" fill="#555">Here's a robust debounce</text>
+  <text x="545" y="250" font-family="sans-serif" font-size="11" fill="#555">with cancel and flush:</text>
+  <text x="545" y="272" font-family="sans-serif" font-size="11" fill="#555">function debounce(fn, ms) {</text>
+  <text x="555" y="290" font-family="sans-serif" font-size="11" fill="#555">let timer;</text>
+  <text x="555" y="308" font-family="sans-serif" font-size="11" fill="#555">function debounced() {</text>
+  <text x="565" y="326" font-family="sans-serif" font-size="11" fill="#555">clearTimeout(timer);</text>
+  <text x="565" y="344" font-family="sans-serif" font-size="11" fill="#555">timer = setTimeout(...);</text>
+  <text x="555" y="362" font-family="sans-serif" font-size="11" fill="#555">}</text>
 
-  <rect x="300" y="376" width="190" height="8" rx="4" fill="#e0dcec" opacity="0.25"/>
-
-  <!-- DeepSeek streaming dots -->
-  <circle cx="300" cy="398" r="2.5" fill="#4f46e5" opacity="0.6"/>
-  <circle cx="312" cy="398" r="2.5" fill="#4f46e5" opacity="0.3"/>
-
-  <!-- ===== Column 3: Claude Opus 4.8 ===== -->
-  <text x="545" y="218" font-family="system-ui, sans-serif" font-size="9" fill="#d97706" opacity="0.6">// generating...</text>
-  <rect x="545" y="228" width="200" height="8" rx="4" fill="#e0dcec" opacity="0.3"/>
-  <rect x="545" y="244" width="195" height="8" rx="4" fill="#e0dcec" opacity="0.5"/>
-  <rect x="545" y="260" width="210" height="8" rx="4" fill="#e0dcec" opacity="0.45"/>
-  <rect x="545" y="276" width="180" height="8" rx="4" fill="#e0dcec" opacity="0.4"/>
-  <rect x="545" y="292" width="200" height="8" rx="4" fill="#e0dcec" opacity="0.35"/>
-  <text x="545" y="312" font-family="system-ui, sans-serif" font-size="9" fill="#d97706">Here's a robust</text>
-  <text x="545" y="326" font-family="system-ui, sans-serif" font-size="9" fill="#d97706">debounce with</text>
-  <text x="545" y="340" font-family="system-ui, sans-serif" font-size="9" fill="#d97706">cancel support:</text>
-  <rect x="545" y="352" width="165" height="24" rx="4" fill="#0f0d1a"/>
-  <text x="551" y="366" font-family="monospace, monospace" font-size="7.5" fill="#c084fc">function debounce...</text>
-  <rect x="545" y="380" width="50" height="14" rx="3" fill="#d97706" opacity="0.1"/>
-  <text x="570" y="390" text-anchor="middle" font-family="system-ui, sans-serif" font-size="7" fill="#d97706">Example</text>
-
-  <!-- Claude streaming dots -->
-  <circle cx="545" cy="405" r="2.5" fill="#d97706" opacity="0.6"/>
-  <circle cx="557" cy="405" r="2.5" fill="#d97706" opacity="0.5"/>
-  <circle cx="569" cy="405" r="2.5" fill="#d97706" opacity="0.3"/>
+  <circle cx="545" cy="378" r="3" fill="#d97706" opacity="0.6"/>
+  <circle cx="557" cy="378" r="3" fill="#d97706" opacity="0.5"/>
+  <circle cx="569" cy="378" r="3" fill="#d97706" opacity="0.3"/>
 </svg>
