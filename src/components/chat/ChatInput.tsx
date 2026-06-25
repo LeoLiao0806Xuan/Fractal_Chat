@@ -3,6 +3,7 @@ import { useDialogStore } from '../../stores/dialogStore'
 import { useModelStore } from '../../stores/modelStore'
 import { getSessionKey } from '../../services/crypto'
 import { callModel } from '../../services/api'
+import { streamMockResponse } from '../../services/mockAI'
 import { ModelSelector } from '../model/ModelSelector'
 import { useTranslation } from '../../i18n'
 
@@ -77,8 +78,41 @@ export function ChatInput() {
       const cfg = configs.find(c => c.id === activeModelId)
       if (cfg) targets = [cfg]
     }
+
+    // Add user message once
+    addMessage(currentDialogId, {
+      role: 'user', content: text,
+      parentId: null, branchId: 'main', status: 'complete',
+    })
+    setInput('')
+
+    // Mock mode: no API keys → simulate responses
     if (targets.length === 0) {
-      setError(t('chat.input.no_key'))
+      const assistantId = addMessage(currentDialogId, {
+        role: 'assistant', content: '', parentId: null, branchId: 'main',
+        status: 'streaming', model: '🤖 Mock AI',
+      })
+      const controller = new AbortController()
+      abortRef.current = controller
+      setSending(true)
+      try {
+        let buffer = ''
+        for await (const chunk of streamMockResponse(text)) {
+          if (controller.signal.aborted) break
+          buffer += chunk
+          updateMessage(currentDialogId, assistantId, { content: buffer })
+        }
+        if (!controller.signal.aborted) {
+          updateMessage(currentDialogId, assistantId, { content: buffer, status: 'complete' })
+        } else {
+          updateMessage(currentDialogId, assistantId, { content: t('chat.input.cancelled'), status: 'error' })
+        }
+      } catch {
+        updateMessage(currentDialogId, assistantId, { content: '⚠️ Mock response error', status: 'error' })
+      } finally {
+        setSending(false)
+        abortRef.current = null
+      }
       return
     }
 
@@ -92,13 +126,6 @@ export function ChatInput() {
       }
       keyMap.set(cfg.id, key)
     }
-
-    // Add user message once
-    addMessage(currentDialogId, {
-      role: 'user', content: text,
-      parentId: null, branchId: 'main', status: 'complete',
-    })
-    setInput('')
 
     // Create one assistant placeholder per target model
     const assistants = targets.map(cfg => ({
