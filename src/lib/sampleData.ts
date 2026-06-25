@@ -18,7 +18,7 @@ const CONTENT = {
 
 🧬 **Branching conversations** — Select any piece of a response and branch it into a focused sub-dialogue. Your main conversation stays clean while you explore tangents.
 
-🔄 **Multi-model comparison** — Send the same prompt to GPT-4.1, Claude, DeepSeek simultaneously. Watch them respond side by side in real time.
+🔁 **Multi-model comparison** — Send the same prompt to GPT-4.1, Claude, DeepSeek simultaneously. Watch them respond side by side in real time.
 
 🌲 **Visual dialog tree** — Navigate your entire conversation history as an interactive tree. Fold, expand, search, drag to reorder.
 
@@ -33,7 +33,7 @@ const CONTENT = {
 
 🧬 **分支对话** — 选中回复中的任意内容，创建聚焦的子对话。主对话保持整洁，同时你可以自由探索分支。
 
-🔄 **多模型并行对比** — 将同一问题同时发送给 GPT-4.1、Claude、DeepSeek，并排观看实时流式回复。
+🔁 **多模型并行对比** — 将同一问题同时发送给 GPT-4.1、Claude、DeepSeek，并排观看实时流式回复。
 
 🌲 **可视化对话树** — 以交互式树状图浏览整个对话历史。折叠、展开、搜索、拖拽排序。
 
@@ -107,7 +107,7 @@ Think of it like a **Git branch for conversations** — you branch, experiment, 
 
 把它想象成 **对话的 Git 分支** —— 你创建分支、实验、准备好后合并回来。`,
   },
-  compareTitle: { en: '🔄 Compare: What is an LLM?', 'zh-CN': '🔄 对比：什么是大语言模型？' },
+  compareTitle: { en: '🔁 Compare: What is an LLM?', 'zh-CN': '🔁 对比：什么是大语言模型？' },
   compareQ: { en: 'Explain what a Large Language Model is in simple terms', 'zh-CN': '用简单的语言解释什么是大语言模型' },
   compareA: {
     en: `**🤖 Claude:** A large language model is like a super-powered autocomplete. It's been trained on a vast amount of text from the internet, books, and more — learning patterns of language. When you give it a prompt, it predicts what words should come next based on everything it learned. Think of it as a **statistical parrot** with an incredible memory.
