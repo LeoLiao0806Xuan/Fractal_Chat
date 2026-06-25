@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <rect width="800" height="400" fill="#f8f7fc" rx="12"/>
+
+  <text x="400" y="32" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="bold" fill="#1f1b2e">可视化对话树</text>
+  <text x="400" y="50" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#6b6580">浏览、搜索、拖拽、折叠——再也不会丢失上下文</text>
+
+  <!-- Sidebar -->
+  <rect x="20" y="65" width="250" height="315" rx="12" fill="#faf9fe" stroke="#d4d0e4" stroke-width="1"/>
+
+  <!-- Search bar -->
+  <rect x="32" y="78" width="226" height="28" rx="7" fill="#fff" stroke="#d4d0e4" stroke-width="1"/>
+  <text x="46" y="96" font-family="sans-serif" font-size="11" fill="#a8a0c0">搜索对话...</text>
+
+  <!-- Tree items -->
+  <rect x="32" y="115" width="226" height="28" rx="6" fill="#ede9fe" stroke="#6366f1" stroke-width="1"/>
+  <text x="60" y="133" font-family="sans-serif" font-size="12" fill="#6366f1" font-weight="bold">▼ 项目启动</text>
+  <text x="238" y="133" font-family="sans-serif" font-size="9" fill="#a8a0c0">3</text>
+
+  <rect x="44" y="150" width="214" height="26" rx="5" fill="#fff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <text x="72" y="167" font-family="sans-serif" font-size="11" fill="#4a4458">▶ 技术选型</text>
+
+  <rect x="44" y="180" width="214" height="26" rx="5" fill="#fff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <text x="72" y="197" font-family="sans-serif" font-size="11" fill="#4a4458">▼ 架构设计</text>
+
+  <rect x="56" y="210" width="202" height="24" rx="5" fill="#f5f3ff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <text x="84" y="226" font-family="sans-serif" font-size="10" fill="#7c3aed">数据库设计</text>
+  <circle cx="68" cy="222" r="3" fill="#a855f7"/>
+
+  <rect x="56" y="238" width="202" height="24" rx="5" fill="#f5f3ff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <text x="84" y="254" font-family="sans-serif" font-size="10" fill="#7c3aed">API 接口</text>
+  <circle cx="68" cy="250" r="3" fill="#a855f7"/>
+
+  <rect x="44" y="270" width="214" height="26" rx="5" fill="#fff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <text x="72" y="287" font-family="sans-serif" font-size="11" fill="#4a4458">▶ UI 原型</text>
+
+  <rect x="44" y="304" width="214" height="26" rx="5" fill="#fff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <text x="72" y="321" font-family="sans-serif" font-size="11" fill="#4a4458">预算规划</text>
+
+  <text x="46" y="355" font-family="sans-serif" font-size="10" fill="#a8a0c0">已归档 (3)</text>
+
+  <!-- Right side: Tree visualization -->
+  <line x1="520" y1="95" x2="520" y2="370" stroke="#d4d0e4" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <circle cx="520" cy="110" r="12" fill="#6366f1"/>
+  <text x="520" y="114" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#fff">●</text>
+
+  <rect x="550" y="98" width="180" height="24" rx="6" fill="#ede9fe"/>
+  <text x="560" y="114" font-family="sans-serif" font-size="11" fill="#6366f1" font-weight="500">项目启动</text>
+
+  <line x1="520" y1="122" x2="520" y2="158" stroke="#6366f1" stroke-width="1.5" opacity="0.5"/>
+  <circle cx="520" cy="165" r="8" fill="#a855f7"/>
+  <rect x="550" y="153" width="150" height="24" rx="6" fill="#f5f3ff"/>
+  <text x="560" y="169" font-family="sans-serif" font-size="11" fill="#7c3aed">技术选型</text>
+
+  <line x1="520" y1="173" x2="520" y2="198" stroke="#a855f7" stroke-width="1" opacity="0.4"/>
+  <circle cx="520" cy="205" r="5" fill="#c084fc"/>
+  <rect x="550" y="193" width="120" height="22" rx="5" fill="#faf5ff"/>
+  <text x="560" y="208" font-family="sans-serif" font-size="10" fill="#a855f7">前端</text>
+
+  <line x1="520" y1="173" x2="450" y2="220" stroke="#a855f7" stroke-width="1" opacity="0.4"/>
+  <circle cx="450" cy="225" r="5" fill="#c084fc"/>
+  <rect x="360" y="213" width="85" height="22" rx="5" fill="#faf5ff"/>
+  <text x="370" y="228" font-family="sans-serif" font-size="10" fill="#a855f7">后端</text>
+
+  <line x1="520" y1="173" x2="600" y2="230" stroke="#a855f7" stroke-width="1" opacity="0.4"/>
+  <circle cx="600" cy="235" r="5" fill="#c084fc"/>
+  <rect x="610" y="223" width="80" height="22" rx="5" fill="#faf5ff"/>
+  <text x="620" y="238" font-family="sans-serif" font-size="10" fill="#a855f7">数据库</text>
+
+  <line x1="520" y1="110" x2="580" y2="280" stroke="#a855f7" stroke-width="1.5" opacity="0.35"/>
+  <circle cx="580" cy="285" r="8" fill="#ec4899"/>
+  <rect x="595" y="273" width="140" height="24" rx="6" fill="#fdf2f8"/>
+  <text x="605" y="289" font-family="sans-serif" font-size="11" fill="#ec4899">UI 原型</text>
+
+  <line x1="520" y1="110" x2="430" y2="310" stroke="#a855f7" stroke-width="1.5" opacity="0.35"/>
+  <circle cx="430" cy="315" r="8" fill="#d97706"/>
+  <rect x="350" y="303" width="75" height="24" rx="6" fill="#fffbeb"/>
+  <text x="360" y="319" font-family="sans-serif" font-size="11" fill="#d97706">预算</text>
+
+  <rect x="590" y="340" width="150" height="40" rx="8" fill="rgba(255,255,255,0.7)" stroke="#d4d0e4" stroke-width="0.5"/>
+  <circle cx="605" cy="355" r="4" fill="#a855f7"/>
+  <text x="615" y="358" font-family="sans-serif" font-size="9" fill="#6b6580">子对话</text>
+  <circle cx="605" cy="370" r="4" fill="#d4d0e4"/>
+  <text x="615" y="373" font-family="sans-serif" font-size="9" fill="#6b6580">叶节点</text>
+</svg>

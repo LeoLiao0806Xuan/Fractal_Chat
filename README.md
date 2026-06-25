@@ -4,7 +4,7 @@
 
 **A recursive conversation tree for multi-model AI chat**
 
-> Select any text → branch into a focused sub-dialogue → compare answers from GPT-4o, Claude, DeepSeek, and more — side by side.
+> Select any text → branch into a focused sub-dialogue → compare answers from GPT-4.1, Claude, DeepSeek, and more — side by side.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)](https://www.typescriptlang.org/)

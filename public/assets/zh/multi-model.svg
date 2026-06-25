@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420">
+  <rect width="800" height="420" fill="#f8f7fc" rx="12"/>
+
+  <text x="400" y="30" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="bold" fill="#1f1b2e">多模型并行对比</text>
+  <text x="400" y="48" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#6b6580">一条消息同时发送给多个模型</text>
+
+  <!-- Input area -->
+  <rect x="40" y="65" width="720" height="46" rx="10" fill="#fff" stroke="#d4d0e4" stroke-width="1"/>
+  <text x="60" y="93" font-family="sans-serif" font-size="14" fill="#6366f1" font-weight="500">"用 TypeScript 实现一个 debounce 函数"</text>
+  <rect x="680" y="73" width="65" height="30" rx="7" fill="#10a37f"/>
+  <text x="712" y="93" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#fff" font-weight="bold">发送</text>
+
+  <!-- Labels row -->
+  <text x="60" y="138" font-family="sans-serif" font-size="11" fill="#6b6580">已选模型：</text>
+  <rect x="170" y="125" width="85" height="22" rx="5" fill="#10a37f" opacity="0.1"/>
+  <text x="212" y="140" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#10a37f" font-weight="bold">GPT-4.1</text>
+  <rect x="265" y="125" width="95" height="22" rx="5" fill="#4f46e5" opacity="0.1"/>
+  <text x="312" y="140" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4f46e5" font-weight="bold">DeepSeek R1</text>
+  <rect x="370" y="125" width="110" height="22" rx="5" fill="#d97706" opacity="0.1"/>
+  <text x="425" y="140" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#d97706" font-weight="bold">Claude Opus 4.8</text>
+
+  <!-- Column 1: GPT-4.1 -->
+  <rect x="40" y="162" width="230" height="235" rx="10" fill="#fff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <rect x="40" y="162" width="230" height="30" rx="10" fill="#10a37f"/>
+  <text x="155" y="182" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#fff" font-weight="bold">GPT-4.1</text>
+
+  <text x="55" y="212" font-family="sans-serif" font-size="10" fill="#10a37f">// 生成中...</text>
+  <text x="55" y="232" font-family="sans-serif" font-size="11" fill="#555">function debounce(fn, delay) {</text>
+  <text x="65" y="250" font-family="sans-serif" font-size="11" fill="#555">let timer;</text>
+  <text x="65" y="268" font-family="sans-serif" font-size="11" fill="#555">return (...args) =&gt; {</text>
+  <text x="75" y="286" font-family="sans-serif" font-size="11" fill="#555">clearTimeout(timer);</text>
+  <text x="75" y="304" font-family="sans-serif" font-size="11" fill="#555">timer = setTimeout(</text>
+  <text x="85" y="322" font-family="sans-serif" font-size="11" fill="#555">() =&gt; fn(...args), delay</text>
+  <text x="65" y="340" font-family="sans-serif" font-size="11" fill="#555">);</text>
+  <text x="55" y="358" font-family="sans-serif" font-size="11" fill="#555">};</text>
+
+  <circle cx="55" cy="378" r="3" fill="#10a37f" opacity="0.6"/>
+
+  <!-- Column 2: DeepSeek R1 -->
+  <rect x="285" y="162" width="230" height="235" rx="10" fill="#fff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <rect x="285" y="162" width="230" height="30" rx="10" fill="#4f46e5"/>
+  <text x="400" y="182" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#fff" font-weight="bold">DeepSeek R1</text>
+
+  <text x="300" y="212" font-family="sans-serif" font-size="10" fill="#4f46e5">// 思考中...</text>
+  <text x="300" y="232" font-family="sans-serif" font-size="11" fill="#555">/** Debounce with leading</text>
+  <text x="300" y="250" font-family="sans-serif" font-size="11" fill="#555"> * option */</text>
+  <text x="300" y="272" font-family="sans-serif" font-size="11" fill="#555">function debounce(fn, delay,</text>
+  <text x="310" y="290" font-family="sans-serif" font-size="11" fill="#555">leading = false) {</text>
+  <text x="310" y="308" font-family="sans-serif" font-size="11" fill="#555">let timer, lastArgs;</text>
+  <text x="300" y="326" font-family="sans-serif" font-size="11" fill="#555">return function(...args) {</text>
+  <text x="310" y="344" font-family="sans-serif" font-size="11" fill="#555">// implementation</text>
+  <text x="300" y="362" font-family="sans-serif" font-size="11" fill="#555">};</text>
+
+  <circle cx="300" cy="378" r="3" fill="#4f46e5" opacity="0.6"/>
+  <circle cx="312" cy="378" r="3" fill="#4f46e5" opacity="0.3"/>
+
+  <!-- Column 3: Claude Opus 4.8 -->
+  <rect x="530" y="162" width="230" height="235" rx="10" fill="#fff" stroke="#d4d0e4" stroke-width="0.5"/>
+  <rect x="530" y="162" width="230" height="30" rx="10" fill="#d97706"/>
+  <text x="645" y="182" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#fff" font-weight="bold">Claude Opus 4.8</text>
+
+  <text x="545" y="212" font-family="sans-serif" font-size="10" fill="#d97706">// 生成中...</text>
+  <text x="545" y="232" font-family="sans-serif" font-size="11" fill="#555">这里是一个包含 cancel</text>
+  <text x="545" y="250" font-family="sans-serif" font-size="11" fill="#555">和 flush 的 debounce：</text>
+  <text x="545" y="272" font-family="sans-serif" font-size="11" fill="#555">function debounce(fn, ms) {</text>
+  <text x="555" y="290" font-family="sans-serif" font-size="11" fill="#555">let timer;</text>
+  <text x="555" y="308" font-family="sans-serif" font-size="11" fill="#555">function debounced() {</text>
+  <text x="565" y="326" font-family="sans-serif" font-size="11" fill="#555">clearTimeout(timer);</text>
+  <text x="565" y="344" font-family="sans-serif" font-size="11" fill="#555">timer = setTimeout(...);</text>
+  <text x="555" y="362" font-family="sans-serif" font-size="11" fill="#555">}</text>
+
+  <circle cx="545" cy="378" r="3" fill="#d97706" opacity="0.6"/>
+  <circle cx="557" cy="378" r="3" fill="#d97706" opacity="0.5"/>
+  <circle cx="569" cy="378" r="3" fill="#d97706" opacity="0.3"/>
+</svg>
