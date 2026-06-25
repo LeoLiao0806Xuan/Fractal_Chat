@@ -20,12 +20,12 @@
 ### 🧬 递归子对话树
 选中回复中的任意内容 → 右键 → 创建一个聚焦的子对话。每个子对话都是一条新分支，可以继续深入挖掘，然后将结果合并回父对话。
 
-<img src="./public/assets/sub-dialogue-flow.svg" alt="子对话流程" width="800">
+<img src="public/assets/sub-dialogue-flow.svg" alt="子对话流程" width="800">
 
 ### 🔄 多模型并行对比
 将同一问题同时发送给多个 LLM，实时并排观看回复流式输出。不再需要在标签页之间手动复制粘贴。
 
-<img src="./public/assets/multi-model.svg" alt="多模型对比" width="800">
+<img src="public/assets/multi-model.svg" alt="多模型对比" width="800">
 
 ### 🌲 可视化对话树
 以交互式树状图浏览整个对话历史。折叠、展开、搜索、拖拽排序——你的上下文永远不会丢失。
@@ -35,7 +35,7 @@
 - **折叠/展开** 保持专注
 - **右键菜单** 快速操作
 
-<img src="./public/assets/conversation-tree.svg" alt="对话树" width="800">
+<img src="public/assets/conversation-tree.svg" alt="对话树" width="800">
 
 ### 🏷️ 整理与导出
 - **标签** 和 **归档** 管理对话
@@ -75,11 +75,11 @@ npm run dev
 
 | 对话树 | 多模型对比 |
 |---|---|
-| <img src="./public/assets/conversation-tree.svg" alt="对话树" width="300"> | <img src="./public/assets/multi-model.svg" alt="对比" width="300"> |
+| <img src="public/assets/conversation-tree.svg" alt="对话树" width="300"> | <img src="public/assets/multi-model.svg" alt="对比" width="300"> |
 
 | 子对话流程 | 架构概览 |
 |---|---|
-| <img src="./public/assets/sub-dialogue-flow.svg" alt="子对话" width="300"> | <img src="./public/assets/hero.svg" alt="架构" width="300"> |
+| <img src="public/assets/sub-dialogue-flow.svg" alt="子对话" width="300"> | <img src="public/assets/hero.svg" alt="架构" width="300"> |
 
 ---
 

@@ -20,12 +20,12 @@
 ### 🧬 Recursive Sub-Dialogue Tree
 Select any part of a response → right-click → create a focused sub-dialogue. Each sub-dialogue is a new branch where you can keep digging deeper, then merge insights back into the parent conversation.
 
-<img src="./public/assets/sub-dialogue-flow.svg" alt="Sub-dialogue flow" width="800">
+<img src="public/assets/sub-dialogue-flow.svg" alt="Sub-dialogue flow" width="800">
 
 ### 🔄 Multi-Model Parallel Comparison
 Send the same prompt to multiple LLMs at once and watch their responses stream in real-time, side by side. No more manual copy-paste between tabs.
 
-<img src="./public/assets/multi-model.svg" alt="Multi-model comparison" width="800">
+<img src="public/assets/multi-model.svg" alt="Multi-model comparison" width="800">
 
 ### 🌲 Visual Conversation Tree
 Navigate your entire conversation history as an interactive tree. Fold, expand, search, drag to reorder — your context never gets lost.
@@ -35,7 +35,7 @@ Navigate your entire conversation history as an interactive tree. Fold, expand, 
 - **Collapse/expand** for focus
 - **Right-click context menu** for quick actions
 
-<img src="./public/assets/conversation-tree.svg" alt="Conversation tree" width="800">
+<img src="public/assets/conversation-tree.svg" alt="Conversation tree" width="800">
 
 ### 🏷️ Organize & Export
 - **Tags** and **archiving** for conversation management
@@ -75,11 +75,11 @@ Open `http://localhost:5173` — no backend, no database, no signup.
 
 | Conversation Tree | Multi-Model Compare |
 |---|---|
-| <img src="./public/assets/conversation-tree.svg" alt="Tree" width="300"> | <img src="./public/assets/multi-model.svg" alt="Compare" width="300"> |
+| <img src="public/assets/conversation-tree.svg" alt="Tree" width="300"> | <img src="public/assets/multi-model.svg" alt="Compare" width="300"> |
 
 | Sub-Dialogue Flow | Architecture |
 |---|---|
-| <img src="./public/assets/sub-dialogue-flow.svg" alt="Sub-dialogue" width="300"> | <img src="./public/assets/hero.svg" alt="Architecture" width="300"> |
+| <img src="public/assets/sub-dialogue-flow.svg" alt="Sub-dialogue" width="300"> | <img src="public/assets/hero.svg" alt="Architecture" width="300"> |
 
 ---
 
