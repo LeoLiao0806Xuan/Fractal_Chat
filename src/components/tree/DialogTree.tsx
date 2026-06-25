@@ -351,6 +351,7 @@ export function DialogTree() {
               )}
               {node.isMerged && <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-medium shrink-0">{t('tree.merged')}</span>}
               {node.status === 'archived' && <span className="text-[10px] text-[#a3a3a3] shrink-0">📦</span>}
+              {node.tags.includes('demo') && <span className="text-[9px] text-amber-600 bg-amber-50 px-1 py-0.5 rounded shrink-0 font-bold tracking-wide">DEMO</span>}
             </div>
             {node.preview && renamingId !== node.id && (
               <div className={`text-xs truncate mt-0.5 ${active ? 'text-indigo-400/70' : 'text-[#a3a3a3]'}`}>{node.preview}</div>
