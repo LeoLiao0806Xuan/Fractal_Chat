@@ -20,12 +20,12 @@
 ### 🧬 Recursive Sub-Dialogue Tree
 Select any part of a response → right-click → create a focused sub-dialogue. Each sub-dialogue is a new branch where you can keep digging deeper, then merge insights back into the parent conversation.
 
-![Sub-dialogue demo](https://placehold.co/800x450/6366f1/ffffff?text=Select+%E2%86%92+Sub-dialogue+%E2%86%92+Merge)
+<img src="./public/assets/sub-dialogue-flow.svg" alt="Sub-dialogue flow" width="800">
 
 ### 🔄 Multi-Model Parallel Comparison
 Send the same prompt to multiple LLMs at once and watch their responses stream in real-time, side by side. No more manual copy-paste between tabs.
 
-![Multi-model comparison](https://placehold.co/800x450/7c3aed/ffffff?text=Multi-Model+Parallel+Comparison)
+<img src="./public/assets/multi-model.svg" alt="Multi-model comparison" width="800">
 
 ### 🌲 Visual Conversation Tree
 Navigate your entire conversation history as an interactive tree. Fold, expand, search, drag to reorder — your context never gets lost.
@@ -34,6 +34,8 @@ Navigate your entire conversation history as an interactive tree. Fold, expand, 
 - **Drag & drop** to reorder dialogues
 - **Collapse/expand** for focus
 - **Right-click context menu** for quick actions
+
+<img src="./public/assets/conversation-tree.svg" alt="Conversation tree" width="800">
 
 ### 🏷️ Organize & Export
 - **Tags** and **archiving** for conversation management
@@ -50,14 +52,9 @@ Navigate your entire conversation history as an interactive tree. Fold, expand, 
 ## 🚀 Quick Start
 
 ```bash
-# Clone
-git clone https://github.com/YOUR_USERNAME/fractal-chat.git
+git clone https://github.com/LeoLiao0806Xuan/Fractal_Chat.git
 cd fractal-chat
-
-# Install
 npm install
-
-# Start dev server
 npm run dev
 ```
 
@@ -70,7 +67,7 @@ Open `http://localhost:5173` — no backend, no database, no signup.
 3. Enter your API key (encrypted in-browser with AES-256-GCM)
 4. Start chatting!
 
-> **💡 Tip:** Add multiple models and click **⊕ 对比** to toggle comparison mode — select which models to compare and send one prompt to all of them.
+> **💡 Tip:** Add multiple models and toggle **⊕ Compare** mode — select which models to compare and send one prompt to all of them simultaneously.
 
 ---
 
@@ -78,11 +75,11 @@ Open `http://localhost:5173` — no backend, no database, no signup.
 
 | Conversation Tree | Multi-Model Compare |
 |---|---|
-| ![Tree](https://placehold.co/600x400/8b5cf6/ffffff?text=Conversation+Tree) | ![Compare](https://placehold.co/600x400/6366f1/ffffff?text=Multi-Model+Compare) |
+| <img src="./public/assets/conversation-tree.svg" alt="Tree" width="300"> | <img src="./public/assets/multi-model.svg" alt="Compare" width="300"> |
 
-| Sub-Dialogue | Export |
+| Sub-Dialogue Flow | Architecture |
 |---|---|
-| ![Sub](https://placehold.co/600x400/7c3aed/ffffff?text=Sub-Dialogue) | ![Export](https://placehold.co/600x400/a855f7/ffffff?text=Export+Menu) |
+| <img src="./public/assets/sub-dialogue-flow.svg" alt="Sub-dialogue" width="300"> | <img src="./public/assets/hero.svg" alt="Architecture" width="300"> |
 
 ---
 
@@ -96,7 +93,7 @@ Fractal Chat is a **pure client-side** application. No backend, no user accounts
 │  ┌─────────┐  ┌───────────────────┐  │
 │  │ Dialog  │  │  Chat Input       │  │
 │  │ Tree    │  │  + ModelSelector  │  │
-│  │ (递归)  │  │  (多模型对比)      │  │
+│  │ (recursive) │  (multi-model)     │  │
 │  └────┬────┘  └────────┬──────────┘  │
 │       │                │             │
 │  ┌────▼────────────────▼──────────┐  │
@@ -107,7 +104,7 @@ Fractal Chat is a **pure client-side** application. No backend, no user accounts
 │  ┌────▼────┐   ┌──────▼────────┐   │
 │  │IndexedDB│   │  API Layer    │   │
 │  │ (idb)   │   │ callModel()   │   │
-│  │持久化   │   │ OAI/Anthropic │   │
+│  │persistence│  │ OAI/Anthropic │   │
 │  └─────────┘   └──────┬────────┘   │
 │                       │            │
 │              ┌────────▼────────┐   │
