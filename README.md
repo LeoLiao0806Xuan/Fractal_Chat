@@ -10,10 +10,13 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF)](https://vitejs.dev/)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f3a2a156-9b3e-4d0f-8c7e-1b9e0e5c2a7d/deploy-status)](https://fractal-chat.netlify.app)
 
 </div>
 
 ---
+
+> **🌐 Try it online:** [fractal-chat.netlify.app](https://fractal-chat.netlify.app) — no install, no signup.
 
 ## ✨ Features
 
@@ -142,14 +145,13 @@ Current: **24 tests** across modelStore, dialogStore, and mergeUtils — all pas
 - [x] Phase 0 — Prototype: API unification, persistence, error boundaries
 - [x] Phase 1 — MVP: Sub-dialogues, tree navigation, search, export, tags
 - [x] Multi-model parallel comparison
-- [ ] Phase 2 — Core differentiation
-  - [ ] Real-time collaboration (Yjs)
-  - [ ] Mobile adaptation
+- [x] i18n — English & Chinese (2026-06-25)
+- [x] GitHub Discussions
+- [ ] Core features
+  - [ ] Conversation filters (by tag, date, status)
   - [ ] Virtual scrolling for long conversations
-  - [ ] Message-level auto-tagging
+  - [ ] Mobile adaptation
 - [ ] Community
-  - [ ] GitHub Discussions
-  - [ ] i18n
   - [ ] Plugin system
 
 ---

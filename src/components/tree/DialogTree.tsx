@@ -146,6 +146,15 @@ export function DialogTree() {
       ? new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
       : (dialogOrder[a.id] ?? Number.MAX_SAFE_INTEGER) - (dialogOrder[b.id] ?? Number.MAX_SAFE_INTEGER))
 
+  const applySortMode = (items: TreeNode[]) => {
+    if (sortMode === 'newest') {
+      return [...items].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    } else if (sortMode === 'oldest') {
+      return [...items].sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime())
+    }
+    return sortNodes(items, false)
+  }
+
   const tree = useMemo((): TreeNode[] => {
     const build = (pid: string): TreeNode[] =>
       sortNodes(dialogs.filter(d => d.parentDialogId === pid).map(c => ({
@@ -171,30 +180,85 @@ export function DialogTree() {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [showArchived, setShowArchived] = useState(false)
+  const [showFilter, setShowFilter] = useState(false)
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'archived'>('all')
+  const [filterTags, setFilterTags] = useState<string[]>([])
+  const [sortMode, setSortMode] = useState<'custom' | 'newest' | 'oldest'>('custom')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  const allTags = useMemo(() => {
+    const set = new Set<string>()
+    dialogs.forEach(d => d.tags?.forEach(t => set.add(t)))
+    return [...set].sort()
+  }, [dialogs])
+
+  const toggleTag = (tag: string) => {
+    setFilterTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    )
+  }
+
+  const clearFilters = () => {
+    setFilterStatus('all')
+    setFilterTags([])
+    setSortMode('custom')
+    setShowArchived(false)
+  }
+
+  const hasActiveFilters = filterStatus !== 'all' || filterTags.length > 0 || sortMode !== 'custom'
+
   const filteredTree = useMemo(() => {
-    let nodes = tree
-    if (!showArchived) {
-      const hide = (n: TreeNode): TreeNode | null => {
-        if (n.status === 'archived') return null
-        const children = n.children.map(hide).filter((x): x is TreeNode => x !== null)
-        return { ...n, children }
+    // 1. Status & tag pre-filter
+    let dialogsInView = [...dialogs]
+    if (!showArchived || filterStatus === 'active') {
+      dialogsInView = dialogsInView.filter(d => d.status !== 'archived')
+    } else if (filterStatus === 'archived') {
+      dialogsInView = dialogsInView.filter(d => d.status === 'archived')
+    }
+    if (filterTags.length > 0) {
+      dialogsInView = dialogsInView.filter(d =>
+        filterTags.every(tag => d.tags?.includes(tag))
+      )
+    }
+
+    // 2. Build tree from filtered dialogs
+    const build = (pid: string): TreeNode[] =>
+      applySortMode(dialogsInView.filter(d => d.parentDialogId === pid).map(c => ({
+        id: c.id,
+        name: c.title.replace(/^[✏️📎🌿]\s*/, ''),
+        messageCount: c.messages.length,
+        preview: getPreview(c.messages),
+        hasSubDialogs: dialogsInView.some(d => d.parentDialogId === c.id),
+        isSubDialog: true, parentId: pid,
+        children: build(c.id),
+        isMerged: /^[✏️📎🌿]/.test(c.title),
+        mergeIcon: c.title.startsWith('✏️') ? '🔀' : c.title.startsWith('📎') ? '📎' : '🌿',
+        status: c.status, updatedAt: c.updatedAt, tags: c.tags || [],
+      })))
+
+    let nodes = applySortMode(dialogsInView.filter(d => !d.parentDialogId).map(r => ({
+      id: r.id, name: r.title, messageCount: r.messages.length,
+      preview: getPreview(r.messages), hasSubDialogs: dialogsInView.some(d => d.parentDialogId === r.id),
+      isSubDialog: false, parentId: null, children: build(r.id),
+      isMerged: false, mergeIcon: '', status: r.status, updatedAt: r.updatedAt, tags: r.tags || [],
+    })))
+
+    // 3. Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      const searchFilter = (n: TreeNode): TreeNode | null => {
+        const nameM = n.name.toLowerCase().includes(q)
+        const prevM = n.preview.toLowerCase().includes(q)
+        const dialog = dialogs.find(d => d.id === n.id)
+        const contM = dialog?.messages.some(m => m.content.toLowerCase().includes(q))
+        const children = n.children.map(searchFilter).filter((x): x is TreeNode => x !== null)
+        return (nameM || prevM || contM || children.length > 0) ? { ...n, children } : null
       }
-      nodes = tree.map(hide).filter((x): x is TreeNode => x !== null)
+      nodes = nodes.map(r => searchFilter(r)).filter((x): x is TreeNode => x !== null)
     }
-    if (!searchQuery.trim()) return nodes
-    const q = searchQuery.toLowerCase()
-    const filter = (n: TreeNode): TreeNode | null => {
-      const nameM = n.name.toLowerCase().includes(q)
-      const prevM = n.preview.toLowerCase().includes(q)
-      const dialog = dialogs.find(d => d.id === n.id)
-      const contM = dialog?.messages.some(m => m.content.toLowerCase().includes(q))
-      const children = n.children.map(filter).filter((x): x is TreeNode => x !== null)
-      return (nameM || prevM || contM || children.length > 0) ? { ...n, children } : null
-    }
-    return tree.map(r => filter(r)).filter((x): x is TreeNode => x !== null)
-  }, [tree, searchQuery, dialogs, showArchived])
+
+    return nodes
+  }, [tree, searchQuery, dialogs, showArchived, filterStatus, filterTags, sortMode])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -317,26 +381,85 @@ export function DialogTree() {
           + {t('tree.new')}
         </button>
 
-        <div className="relative">
-          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#a3a3a3] text-xs leading-none">🔍</span>
-          <input ref={searchInputRef} type="text" value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Escape') { setSearchQuery(''); searchInputRef.current?.blur() } }}
-            placeholder={t('tree.search')}
-            className="w-full pl-8 pr-7 py-1.5 text-xs border border-[#e4e3ed] rounded-lg
-                       focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300
-                       bg-[#f8f7fc] focus:bg-white transition-all placeholder:text-[#a3a3a3]" />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-[#a3a3a3] hover:text-gray-600 text-xs">✕</button>
-          )}
+        <div className="flex gap-1.5">
+          <div className="relative flex-1">
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#a3a3a3] text-xs leading-none">🔍</span>
+            <input ref={searchInputRef} type="text" value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Escape') { setSearchQuery(''); searchInputRef.current?.blur() } }}
+              placeholder={t('tree.search')}
+              className="w-full pl-8 pr-7 py-1.5 text-xs border border-[#e4e3ed] rounded-lg
+                         focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300
+                         bg-[#f8f7fc] focus:bg-white transition-all placeholder:text-[#a3a3a3]" />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#a3a3a3] hover:text-gray-600 text-xs">✕</button>
+            )}
+          </div>
+          <button onClick={() => setShowFilter(!showFilter)}
+            className={`shrink-0 px-2 py-1.5 text-xs rounded-lg border transition-all
+              ${showFilter || hasActiveFilters
+                ? 'bg-indigo-50 border-indigo-300 text-indigo-600'
+                : 'border-[#e4e3ed] text-[#a3a3a3] hover:border-indigo-200 hover:text-indigo-500'}`}>
+            {hasActiveFilters ? '🔽' : '⏬'}
+          </button>
         </div>
 
-        <button onClick={() => setShowArchived(!showArchived)}
-          className={`text-xs w-full text-left px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5
-            ${showArchived ? 'bg-[#f1f0ff] text-indigo-600' : 'text-[#a3a3a3] hover:text-gray-500 hover:bg-gray-50'}`}>
-          {showArchived ? t('tree.show_all') : t('tree.hide_archived')}
-        </button>
+        {/* Filter panel */}
+        {showFilter && (
+          <div className="bg-[#f8f7fc] rounded-xl p-2.5 space-y-2.5 border border-[#e4e3ed] animate-fade-in">
+            {/* Status filter */}
+            <div className="flex gap-1">
+              {(['all', 'active', 'archived'] as const).map(st => (
+                <button key={st} onClick={() => { setFilterStatus(st); if (st === 'all') setShowArchived(false); else if (st === 'active') setShowArchived(false); else setShowArchived(true) }}
+                  className={`flex-1 text-[11px] py-1.5 rounded-lg font-medium transition-colors
+                    ${filterStatus === st
+                      ? 'bg-white text-indigo-600 shadow-sm border border-indigo-200'
+                      : 'text-[#a3a3a3] hover:text-gray-600 hover:bg-white/50'}`}>
+                  {st === 'all' ? t('tree.filter_status') : st === 'active' ? t('tree.filter_active') : t('tree.filter_archived')}
+                </button>
+              ))}
+            </div>
+
+            {/* Tag filter */}
+            {allTags.length > 0 && (
+              <div>
+                <div className="text-[10px] text-[#a3a3a3] mb-1 font-medium">{t('tree.filter_tag')}</div>
+                <div className="flex flex-wrap gap-1">
+                  {allTags.map(tag => (
+                    <button key={tag} onClick={() => toggleTag(tag)}
+                      className={`text-[10px] px-2 py-0.5 rounded-full transition-colors border
+                        ${filterTags.includes(tag)
+                          ? 'bg-indigo-100 text-indigo-700 border-indigo-300 font-medium'
+                          : 'bg-white text-[#737373] border-[#e4e3ed] hover:border-indigo-200 hover:text-indigo-500'}`}>
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Sort */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-[#a3a3a3] font-medium shrink-0">↕</span>
+              {(['custom', 'newest', 'oldest'] as const).map(sm => (
+                <button key={sm} onClick={() => setSortMode(sm)}
+                  className={`text-[10px] px-2 py-1 rounded-md transition-colors
+                    ${sortMode === sm
+                      ? 'bg-white text-indigo-600 shadow-sm border border-indigo-200'
+                      : 'text-[#a3a3a3] hover:text-gray-600'}`}>
+                  {sm === 'custom' ? t('tree.sort_custom') : sm === 'newest' ? t('tree.sort_newest') : t('tree.sort_oldest')}
+                </button>
+              ))}
+              {hasActiveFilters && (
+                <button onClick={clearFilters}
+                  className="ml-auto text-[10px] text-red-400 hover:text-red-600 transition-colors">
+                  ✕ {t('tree.clear_filters')}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tree */}
