@@ -207,6 +207,8 @@ export function DialogTree() {
 
   const hasActiveFilters = filterStatus !== 'all' || filterTags.length > 0 || sortMode !== 'custom'
 
+  const hasDemoDialogs = useMemo(() => dialogs.some(d => d.tags?.includes('demo')), [dialogs])
+
   const filteredTree = useMemo(() => {
     // 1. Status & tag pre-filter
     let dialogsInView = [...dialogs]
@@ -374,12 +376,20 @@ export function DialogTree() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="p-3 border-b border-[#f0eff5] space-y-2">
-        <button onClick={handleNew}
-          className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl
-                     px-3 py-2.5 text-sm font-medium hover:from-indigo-600 hover:to-purple-700
-                     transition-all shadow-sm hover:shadow-md active:scale-[0.98]">
-          + {t('tree.new')}
-        </button>
+        <div className="relative">
+          <button onClick={handleNew}
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl
+                       px-3 py-2.5 text-sm font-medium hover:from-indigo-600 hover:to-purple-700
+                       transition-all shadow-sm hover:shadow-md active:scale-[0.98]">
+            + {t('tree.new')}
+          </button>
+          {hasDemoDialogs && (
+            <span className="absolute -top-1 -right-1 text-[9px] bg-amber-400 text-white font-bold
+                           px-1.5 py-0.5 rounded-full shadow-sm leading-none">
+              🎬 DEMO
+            </span>
+          )}
+        </div>
 
         <div className="flex gap-1.5">
           <div className="relative flex-1">

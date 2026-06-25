@@ -4,6 +4,7 @@ import { useModelStore } from './stores/modelStore'
 import { AppLayout } from './components/layout/AppLayout'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { loadAllDialogs, saveAllDialogs, loadAllModels, saveAllModels } from './lib/db'
+import { generateSampleDialogs } from './lib/sampleData'
 import { I18nProvider, useTranslation } from './i18n'
 
 function LoadingScreen() {
@@ -49,11 +50,22 @@ function AppContent() {
     ]).then(() => setLoaded(true))
   }, [])
 
-  // 2. Create default dialog if no dialogs exist after loading
+  // 2. Create default dialog or load demo data if no dialogs exist
   useEffect(() => {
     if (!loaded) return
     if (dialogs.length === 0 && !initialized.current) {
       initialized.current = true
+
+      // First-time user with no API keys → load demo sample data
+      if (useModelStore.getState().configs.length === 0) {
+        const samples = generateSampleDialogs()
+        useDialogStore.setState({ dialogs: samples, currentDialogId: samples[0].id })
+        // Save demo data to IndexedDB so it survives refresh
+        saveAllDialogs(samples)
+        return
+      }
+
+      // User has API keys but no conversations yet → welcome dialog
       const id = createDialog(t('app.welcome'))
       welcomeDialogId.current = id
       const { addMessage } = useDialogStore.getState()
