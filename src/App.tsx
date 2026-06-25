@@ -89,7 +89,7 @@ function AppContent() {
     if (dialog.messages.length > 0) {
       store.updateMessage(welcomeDialogId.current, dialog.messages[0].id, { content: t('app.welcome_msg') })
     }
-  }, [locale, loaded])
+  }, [locale, t, loaded])
 
   // 3. Persist dialogs to IndexedDB (debounced 1s)
   useEffect(() => {

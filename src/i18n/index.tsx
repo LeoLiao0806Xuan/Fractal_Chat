@@ -35,18 +35,18 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(() => {
     return (localStorage.getItem('fractal-locale') as Locale) || detectLocale();
   });
-  const [dict, setDict] = useState<Translations>(() => allDicts[locale]);
 
   useEffect(() => {
     localStorage.setItem('fractal-locale', locale);
-    setDict(allDicts[locale]);
   }, [locale]);
 
   const setLocale = useCallback((l: Locale) => setLocaleState(l), []);
 
+  // Compute dict directly from locale — no separate state, no stale closure
   const t = useCallback((key: string, fallback?: string): string => {
+    const dict = allDicts[locale];
     return dict[key as keyof typeof dict] ?? fallback ?? key;
-  }, [dict]);
+  }, [locale]);
 
   return (
     <I18nContext.Provider value={{ locale, setLocale, t }}>
