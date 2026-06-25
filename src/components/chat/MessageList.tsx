@@ -2,8 +2,10 @@ import { useRef, useEffect, useMemo } from 'react'
 import { useDialogStore } from '../../stores/dialogStore'
 import { useSubDialogStore } from '../../stores/subDialogStore'
 import { MessageBubble } from './MessageBubble'
+import { useTranslation } from '../../i18n'
 
 export function MessageList() {
+  const { t } = useTranslation()
   const dialogs = useDialogStore(s => s.dialogs)
   const currentDialogId = useDialogStore(s => s.currentDialogId)
   const currentDialog = useMemo(
@@ -25,14 +27,14 @@ export function MessageList() {
                           flex items-center justify-center text-3xl shadow-sm animate-float">
             💬
           </div>
-          <h2 className="text-lg font-semibold text-[#52525b] mb-1.5">选择一个对话</h2>
+          <h2 className="text-lg font-semibold text-[#52525b] mb-1.5">{t('chat.list.select')}</h2>
           <p className="text-sm text-[#a3a3a3] leading-relaxed">
-            从左侧选择一个对话，或点击
+            {t('chat.list.select_hint')}
             <span className="inline-flex items-center gap-1 mx-1 px-1.5 py-0.5 rounded-md
                            bg-indigo-50 text-indigo-600 text-xs font-medium">
-              + 新建对话
+              + {t('tree.new')}
             </span>
-            开始
+            {t('chat.list.select_hint2')}
           </p>
         </div>
       </div>
@@ -51,17 +53,17 @@ export function MessageList() {
                         border-b border-amber-200/60 flex items-center gap-2 flex-wrap text-sm">
           <span className="text-amber-700 font-medium flex items-center gap-1.5">
             <span className="text-base">🌿</span>
-            <span>子对话</span>
+            <span>{t('chat.list.sub')}</span>
           </span>
           <button onClick={() => {
             if (parentDialog) useDialogStore.getState().setCurrentDialog(parentDialog.id)
           }} className="text-amber-600 hover:text-amber-800 hover:bg-amber-100/50
                        flex items-center gap-1 px-2 py-0.5 rounded-lg transition-colors text-xs font-medium">
-            ↩ 返回「{parentDialog?.title || '父对话'}」
+            ↩ {t('chat.list.back_to')}「{parentDialog?.title || t('chat.list.parent')}」
           </button>
           <button onClick={() => useSubDialogStore.getState().reopen(currentDialog.id, currentDialog.parentDialogId || '', '')}
             className="text-xs bg-amber-100/80 hover:bg-amber-200 text-amber-700
-                       px-2.5 py-1 rounded-lg font-medium transition-colors">📂 打开面板</button>
+                       px-2.5 py-1 rounded-lg font-medium transition-colors">{t('chat.list.open_panel')}</button>
           {!isMerged && (
             <button onClick={() => {
               const anchor = currentDialog.contextAnchor
@@ -72,9 +74,9 @@ export function MessageList() {
               }
               useSubDialogStore.getState().reopen(currentDialog.id, currentDialog.parentDialogId || '', pm)
             }} className="ml-auto text-xs bg-emerald-100/80 hover:bg-emerald-200 text-emerald-700
-                         px-2.5 py-1 rounded-lg font-medium transition-colors shadow-sm">🔀 合并</button>
+                         px-2.5 py-1 rounded-lg font-medium transition-colors shadow-sm">{t('chat.list.merge')}</button>
           )}
-          {isMerged && <span className="ml-auto text-xs text-emerald-600 font-medium">✅ 已合并</span>}
+          {isMerged && <span className="ml-auto text-xs text-emerald-600 font-medium">{t('chat.list.merged')}</span>}
         </div>
       )}
 
@@ -85,7 +87,7 @@ export function MessageList() {
             <div className="text-center px-8">
               <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100
                               flex items-center justify-center text-2xl shadow-sm">✍️</div>
-              <p className="text-sm text-[#a3a3a3]">发送第一条消息开始对话</p>
+              <p className="text-sm text-[#a3a3a3]">{t('chat.list.start')}</p>
             </div>
           </div>
         ) : (
@@ -95,8 +97,8 @@ export function MessageList() {
                 {currentDialog.title.replace(/^[✏️📎🌿]\s*/, '')}
               </h2>
               <p className="text-[11px] text-[#a3a3a3] mt-0.5">
-                {currentDialog.messages.length} 条消息
-                {currentDialog.messages.some(m => m.model) && ' · AI 回复'}
+                {currentDialog.messages.length} {t('chat.list.messages')}
+                {currentDialog.messages.some(m => m.model) && t('chat.list.ai_reply')}
               </p>
             </div>
             {currentDialog.messages.map(msg => <MessageBubble key={msg.id} message={msg} />)}

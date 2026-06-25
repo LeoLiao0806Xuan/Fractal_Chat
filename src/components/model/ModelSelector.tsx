@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useModelStore } from '../../stores/modelStore'
 import { ModelConfigPanel } from './ModelConfigPanel'
+import { useTranslation } from '../../i18n'
 
 export function ModelSelector() {
+  const { t } = useTranslation()
   const configs = useModelStore(s => s.configs)
   const activeModelId = useModelStore(s => s.activeModelId)
   const setActiveModel = useModelStore(s => s.setActiveModel)
@@ -18,9 +20,9 @@ export function ModelSelector() {
         {compareMode ? (
           /* ── Multi-select compare mode ── */
           <div className="flex items-center gap-1 text-xs text-[#52525b]">
-            <span className="text-indigo-500 font-medium shrink-0">对比</span>
+            <span className="text-indigo-500 font-medium shrink-0">{t('selector.compare_btn')}</span>
             {configs.length === 0 ? (
-              <span className="text-[#a3a3a3]">未配置模型</span>
+              <span className="text-[#a3a3a3]">{t('selector.no_config')}</span>
             ) : (
               <div className="flex items-center gap-1 flex-wrap">
                 {configs.map(c => (
@@ -53,7 +55,7 @@ export function ModelSelector() {
                        focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:border-indigo-400
                        transition-all"
           >
-            {configs.length === 0 && <option value="">未配置模型</option>}
+            {configs.length === 0 && <option value="">{t('selector.no_config')}</option>}
             {configs.map(c => (
               <option key={c.id} value={c.id}>{c.name} ({c.modelName})</option>
             ))}
@@ -69,16 +71,16 @@ export function ModelSelector() {
                 ? 'bg-indigo-100 text-indigo-600 font-medium shadow-sm'
                 : 'text-[#a3a3a3] hover:text-[#6366f1] hover:bg-[#f8f7fc]'
             }`}
-            title={compareMode ? '退出对比模式' : '多模型对比'}
+            title={compareMode ? t('selector.exit_compare') : t('selector.compare')}
           >
-            {compareMode ? '✕ 退出' : '⊕ 对比'}
+            {compareMode ? t('selector.exit') : t('selector.compare_btn')}
           </button>
         )}
 
         <button
           onClick={() => setShowPanel(true)}
           className="text-xs text-[#a3a3a3] hover:text-[#6366f1] hover:bg-[#f8f7fc] px-1.5 py-1.5 rounded-lg transition-colors"
-          title="管理模型配置"
+          title={t('selector.manage')}
         >
           ⚙️
         </button>

@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import type { SelectionResult } from '../../services/selectionEngine'
 import { selectionTypeLabel, selectionTypeIcon } from '../../services/selectionEngine'
+import { useTranslation } from '../../i18n'
 
 interface MenuItem {
   id: string
   label: string
   icon: string
-  description: string
   action: () => void
 }
 
@@ -15,13 +15,6 @@ interface Props {
   onClose: () => void
   onSubDialog: (text: string, mode: string) => void
 }
-
-const ALL_ITEMS: MenuItem[] = [
-  { id: 'deep-dive', label: '深入探讨', icon: '🔍', description: '展开独立讨论', action: () => {} },
-  { id: 'debug', label: 'Debug', icon: '🐛', description: '审查代码', action: () => {} },
-  { id: 'ask-other', label: '换模型问', icon: '🤖', description: '多模型对比', action: () => {} },
-  { id: 'anchor', label: '锚定引用', icon: '📌', description: '固定引用', action: () => {} },
-]
 
 function recommendedItems(type: string): string[] {
   switch (type) {
@@ -36,8 +29,15 @@ function recommendedItems(type: string): string[] {
 }
 
 export function SelectionMenu({ selectionResult, onClose, onSubDialog }: Props) {
+  const { t } = useTranslation()
   const menuRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ top: 0, left: 0 })
+  const ALL_ITEMS = useMemo<MenuItem[]>(() => [
+    { id: 'deep-dive', label: t('selection.deep_dive'), icon: '🔍', action: () => {} },
+    { id: 'debug', label: 'Debug', icon: '🐛', action: () => {} },
+    { id: 'ask-other', label: t('selection.switch_model'), icon: '🤖', action: () => {} },
+    { id: 'anchor', label: t('selection.pin'), icon: '📌', action: () => {} },
+  ], [t])
 
   const { text, rect, type, confidence } = selectionResult
   const items = ALL_ITEMS.filter(i => recommendedItems(type).includes(i.id))
@@ -94,7 +94,7 @@ export function SelectionMenu({ selectionResult, onClose, onSubDialog }: Props) 
             {selectionTypeLabel(type)}
           </span>
           <span className="text-[10px] text-[#a3a3a3] ml-auto font-medium">
-            {text.length} 字符
+            {text.length} {t('selection.chars')}
           </span>
         </div>
 

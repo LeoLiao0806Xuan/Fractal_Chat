@@ -2,6 +2,8 @@ import { Component, type ReactNode, type ErrorInfo } from 'react'
 
 interface Props {
   children: ReactNode
+  errorTitle?: string
+  errorButton?: string
 }
 
 interface State {
@@ -26,7 +28,7 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center p-8 max-w-md">
             <div className="text-5xl mb-4">💥</div>
-            <h1 className="text-xl font-bold text-gray-800 mb-2">出了点问题</h1>
+            <h1 className="text-xl font-bold text-gray-800 mb-2">{this.props.errorTitle || 'Something went wrong'}</h1>
             <p className="text-sm text-gray-500 mb-4 font-mono bg-gray-100 p-3 rounded-lg break-all">
               {this.state.error?.message}
             </p>
@@ -35,7 +37,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload() }}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
               >
-                重新加载
+                {this.props.errorButton || 'Reload'}
               </button>
             </div>
           </div>

@@ -6,6 +6,7 @@ import type { SelectionResult } from '../../services/selectionEngine'
 import { useSubDialogStore } from '../../stores/subDialogStore'
 import { useDialogStore } from '../../stores/dialogStore'
 import { getTimestamp } from '../../lib/utils'
+import { useTranslation } from '../../i18n'
 
 interface Props {
   message: Message
@@ -14,12 +15,14 @@ interface Props {
 function formatTime(iso: string): string {
   try {
     const d = new Date(iso)
-    return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    const locale = typeof navigator !== 'undefined' ? (navigator.language || 'en') : 'en'
+    return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
   } catch { return '' }
 }
 
 export function MessageBubble({ message }: Props) {
   const isUser = message.role === 'user'
+  const { t } = useTranslation()
   const [selectionResult, setSelectionResult] = useState<SelectionResult | null>(null)
   const [editing, setEditing] = useState(false)
   const [editText, setEditText] = useState('')
@@ -111,7 +114,7 @@ export function MessageBubble({ message }: Props) {
                            text-gray-400 hover:text-indigo-500 transition-all text-xs p-1
                            bg-white rounded-lg shadow-sm border border-gray-100
                            hover:border-indigo-200 hover:shadow-md"
-                title="编辑消息"
+                title={t('chat.bubble.edit')}
               >
                 ✏️
               </button>
@@ -136,13 +139,13 @@ export function MessageBubble({ message }: Props) {
                   <button onClick={cancelEdit}
                     className="text-xs px-3 py-1.5 rounded-lg text-gray-500 hover:text-gray-700
                                hover:bg-gray-100 transition-colors font-medium">
-                    取消
+                    {t('chat.bubble.cancel')}
                   </button>
                   <button onClick={saveEdit}
                     className="text-xs px-3 py-1.5 rounded-lg text-white font-medium shadow-sm
                                bg-gradient-to-r from-indigo-500 to-purple-600
                                hover:from-indigo-600 hover:to-purple-700 transition-all">
-                    保存 <span className="opacity-70">⌘⏎</span>
+                    {t('chat.bubble.save')} <span className="opacity-70">⌘⏎</span>
                   </button>
                 </div>
               </div>
@@ -168,7 +171,7 @@ export function MessageBubble({ message }: Props) {
                 )}
                 <span className={`text-[10px] ${isUser ? 'text-white/60' : 'text-gray-400'}`}>
                   {formatTime(message.createdAt)}
-                  {message.editedAt && ' · 已编辑'}
+                  {message.editedAt && t('chat.bubble.edited')}
                 </span>
                 {showStreaming && (
                   <span className="inline-flex items-center gap-[3px] px-1">
@@ -190,13 +193,13 @@ export function MessageBubble({ message }: Props) {
               <button onClick={handleJumpToSubDialog}
                 className="text-[11px] text-indigo-500 hover:text-indigo-700 hover:underline
                            flex items-center gap-1 transition-colors font-medium">
-                <span className="text-xs">↩</span> 查看子对话
+                <span className="text-xs">↩</span> {t('chat.bubble.view_sub')}
               </button>
               {mergedDialog?.mergeSnapshot && (
                 <button onClick={() => useDialogStore.getState().undoMerge(message.mergedFromSubDialogId!)}
                   className="text-[11px] text-amber-600 hover:text-amber-700 hover:underline
                              flex items-center gap-1 transition-colors font-medium">
-                  <span className="text-xs">↩️</span> 撤销合并
+                  <span className="text-xs">↩️</span> {t('chat.bubble.undo_merge')}
                 </button>
               )}
             </div>

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useModelStore } from '../../stores/modelStore'
 import { encryptAPIKey, storeSessionKey, setSessionPassword, getSessionPassword } from '../../services/crypto'
+import { useTranslation } from '../../i18n'
 
 export function ModelConfigPanel({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
   const configs = useModelStore(s => s.configs)
   const addConfig = useModelStore(s => s.addConfig)
   const removeConfig = useModelStore(s => s.removeConfig)
@@ -53,7 +55,7 @@ export function ModelConfigPanel({ onClose }: { onClose: () => void }) {
       <div className="bg-white rounded-2xl shadow-2xl w-[520px] max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between shrink-0">
-          <h2 className="text-lg font-semibold">⚙️ 模型配置</h2>
+          <h2 className="text-lg font-semibold">{t('model.config')}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -64,15 +66,13 @@ export function ModelConfigPanel({ onClose }: { onClose: () => void }) {
         {/* Password unlock */}
         {!unlocked ? (
           <div className="p-6">
-            <p className="text-sm text-gray-600 mb-3">
-              请输入一个密码来加密你的 API Key。密码仅本次会话有效，不会存储。
-            </p>
+            <p className="text-sm text-gray-600 mb-3">{t('model.password_hint')}</p>
             <div className="flex gap-2">
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="输入会话密码..."
+                placeholder={t('model.password')}
                 className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onKeyDown={e => e.key === 'Enter' && handleUnlock()}
               />
@@ -81,7 +81,7 @@ export function ModelConfigPanel({ onClose }: { onClose: () => void }) {
                 disabled={password.length < 4}
                 className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-40"
               >
-                解锁
+                {t('model.unlock')}
               </button>
             </div>
           </div>
@@ -107,7 +107,7 @@ export function ModelConfigPanel({ onClose }: { onClose: () => void }) {
                     </div>
                     <div className="flex items-center gap-2">
                       {config.isDefault && (
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">默认</span>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{t('model.default')}</span>
                       )}
                       {activeModelId === config.id && (
                         <span className="text-green-500">●</span>
@@ -116,7 +116,7 @@ export function ModelConfigPanel({ onClose }: { onClose: () => void }) {
                         onClick={(e) => { e.stopPropagation(); removeConfig(config.id) }}
                         className="text-red-400 hover:text-red-600 text-xs"
                       >
-                        删除
+                        {t('tree.delete')}
                       </button>
                     </div>
                   </div>
@@ -129,7 +129,7 @@ export function ModelConfigPanel({ onClose }: { onClose: () => void }) {
                   <input
                     value={form.name}
                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                    placeholder="配置名称（如 我的 GPT-4o）"
+                    placeholder={t('model.name_label')}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <input
@@ -148,15 +148,15 @@ export function ModelConfigPanel({ onClose }: { onClose: () => void }) {
                   <input
                     value={form.modelName}
                     onChange={e => setForm(f => ({ ...f, modelName: e.target.value }))}
-                    placeholder="模型名（如 gpt-4o）"
+                    placeholder={t('model.model_label')}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <div className="flex gap-2 pt-1">
                     <button onClick={handleAdd} className="bg-blue-600 text-white rounded-lg px-4 py-1.5 text-sm font-medium hover:bg-blue-700">
-                      保存
+                      {t('chat.bubble.save')}
                     </button>
                     <button onClick={() => setShowAddForm(false)} className="text-gray-500 px-3 py-1.5 text-sm hover:text-gray-700">
-                      取消
+                      {t('chat.bubble.cancel')}
                     </button>
                   </div>
                 </div>
@@ -165,14 +165,14 @@ export function ModelConfigPanel({ onClose }: { onClose: () => void }) {
                   onClick={() => setShowAddForm(true)}
                   className="w-full p-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 text-sm hover:border-gray-400 hover:text-gray-700 transition-colors"
                 >
-                  + 添加模型
+                  + {t('model.add')}
                 </button>
               )}
             </div>
 
             {/* Presets */}
             <div className="px-4 pb-4 border-t border-gray-200 pt-3">
-              <div className="text-xs text-gray-500 mb-2">预设模板（点击快速填入）</div>
+              <div className="text-xs text-gray-500 mb-2">{t('model.presets')}</div>
               <div className="flex flex-wrap gap-1.5">
                 {PRESETS.map(preset => (
                   <button

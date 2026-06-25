@@ -9,8 +9,10 @@ import { TiptapRenderer } from './TiptapRenderer'
 import { SelectionMenu } from './SelectionMenu'
 import type { SelectionResult } from '../../services/selectionEngine'
 import { getTimestamp } from '../../lib/utils'
+import { useTranslation } from '../../i18n'
 
 export default function SubDialogPanel() {
+  const { t } = useTranslation()
   const [input, setInput] = useState('')
   const [showMerge, setShowMerge] = useState(false)
   const [sending, setSending] = useState(false)
@@ -34,9 +36,9 @@ export default function SubDialogPanel() {
 
   async function sendToAI(dialogId: string, assistantId: string, signal: AbortSignal) {
     const cfg = useModelStore.getState().configs.find(c => c.id === useModelStore.getState().activeModelId)
-    if (!cfg) throw new Error('请先在 ⚙️ 中配置 API Key')
+    if (!cfg) throw new Error(t('sub.no_key'))
     const key = getSessionKey(cfg.id)
-    if (!key) throw new Error('API Key 已过期，请在 ⚙️ 中重新配置')
+    if (!key) throw new Error(t('sub.key_expired'))
     const state = useDialogStore.getState()
     const dialog = state.dialogs.find((d: { id: string }) => d.id === dialogId)
     const ctx = dialog?.messages
@@ -59,8 +61,8 @@ export default function SubDialogPanel() {
     const rootId = parentDialog?.rootDialogId || parentDialogId
     const shortTitle = selectedText.slice(0, 22).replace(/\n/g, ' ')
     const id = createDialog(shortTitle + (selectedText.length > 22 ? '…' : ''), parentDialogId, rootId, false)
-    const modeLabel: Record<string, string> = { 'deep-dive': '深入分析', 'debug': '代码审查', 'ask-other': '换模型追问', 'anchor': '锚定引用' }
-    addMessage(id, { role: 'system', content: `基于选中内容${modeLabel[mode] || '深入分析'}：「${selectedText}」`, parentId: null, branchId: 'main', status: 'complete' })
+    const modeLabel: Record<string, string> = { 'deep-dive': t('sub.deep_dive'), 'debug': t('sub.code_review'), 'ask-other': t('sub.switch_model'), 'anchor': t('sub.pin') }
+    addMessage(id, { role: 'system', content: t('sub.system_prompt').replace('{mode}', modeLabel[mode] || t('sub.deep_dive')).replace('{text}', selectedText), parentId: null, branchId: 'main', status: 'complete' })
     if (parentMessageId) useDialogStore.getState().updateDialog(id, { contextAnchor: { messageId: parentMessageId, selectedText } })
     setSubDialogId(id)
   }, [isOpen, subDialogId]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -70,8 +72,8 @@ export default function SubDialogPanel() {
     const dialog = useDialogStore.getState().dialogs.find(d => d.id === subDialogId)
     if (!dialog || dialog.messages.length > 1) return
     const autoContent = mode === 'debug'
-      ? `审查这段代码，找出 bug、安全漏洞和性能问题，给出修复建议：\n\n${selectedText}`
-      : `深入分析这段内容：\n\n${selectedText}`
+      ? t('sub.auto_debug') + '\n\n' + selectedText
+      : t('sub.auto_deep_dive') + '\n\n' + selectedText
     addMessage(subDialogId, { role: 'user', content: autoContent, parentId: null, branchId: 'main', status: 'complete' })
     const aid = addMessage(subDialogId, { role: 'assistant', content: '', parentId: null, branchId: 'main', status: 'streaming', model: '' })
     sendToAI(subDialogId, aid, new AbortController().signal).catch((err: Error) => {
@@ -89,9 +91,9 @@ export default function SubDialogPanel() {
     if (!text || !subDialogId || sending) return
     setSubError(null)
     const cfg = useModelStore.getState().configs.find(c => c.id === useModelStore.getState().activeModelId)
-    if (!cfg) { setSubError('请先在 ⚙️ 中配置 API Key'); return }
+    if (!cfg) { setSubError(t('sub.no_key')); return }
     const key = getSessionKey(cfg.id)
-    if (!key) { setSubError('API Key 已过期'); return }
+    if (!key) { setSubError(t('sub.key_expired_short')); return }
     addMessage(subDialogId, { role: 'user', content: text, parentId: null, branchId: 'main', status: 'complete' })
     setInput('')
     const assistantId = addMessage(subDialogId, { role: 'assistant', content: '', parentId: null, branchId: 'main', status: 'streaming', model: cfg.name })
@@ -100,7 +102,7 @@ export default function SubDialogPanel() {
     setSending(true)
     try { await sendToAI(subDialogId, assistantId, controller.signal) }
     catch (err: unknown) {
-      if (err instanceof DOMException && err.name === 'AbortError') { updateMessage(subDialogId, assistantId, { content: '⚠️ 已取消', status: 'error' }); return }
+      if (err instanceof DOMException && err.name === 'AbortError') { updateMessage(subDialogId, assistantId, { content: t('sub.cancelled'), status: 'error' }); return }
       updateMessage(subDialogId, assistantId, { content: `错误: ${(err as Error).message}`, status: 'error' })
     } finally { setSending(false); if (abortRef.current === controller) abortRef.current = null }
   }
@@ -129,14 +131,14 @@ export default function SubDialogPanel() {
       useDialogStore.getState().updateDialog(subDialogId, { mergeSnapshot: { parentMessageId: targetMsgId, originalContent: '', originalTitle: subDialog.title, mergeMode, mergedAt: getTimestamp() } })
     }
     if (subDialogId) {
-      const labels: Record<MergeMode, string> = { replace: '✏️ 已替换', footnote: '📎 已追加', 'keep-child': '🌿 已保留' }
+      const labels: Record<MergeMode, string> = { replace: t('sub.replaced'), footnote: t('sub.appended'), 'keep-child': t('sub.kept') }
       useDialogStore.getState().updateDialogTitle(subDialogId, `${labels[mergeMode]}: ${subDialog.title}`)
     }
     setShowMerge(false); close()
   }
 
   const modeIcon: Record<string, string> = { 'deep-dive': '🔍', 'debug': '🐛', 'ask-other': '🤖', 'anchor': '📌' }
-  const modeTitle: Record<string, string> = { 'deep-dive': '深入分析', 'debug': '代码审查', 'ask-other': '换模型追问', 'anchor': '锚定引用' }
+  const modeTitle: Record<string, string> = { 'deep-dive': t('sub.deep_dive'), 'debug': t('sub.code_review'), 'ask-other': t('sub.switch_model'), 'anchor': t('sub.pin') }
 
   if (!isOpen) return null
 
@@ -151,7 +153,7 @@ export default function SubDialogPanel() {
               {modeIcon[mode] || '💬'}
             </span>
             <div className="min-w-0">
-              <span className="font-semibold text-sm text-[#171717] truncate block">{modeTitle[mode] || '子对话'}</span>
+              <span className="font-semibold text-sm text-[#171717] truncate block">{modeTitle[mode] || t('sub.title')}</span>
               <span className="text-[10px] text-[#a3a3a3] truncate block max-w-[200px]">「{selectedText.slice(0, 30)}…」</span>
             </div>
           </div>
@@ -161,7 +163,7 @@ export default function SubDialogPanel() {
                 className="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700
                            px-2.5 py-1.5 rounded-lg font-medium transition-colors
                            border border-emerald-200/50 hover:border-emerald-300 shadow-sm">
-                🔀 合并
+                {t('sub.merge_back')}
               </button>
             )}
             <button onClick={close} className="text-[#a3a3a3] hover:text-[#52525b] p-1.5 rounded-lg hover:bg-[#f8f7fc] transition-colors">
@@ -188,7 +190,7 @@ export default function SubDialogPanel() {
             <div className="flex items-center justify-center h-full text-[#a3a3a3]">
               <div className="text-center">
                 <div className="text-2xl mb-2 opacity-50">💬</div>
-                <p className="text-xs">在下方输入开始子对话</p>
+                <p className="text-xs">{t('sub.placeholder')}</p>
               </div>
             </div>
           ) : (
@@ -216,7 +218,7 @@ export default function SubDialogPanel() {
                 <span key={d} className="w-1 h-1 rounded-full bg-indigo-400 animate-pulse-dot"
                       style={{ animationDelay: `${d}s` }} />
               ))}
-              <span className="ml-1 text-[#a3a3a3]">生成中</span>
+              <span className="ml-1 text-[#a3a3a3]">{t('sub.generating')}</span>
             </div>
           )}
         </div>
@@ -238,7 +240,7 @@ export default function SubDialogPanel() {
           <div className="flex gap-2">
             <input value={input} onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-              placeholder={sending ? '等待回复...' : '输入消息...'} disabled={sending}
+              placeholder={sending ? t('sub.waiting') : t('sub.placeholder')} disabled={sending}
               className="flex-1 rounded-xl border border-[#e4e3ed] bg-[#f8f7fc] px-3.5 py-2.5 text-sm
                          focus:outline-none focus:ring-2 focus:ring-indigo-400/40
                          focus:border-indigo-400 focus:bg-white
@@ -253,7 +255,7 @@ export default function SubDialogPanel() {
                 className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl
                            px-4 py-2.5 text-sm font-medium hover:from-indigo-600 hover:to-purple-700
                            disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm
-                           active:scale-[0.97] shrink-0">发送</button>
+                           active:scale-[0.97] shrink-0">{t('chat.input.send')}</button>
             )}
           </div>
         </div>
@@ -266,14 +268,14 @@ export default function SubDialogPanel() {
           <div className="bg-white rounded-2xl shadow-xl w-[480px] animate-fade-in-scale"
                onClick={e => e.stopPropagation()}>
             <div className="p-5 border-b border-[#f0eff5]">
-              <h3 className="font-semibold text-base text-[#171717]">🔀 合并回主干</h3>
+              <h3 className="font-semibold text-base text-[#171717]">{t('sub.merge_back')}</h3>
               <p className="text-xs text-[#737373] mt-1">
-                将子对话的结论合并到「{dialogs.find(d => d.id === parentDialogId)?.title || '父对话'}」中
+                {t('sub.merge_to')}「{dialogs.find(d => d.id === parentDialogId)?.title || t('sub.parent')}」
               </p>
             </div>
             {subDialog.messages.length > 1 && (
               <div className="px-5 py-3.5 border-b border-[#f8f7fc] bg-gradient-to-r from-gray-50/50 to-transparent">
-                <div className="text-[11px] text-[#737373] mb-1.5 font-medium">📝 结论预览</div>
+                <div className="text-[11px] text-[#737373] mb-1.5 font-medium">{t('sub.preview')}</div>
                 <div className="text-xs text-[#52525b] bg-white rounded-xl p-3 border border-[#f0eff5]
                                 max-h-24 overflow-y-auto leading-relaxed whitespace-pre-wrap shadow-sm">
                   {buildConclusion(subDialog)}
@@ -282,9 +284,9 @@ export default function SubDialogPanel() {
             )}
             <div className="p-5 space-y-2.5">
               {([
-                { mode: 'footnote' as MergeMode, title: '📎 追加脚注', desc: '子对话结论以引用块追加到原文末尾', rec: true },
-                { mode: 'replace' as MergeMode, title: '✏️ 替换原文', desc: '用讨论的结论替换你选中的那段文本', rec: false },
-                { mode: 'keep-child' as MergeMode, title: '🌿 仅标记合并', desc: '不修改内容，只在对话树标记「已合并」', rec: false },
+                { mode: 'footnote' as MergeMode, title: t('sub.footnote'), desc: t('sub.footnote_desc'), rec: true },
+                { mode: 'replace' as MergeMode, title: t('sub.replace'), desc: t('sub.replace_desc'), rec: false },
+                { mode: 'keep-child' as MergeMode, title: t('sub.mark'), desc: t('sub.mark_desc'), rec: false },
               ]).map(({ mode: m, title, desc, rec }) => (
                 <button key={m} onClick={() => handleMerge(m)}
                   className={`w-full text-left p-3.5 rounded-xl transition-all
@@ -292,7 +294,7 @@ export default function SubDialogPanel() {
                       ? 'border-2 border-indigo-500 bg-indigo-50/80 shadow-sm hover:shadow-md'
                       : 'border border-[#e4e3ed] hover:border-gray-300 hover:bg-gray-50/50'
                     }`}>
-                  <div className="font-medium text-sm text-[#171717]">{title} {rec && <span className="text-indigo-400 font-normal">(推荐)</span>}</div>
+                  <div className="font-medium text-sm text-[#171717]">{title} {rec && <span className="text-indigo-400 font-normal">{t('sub.recommended')}</span>}</div>
                   <div className="text-xs text-[#737373] mt-1">{desc}</div>
                 </button>
               ))}
@@ -300,7 +302,7 @@ export default function SubDialogPanel() {
             <div className="p-4 border-t border-[#f0eff5] flex justify-end">
               <button onClick={() => setShowMerge(false)}
                 className="px-4 py-2 text-sm text-[#737373] hover:text-[#171717] rounded-xl
-                           hover:bg-[#f8f7fc] transition-colors font-medium">取消</button>
+                           hover:bg-[#f8f7fc] transition-colors font-medium">{t('chat.bubble.cancel')}</button>
             </div>
           </div>
         </div>

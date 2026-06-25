@@ -1,6 +1,9 @@
 import { DialogTree } from '../tree/DialogTree'
+import { LanguageSwitcher } from '../LanguageSwitcher'
+import { useTranslation } from '../../i18n'
 
 export function Sidebar() {
+  const { t } = useTranslation()
   return (
     <aside className="bg-[#faf9fe] flex flex-col h-full">
       {/* Brand header */}
@@ -13,7 +16,10 @@ export function Sidebar() {
           </div>
           <div>
             <h1 className="text-sm font-bold text-[#171717] tracking-tight">Fractal Chat</h1>
-            <p className="text-[10px] text-[#a3a3a3] font-medium">AI 对话工作台</p>
+            <p className="text-[10px] text-[#a3a3a3] font-medium">{t('sidebar.title')}</p>
+          </div>
+          <div className="ml-auto">
+            <LanguageSwitcher />
           </div>
         </div>
       </div>

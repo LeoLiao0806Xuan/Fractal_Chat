@@ -2,6 +2,7 @@ import { useMemo, useState, useRef, useEffect } from 'react'
 import { useDialogStore } from '../../stores/dialogStore'
 import { useSubDialogStore } from '../../stores/subDialogStore'
 import { exportDialogToMarkdown, exportDialogToJSON } from '../../lib/exporter'
+import { useTranslation } from '../../i18n'
 
 interface TreeNode {
   id: string
@@ -20,6 +21,7 @@ interface TreeNode {
 }
 
 export function DialogTree() {
+  const { t } = useTranslation()
   const dialogs = useDialogStore(s => s.dialogs)
   const currentDialogId = useDialogStore(s => s.currentDialogId)
   const setCurrentDialog = useDialogStore(s => s.setCurrentDialog)
@@ -218,7 +220,7 @@ export function DialogTree() {
     return () => document.removeEventListener('keydown', handler)
   }, [])
 
-  const handleNew = () => createDialog('新对话')
+  const handleNew = () => createDialog(t('tree.new'))
   const handleDelete = (e: React.MouseEvent | null, id: string) => { e?.stopPropagation(); useDialogStore.getState().deleteDialog(id) }
 
   const renderNode = (node: TreeNode, depth = 0) => {
@@ -279,7 +281,7 @@ export function DialogTree() {
               ) : (
                 <span className={`truncate ${active ? 'text-indigo-700' : ''}`}>{node.name}</span>
               )}
-              {node.isMerged && <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-medium shrink-0">已合并</span>}
+              {node.isMerged && <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-medium shrink-0">{t('tree.merged')}</span>}
               {node.status === 'archived' && <span className="text-[10px] text-[#a3a3a3] shrink-0">📦</span>}
             </div>
             {node.preview && renamingId !== node.id && (
@@ -294,7 +296,7 @@ export function DialogTree() {
           <button onClick={e => handleDelete(e, node.id)}
             className="opacity-0 group-hover:opacity-100 text-[#a3a3a3] hover:text-red-500
                        text-xs shrink-0 mt-0.5 transition-all"
-            title="删除">✕</button>
+            title={t('tree.delete')}>✕</button>
         </div>
         {hasKids && expanded && (
           <div className="animate-slide-down">{node.children.map(c => renderNode(c, depth + 1))}</div>
@@ -312,7 +314,7 @@ export function DialogTree() {
           className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl
                      px-3 py-2.5 text-sm font-medium hover:from-indigo-600 hover:to-purple-700
                      transition-all shadow-sm hover:shadow-md active:scale-[0.98]">
-          + 新建对话
+          + {t('tree.new')}
         </button>
 
         <div className="relative">
@@ -320,7 +322,7 @@ export function DialogTree() {
           <input ref={searchInputRef} type="text" value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={e => { if (e.key === 'Escape') { setSearchQuery(''); searchInputRef.current?.blur() } }}
-            placeholder="搜索对话..."
+            placeholder={t('tree.search')}
             className="w-full pl-8 pr-7 py-1.5 text-xs border border-[#e4e3ed] rounded-lg
                        focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300
                        bg-[#f8f7fc] focus:bg-white transition-all placeholder:text-[#a3a3a3]" />
@@ -333,7 +335,7 @@ export function DialogTree() {
         <button onClick={() => setShowArchived(!showArchived)}
           className={`text-xs w-full text-left px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5
             ${showArchived ? 'bg-[#f1f0ff] text-indigo-600' : 'text-[#a3a3a3] hover:text-gray-500 hover:bg-gray-50'}`}>
-          {showArchived ? '📂 显示全部' : '📦 隐藏已归档'}
+          {showArchived ? t('tree.show_all') : t('tree.hide_archived')}
         </button>
       </div>
 
@@ -342,7 +344,7 @@ export function DialogTree() {
         {filteredTree.length === 0 ? (
           <div className="text-center text-[#a3a3a3] text-sm py-12 px-4">
             <div className="text-2xl mb-2 opacity-50">{searchQuery ? '🔍' : '💬'}</div>
-            <p>{searchQuery ? '未找到匹配的对话' : '暂无对话'}</p>
+            <p>{searchQuery ? t('tree.no_match') : t('tree.empty')}</p>
           </div>
         ) : filteredTree.map(n => renderNode(n, 0))}
       </div>
@@ -354,31 +356,31 @@ export function DialogTree() {
                      border border-[#f0eff5]/80 py-1.5 min-w-[160px] animate-fade-in overflow-hidden"
           style={{ left: contextMenu.x, top: contextMenu.y }}>
           {[
-            { label: '✏️ 重命名', action: () => {
+            { label: t('tree.rename'), action: () => {
               const d = dialogs.find(x => x.id === contextMenu.id)
               startRenaming(contextMenu.id, d?.title?.replace(/^[✏️📎🌿]\s*/, '') || '')
               setContextMenu(null)
             }, hover: 'hover:bg-indigo-50 hover:text-indigo-700' },
             ...(dialogs.find(d => d.id === contextMenu.id)?.mergeSnapshot
-              ? [{ label: '↩️ 撤销合并', action: () => { useDialogStore.getState().undoMerge(contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-amber-50 hover:text-amber-700' }] : []),
-            { label: '🔗 复制引用', action: () => {
+              ? [{ label: t('tree.undo_merge'), action: () => { useDialogStore.getState().undoMerge(contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-amber-50 hover:text-amber-700' }] : []),
+            { label: t('tree.copy_ref'), action: () => {
               const d = dialogs.find(x => x.id === contextMenu.id)
               if (d) navigator.clipboard.writeText(`→[${d.title.replace(/^[✏️📎🌿]\s*/, '')}](fc-dialog://${d.id})`).catch(() => {})
               setContextMenu(null)
             }, hover: 'hover:bg-purple-50 hover:text-purple-700' },
             null,
-            { label: '📥 导出 MD', action: () => { const d = dialogs.find(x => x.id === contextMenu.id); if (d) exportDialogToMarkdown(d, dialogs); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true },
-            { label: '📥 导出 JSON', action: () => { const d = dialogs.find(x => x.id === contextMenu.id); if (d) exportDialogToJSON(d, dialogs); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true },
+            { label: t('tree.export_md'), action: () => { const d = dialogs.find(x => x.id === contextMenu.id); if (d) exportDialogToMarkdown(d, dialogs); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true },
+            { label: t('tree.export_json'), action: () => { const d = dialogs.find(x => x.id === contextMenu.id); if (d) exportDialogToJSON(d, dialogs); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true },
             null,
-            { label: '🏷️ 添加标签', action: () => { const tag = prompt('输入标签：'); if (tag?.trim()) useDialogStore.getState().tagDialog(contextMenu.id, tag.trim()); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true },
+            { label: t('tree.add_tag'), action: () => { const tag = prompt(t('tree.tag_placeholder')); if (tag?.trim()) useDialogStore.getState().tagDialog(contextMenu.id, tag.trim()); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true },
             ...(dialogs.find(d => d.id === contextMenu.id)?.tags?.length
               ? [{ tags: dialogs.find(d => d.id === contextMenu.id)?.tags || [] }] : []),
             null,
             (dialogs.find(d => d.id === contextMenu.id)?.status === 'archived'
-              ? { label: '📂 取消归档', action: () => { useDialogStore.getState().archiveDialog(contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true }
-              : { label: '📦 归档', action: () => { useDialogStore.getState().archiveDialog(contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true }),
+              ? { label: t('tree.unarchive'), action: () => { useDialogStore.getState().archiveDialog(contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true }
+              : { label: t('tree.archive'), action: () => { useDialogStore.getState().archiveDialog(contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true }),
             null,
-            { label: '🗑️ 删除', action: () => { handleDelete(null, contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-red-50 hover:text-red-700', danger: true },
+            { label: t('tree.delete'), action: () => { handleDelete(null, contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-red-50 hover:text-red-700', danger: true },
           ].filter(Boolean).map((item: any, i) =>
             item === null ? <div key={i} className="border-t border-[#f0eff5] my-1" /> :
             item.tags ? (

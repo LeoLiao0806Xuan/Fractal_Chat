@@ -4,8 +4,10 @@ import { useModelStore } from '../../stores/modelStore'
 import { getSessionKey } from '../../services/crypto'
 import { callModel } from '../../services/api'
 import { ModelSelector } from '../model/ModelSelector'
+import { useTranslation } from '../../i18n'
 
 export function ChatInput() {
+  const { t } = useTranslation()
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -76,7 +78,7 @@ export function ChatInput() {
       if (cfg) targets = [cfg]
     }
     if (targets.length === 0) {
-      setError('请先在 ⚙️ 中配置 API Key')
+      setError(t('chat.input.no_key'))
       return
     }
 
@@ -85,7 +87,7 @@ export function ChatInput() {
     for (const cfg of targets) {
       const key = validateAndGetKey(cfg)
       if (!key) {
-        setError(`${cfg.name}: API Key 无效或已过期，请在 ⚙️ 中重新配置`)
+        setError(`${cfg.name}: ` + t('chat.input.key_invalid'))
         return
       }
       keyMap.set(cfg.id, key)
@@ -118,7 +120,7 @@ export function ChatInput() {
           callOneModel(currentDialogId, id, cfg, key, controller.signal)
             .catch((err: Error) => {
               if (err.name === 'AbortError') {
-                updateMessage(currentDialogId, id, { content: '⚠️ 已取消', status: 'error' })
+                updateMessage(currentDialogId, id, { content: t('chat.input.cancelled'), status: 'error' })
                 return
               }
               updateMessage(currentDialogId, id, { content: `错误: ${err.message}`, status: 'error' })
@@ -149,7 +151,7 @@ export function ChatInput() {
           <div className="flex items-center gap-2">
             {sending && (
               <div className="flex items-center gap-1 mr-1">
-                <span className="text-xs text-[#a3a3a3]">生成中</span>
+                <span className="text-xs text-[#a3a3a3]">{t('chat.input.generating')}</span>
                 <span className="inline-flex items-center gap-[3px] px-1">
                   {[0, 0.2, 0.4].map(d => (
                     <span key={d} className="w-1 h-1 rounded-full bg-indigo-400 animate-pulse-dot"
@@ -163,7 +165,7 @@ export function ChatInput() {
                 className="text-xs text-red-500 hover:text-white hover:bg-red-500
                            bg-red-50/50 px-2.5 py-1.5 rounded-lg transition-all font-medium
                            border border-red-200/60 hover:border-red-400">
-                取消
+                {t('chat.input.cancel')}
               </button>
             )}
           </div>
@@ -191,7 +193,7 @@ export function ChatInput() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="输入消息..."
+              placeholder={t('chat.input.placeholder')}
               rows={1}
               disabled={sending}
               className="w-full resize-none rounded-xl border border-[#e4e3ed] bg-[#f8f7fc]
@@ -217,7 +219,7 @@ export function ChatInput() {
                        hover:shadow-md active:scale-[0.97]
                        disabled:shadow-none"
           >
-            {sending ? '…' : '发送'}
+            {sending ? '…' : t('chat.input.send')}
           </button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useSubDialogStore } from '../../stores/subDialogStore'
 import { Sidebar } from './Sidebar'
 import { MessageList } from '../chat/MessageList'
 import { ChatInput } from '../chat/ChatInput'
+import { useTranslation } from '../../i18n'
 
 const SubDialogPanel = lazy(() => import('../editor/SubDialogPanel'))
 
@@ -12,6 +13,7 @@ const SIDEBAR_MAX = 400
 const SIDEBAR_DEFAULT = 272
 
 export function AppLayout() {
+  const { t } = useTranslation()
   const leftPanelOpen = useUIStore(s => s.leftPanelOpen)
   const setLeftPanel = useUIStore(s => s.setLeftPanel)
   const subDialogOpen = useSubDialogStore(s => s.isOpen)
@@ -79,7 +81,7 @@ export function AppLayout() {
         className="shrink-0 w-6 border-r border-[#f0eff5] bg-white hover:bg-[#faf9fe]
                    flex items-center justify-center cursor-pointer group
                    transition-colors relative z-10"
-        title={leftPanelOpen ? '收起侧边栏' : '展开侧边栏'}
+        title={leftPanelOpen ? t('layout.collapse') : t('layout.expand')}
       >
         <svg className={`w-3 h-3 text-[#a3a3a3] group-hover:text-[#6366f1]
                          transition-all duration-300 ${leftPanelOpen ? '' : 'rotate-180'}`}
@@ -101,7 +103,7 @@ export function AppLayout() {
             <div className="w-[420px] border-l border-[#f0eff5] bg-white/80 flex items-center justify-center">
               <div className="text-center space-y-3">
                 <div className="w-8 h-8 mx-auto rounded-full skeleton" />
-                <div className="text-xs text-[#a3a3a3]">加载中...</div>
+                <div className="text-xs text-[#a3a3a3]">{t('layout.loading')}</div>
               </div>
             </div>
           }
