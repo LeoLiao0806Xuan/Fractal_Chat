@@ -26,10 +26,11 @@ function App() {
 }
 
 function AppContent() {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const dialogs = useDialogStore(s => s.dialogs)
   const createDialog = useDialogStore(s => s.createDialog)
   const initialized = useRef(false)
+  const welcomeDialogId = useRef<string | null>(null)
   const [loaded, setLoaded] = useState(false)
 
   // 1. Load persisted data from IndexedDB on mount
@@ -54,6 +55,7 @@ function AppContent() {
     if (dialogs.length === 0 && !initialized.current) {
       initialized.current = true
       const id = createDialog(t('app.welcome'))
+      welcomeDialogId.current = id
       const { addMessage } = useDialogStore.getState()
       addMessage(id, {
         role: 'assistant',
@@ -64,6 +66,18 @@ function AppContent() {
       })
     }
   }, [loaded, dialogs.length, createDialog])
+
+  // 2b. Re-translate welcome dialog when language changes
+  useEffect(() => {
+    if (!loaded || !welcomeDialogId.current) return
+    const store = useDialogStore.getState()
+    const dialog = store.dialogs.find(d => d.id === welcomeDialogId.current)
+    if (!dialog) return
+    store.updateDialog(welcomeDialogId.current, { title: t('app.welcome') })
+    if (dialog.messages.length > 0) {
+      store.updateMessage(welcomeDialogId.current, dialog.messages[0].id, { content: t('app.welcome_msg') })
+    }
+  }, [locale, loaded])
 
   // 3. Persist dialogs to IndexedDB (debounced 1s)
   useEffect(() => {

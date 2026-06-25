@@ -3,7 +3,6 @@
   "app.welcome": "Welcome to Fractal Chat",
   "app.welcome_msg": "## 🎉 Welcome to Fractal Chat!\n\nFractal Chat is a **multi-dimensional AI chat workspace**. Unlike normal chats, you can **select any content to create branching sub-dialogues**, freeing your thinking from linear conversations.\n\n---\n\n### 🚀 Quick Start (3 Steps)\n\n**1. Configure a model**\nClick `⚙️` next to the input → set a password → add your API Key\nSupports OpenAI / DeepSeek / Anthropic Claude / Gemini and more\n\n**2. Start chatting**\nType in the input below, `Enter` to send\n\n**3. Branch from a selection (core feature)**\nSelect any text in an AI response → popup menu → choose: `Deep dive` / `Debug` / `Switch model`\nSub-dialogues open in the right panel without disturbing the main conversation. Click **Merge back** when done.\n\n---\n\n> 💡 **Tip**: All data auto-saves — refreshing the page won't lose anything. Use the sidebar to switch conversations. Press `Esc` to close popups.\n\nGive it a try! 👇",
   "error.something_wrong": "Something went wrong",
-  "error.something_wrong": "Something went wrong",
 
   "chat.input.cancel": "Cancel",
   "chat.input.send": "Send",
