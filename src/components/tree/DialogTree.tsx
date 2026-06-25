@@ -2,6 +2,8 @@ import { useMemo, useState, useRef, useEffect } from 'react'
 import { useDialogStore } from '../../stores/dialogStore'
 import { useSubDialogStore } from '../../stores/subDialogStore'
 import { exportDialogToMarkdown, exportDialogToJSON } from '../../lib/exporter'
+import { generateSampleDialogs } from '../../lib/sampleData'
+import { saveAllDialogs } from '../../lib/db'
 import { useTranslation } from '../../i18n'
 
 interface TreeNode {
@@ -478,8 +480,33 @@ export function DialogTree() {
           <div className="text-center text-[#a3a3a3] text-sm py-12 px-4">
             <div className="text-2xl mb-2 opacity-50">{searchQuery ? '🔍' : '💬'}</div>
             <p>{searchQuery ? t('tree.no_match') : t('tree.empty')}</p>
+            {!searchQuery && hasDemoDialogs && (
+              <button onClick={() => {
+                const samples = generateSampleDialogs();
+                useDialogStore.setState({ dialogs: samples, currentDialogId: samples[0].id });
+                saveAllDialogs(samples);
+              }}
+              className="mt-4 text-xs text-indigo-500 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100
+                         px-3 py-1.5 rounded-lg transition-colors font-medium">
+                📖 Reload demo data
+              </button>
+            )}
           </div>
         ) : filteredTree.map(n => renderNode(n, 0))}
+        {/* Demo link at bottom of tree */}
+        {!hasDemoDialogs && filteredTree.length > 0 && (
+          <div className="sticky bottom-0 px-3 pt-1 pb-2 bg-gradient-to-t from-[#faf9fe] via-[#faf9fe] to-transparent">
+            <button onClick={() => {
+              const samples = generateSampleDialogs();
+              useDialogStore.setState({ dialogs: samples, currentDialogId: samples[0].id });
+              saveAllDialogs(samples);
+            }}
+              className="w-full text-[10px] text-[#a3a3a3] hover:text-indigo-500 py-1
+                         transition-colors text-center">
+              📖 Load demo data
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Context menu */}
