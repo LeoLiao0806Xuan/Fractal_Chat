@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useModelStore } from '../../stores/modelStore'
 import { SettingsPanel } from '../settings/SettingsPanel'
+import { OnboardingWizard } from '../onboarding/OnboardingWizard'
 import { useTranslation } from '../../i18n'
 
 export function ModelSelector() {
@@ -13,6 +14,7 @@ export function ModelSelector() {
   const selectedModelIds = useModelStore(s => s.selectedModelIds)
   const toggleModelSelection = useModelStore(s => s.toggleModelSelection)
   const [showPanel, setShowPanel] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   const mockMode = configs.length === 0
 
@@ -44,11 +46,14 @@ export function ModelSelector() {
             )}
           </div>
         ) : mockMode ? (
-          /* ── Mock mode badge ── */
-          <span className="inline-flex items-center gap-1 text-xs text-amber-600 bg-amber-50
-                         px-2 py-1.5 rounded-lg border border-amber-200/60 font-medium">
-            💬 Mock Mode
-          </span>
+          /* ── Mock mode badge → click to setup ── */
+          <button onClick={() => setShowOnboarding(true)}
+            className="inline-flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50
+                       px-3 py-1.5 rounded-lg border border-emerald-200/60 font-medium
+                       hover:bg-emerald-100 hover:border-emerald-300 transition-all"
+          >
+            🚀 {t('selector.setup_free')}
+          </button>
         ) : (
           /* ── Single-select dropdown ── */
           <select value={activeModelId || ''}
@@ -86,6 +91,7 @@ export function ModelSelector() {
       </div>
 
       {showPanel && <SettingsPanel onClose={() => setShowPanel(false)} />}
+      {showOnboarding && <OnboardingWizard onComplete={() => setShowOnboarding(false)} />}
     </>
   )
 }

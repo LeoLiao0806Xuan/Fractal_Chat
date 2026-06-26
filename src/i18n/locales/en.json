@@ -93,6 +93,7 @@
   "selector.exit": "✕ Exit",
   "selector.compare_btn": "⊕ Compare",
   "selector.manage": "Manage models",
+  "selector.setup_free": "Setup Free AI →",
 
   "tree.new": "New conversation",
   "tree.merged": "Merged",

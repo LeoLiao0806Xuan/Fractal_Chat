@@ -93,6 +93,7 @@
   "selector.exit": "✕ 退出",
   "selector.compare_btn": "⊕ 对比",
   "selector.manage": "管理模型配置",
+  "selector.setup_free": "🚀 免费配置 AI →",
 
   "tree.new": "新对话",
   "tree.merged": "已合并",
