@@ -68,24 +68,36 @@ src/
 │   ├── chat/        # ChatInput, MessageBubble, MessageList
 │   ├── editor/      # SubDialogPanel, SelectionMenu, TiptapRenderer
 │   ├── layout/      # AppLayout, Sidebar
-│   ├── model/       # ModelSelector, ModelConfigPanel
+│   ├── model/       # ModelSelector
+│   ├── onboarding/  # OnboardingWizard (first-run flow)
+│   ├── settings/    # SettingsPanel (General/Usage/Plugins/About)
 │   └── tree/        # DialogTree
 ├── lib/
 │   ├── db.ts        # IndexedDB persistence
 │   ├── types.ts     # Core type definitions
 │   ├── utils.ts     # Utilities
 │   ├── mergeUtils.ts
-│   └── exporter.ts  # MD/JSON export
+│   ├── exporter.ts  # MD/JSON export
+│   └── freeProviders.ts  # Free API provider definitions
+├── plugins/
+│   └── char-counter.ts   # Built-in example plugin
 ├── services/
 │   ├── api.ts       # Unified API layer (OpenAI/Anthropic)
 │   ├── crypto.ts    # AES-256-GCM encryption
-│   └── selectionEngine.ts
+│   ├── selectionEngine.ts
+│   └── pluginLoader.ts
 ├── stores/
 │   ├── dialogStore.ts
 │   ├── modelStore.ts
 │   ├── subDialogStore.ts
-│   └── uiStore.ts
-└── App.tsx
+│   ├── uiStore.ts
+│   ├── usageStore.ts
+│   └── pluginStore.ts
+├── i18n/
+│   ├── index.tsx    # I18nProvider + useTranslation hook
+│   └── locales/     # en.json, zh.json
+├── App.tsx
+└── index.css
 ```
 
 ## Questions?
