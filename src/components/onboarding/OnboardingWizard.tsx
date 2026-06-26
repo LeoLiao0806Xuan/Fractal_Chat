@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from '../../i18n'
-import { getProvidersByLocale, type FreeProvider } from '../../data/freeProviders'
+import { getProvidersByLocale, type FreeProvider } from '../../lib/freeProviders'
 import { useModelStore } from '../../stores/modelStore'
 import { encryptAPIKey, storeSessionKey, setSessionPassword, getSessionPassword } from '../../services/crypto'
 
