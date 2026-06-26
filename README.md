@@ -10,13 +10,10 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF)](https://vitejs.dev/)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/f3a2a156-9b3e-4d0f-8c7e-1b9e0e5c2a7d/deploy-status)](https://fractal-chat.netlify.app)
 
 </div>
 
 ---
-
-> **🌐 Try it online:** [fractal-chat.netlify.app](https://fractal-chat.netlify.app) — no install, no signup.
 
 ## ✨ Features
 
@@ -50,6 +47,18 @@ Navigate your entire conversation history as an interactive tree. Fold, expand, 
 - **"Edited" timestamps** for transparency
 - **Merge undo** — revert merged sub-dialogues with one click
 
+### 🚀 First-Run Onboarding
+- **Onboarding wizard** on first visit — pick DeepSeek, Groq, or SiliconFlow
+- **Locale-aware recommendations** — Chinese users see DeepSeek + SiliconFlow; English users see DeepSeek + Groq
+- **In-app API key configuration** with step-by-step guide, no external detours
+- **"Skip to demo"** to explore without configuring anything
+
+### ⚙️ Settings Panel
+- **General tab** — manage model configs, encryption password
+- **Usage tab** — track API token consumption with progress bars
+- **About tab** — version, GitHub link, license, tech stack
+- Accessible from the **sidebar footer** gear icon
+
 ---
 
 ## 🚀 Quick Start
@@ -61,16 +70,19 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173` — no backend, no database, no signup.
+Open the URL shown in terminal — no backend, no database, no signup.
 
 ### Configure a model
 
-1. Click ⚙️ in the input bar
-2. Add your API endpoint (OpenAI / Anthropic / DeepSeek / any OpenAI-compatible)
-3. Enter your API key (encrypted in-browser with AES-256-GCM)
-4. Start chatting!
+On first visit the **Onboarding Wizard** will guide you through connecting a free provider. Alternatively:
 
-> **💡 Tip:** Add multiple models and toggle **⊕ Compare** mode — select which models to compare and send one prompt to all of them simultaneously.
+1. Click ⚙️ in the input bar, or ⚙️ **Settings** in the sidebar footer
+2. Set an encryption password (session-only, AES-256-GCM)
+3. Add your API endpoint (DeepSeek / Groq / OpenAI / Anthropic / Gemini / any OpenAI-compatible)
+4. Paste your API key — it's encrypted before touching disk
+5. Start chatting!
+
+> **💡 Tip:** Add multiple models and toggle **⊕ Compare** mode — send one prompt to all of them simultaneously and watch responses stream side by side.
 
 ---
 
@@ -91,30 +103,31 @@ Open `http://localhost:5173` — no backend, no database, no signup.
 Fractal Chat is a **pure client-side** application. No backend, no user accounts, no data leaves your browser unless it's sent to the LLM APIs you configure.
 
 ```
-┌──────────────────────────────────────┐
-│          React 19 + TypeScript        │
-│  ┌─────────┐  ┌───────────────────┐  │
-│  │ Dialog  │  │  Chat Input       │  │
-│  │ Tree    │  │  + ModelSelector  │  │
-│  │ (recursive) │  (multi-model)     │  │
-│  └────┬────┘  └────────┬──────────┘  │
-│       │                │             │
-│  ┌────▼────────────────▼──────────┐  │
-│  │         Zustand Stores         │  │
-│  │  dialogStore · modelStore      │  │
-│  └────────────┬───────────────────┘  │
-│       │                │             │
-│  ┌────▼────┐   ┌──────▼────────┐   │
-│  │IndexedDB│   │  API Layer    │   │
-│  │ (idb)   │   │ callModel()   │   │
-│  │persistence│  │ OAI/Anthropic │   │
-│  └─────────┘   └──────┬────────┘   │
-│                       │            │
-│              ┌────────▼────────┐   │
-│              │  LLM Providers  │   │
-│              │  (your API key) │   │
-│              └─────────────────┘   │
-└──────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│            React 19 + TypeScript           │
+│  ┌─────────┐  ┌──────────┐  ┌──────────┐ │
+│  │ Dialog  │  │Onboarding│  │ Settings │ │
+│  │ Tree    │  │ Wizard   │  │ Panel    │ │
+│  │(recursive)│  │(first-run)│  │(tabs)    │ │
+│  └────┬────┘  └──────────┘  └────┬─────┘ │
+│       │                          │       │
+│  ┌────▼──────────────────────────▼─────┐ │
+│  │          Zustand Stores              │ │
+│  │  dialogStore · modelStore · usageStore│ │
+│  └────────────┬─────────────────────────┘ │
+│       │                │                  │
+│  ┌────▼────┐   ┌──────▼──────────┐      │
+│  │IndexedDB│   │  API Layer      │      │
+│  │ (idb)   │   │ callModel()     │      │
+│  │persistence│  │ OAI/Anthropic  │      │
+│  │ +localStorage│  │ + usage tracking │      │
+│  └─────────┘   └──────┬──────────┘      │
+│                       │                  │
+│              ┌────────▼────────┐        │
+│              │  LLM Providers  │        │
+│              │  (your API key) │        │
+│              └─────────────────┘        │
+└──────────────────────────────────────────┘
 ```
 
 ### Key decisions
@@ -123,6 +136,7 @@ Fractal Chat is a **pure client-side** application. No backend, no user accounts
 |--------|-----|
 | **Pure client-side** | Zero ops, zero cost, complete privacy |
 | **IndexedDB** via `idb` | Survives page refresh, no server needed |
+| **localStorage** | UI preferences and usage tracking |
 | **Zustand** | Lightweight state — no boilerplate, no providers |
 | **Tiptap** | Rich text rendering with Markdown support |
 | **AES-256-GCM** | API keys encrypted before touching IndexedDB |
@@ -146,13 +160,13 @@ Current: **24 tests** across modelStore, dialogStore, and mergeUtils — all pas
 - [x] Phase 1 — MVP: Sub-dialogues, tree navigation, search, export, tags
 - [x] Multi-model parallel comparison
 - [x] i18n — English & Chinese (2026-06-25)
-- [x] GitHub Discussions
-- [ ] Core features
-  - [ ] Conversation filters (by tag, date, status)
-  - [ ] Virtual scrolling for long conversations
-  - [ ] Mobile adaptation
-- [ ] Community
-  - [ ] Plugin system
+- [x] Onboarding wizard — locale-aware free provider recommendations
+- [x] Settings panel — General / Usage / About tabs
+- [x] Usage tracking — token consumption with progress bars
+- [ ] Conversation filters (by tag, date, status)
+- [ ] Virtual scrolling for long conversations
+- [ ] Mobile adaptation
+- [ ] Plugin system
 
 ---
 
