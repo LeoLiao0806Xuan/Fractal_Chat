@@ -10,7 +10,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF)](https://vitejs.dev/)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/f3a2a156-9b3e-4d0f-8c7e-1b9e0e5c2a7d/deploy-status)](https://fractal-chat.netlify.app)
 
 </div>
 
