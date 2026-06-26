@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useModelStore } from '../../stores/modelStore'
-import { ModelConfigPanel } from './ModelConfigPanel'
+import { SettingsPanel } from '../settings/SettingsPanel'
 import { useTranslation } from '../../i18n'
 
 export function ModelSelector() {
@@ -85,7 +85,7 @@ export function ModelSelector() {
         </button>
       </div>
 
-      {showPanel && <ModelConfigPanel onClose={() => setShowPanel(false)} />}
+      {showPanel && <SettingsPanel onClose={() => setShowPanel(false)} />}
     </>
   )
 }
