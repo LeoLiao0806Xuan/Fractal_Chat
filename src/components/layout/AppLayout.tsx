@@ -17,7 +17,10 @@ export function AppLayout() {
   const leftPanelOpen = useUIStore(s => s.leftPanelOpen)
   const setLeftPanel = useUIStore(s => s.setLeftPanel)
   const subDialogOpen = useSubDialogStore(s => s.isOpen)
-  const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT)
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('fractal-sidebar-width')
+    return saved ? Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, Number(saved))) : SIDEBAR_DEFAULT
+  })
   const resizing = useRef(false)
 
   const handleMouseDown = useCallback(() => {
@@ -28,7 +31,9 @@ export function AppLayout() {
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!resizing.current) return
-    setSidebarWidth(Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, e.clientX)))
+    const w = Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, e.clientX))
+    setSidebarWidth(w)
+    localStorage.setItem('fractal-sidebar-width', String(w))
   }, [])
 
   const handleMouseUp = useCallback(() => {

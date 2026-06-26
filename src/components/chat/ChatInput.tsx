@@ -74,8 +74,14 @@ export function ChatInput() {
 
     // Determine which models to target
     let targets: typeof configs = []
-    if (compareMode && selectedModelIds.length > 0) {
-      targets = selectedModelIds.map(id => configs.find(c => c.id === id)).filter(Boolean) as typeof configs
+    if (compareMode) {
+      if (selectedModelIds.length === 0) {
+        // Compare mode on but no models selected — fall back to single active model
+        const cfg = configs.find(c => c.id === activeModelId)
+        if (cfg) targets = [cfg]
+      } else {
+        targets = selectedModelIds.map(id => configs.find(c => c.id === id)).filter(Boolean) as typeof configs
+      }
     } else {
       const cfg = configs.find(c => c.id === activeModelId)
       if (cfg) targets = [cfg]

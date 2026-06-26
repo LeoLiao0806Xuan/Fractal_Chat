@@ -8,7 +8,7 @@ export type MergeMode = 'replace' | 'footnote' | 'keep-child'
  */
 export function buildConclusion(subDialog: Dialog): string {
   const msgs = subDialog.messages.filter(m => m.role !== 'system')
-  if (msgs.length === 0) return '*(子对话无内容)*'
+  if (msgs.length === 0) return '_*(empty sub-dialogue)*_'
 
   return msgs
     .map(m =>

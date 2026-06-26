@@ -25,7 +25,7 @@ function makeSub(msgs: { role: string; content: string }[]): Dialog {
 describe('buildConclusion', () => {
   it('returns fallback for empty sub-dialog', () => {
     const sub = makeSub([])
-    expect(buildConclusion(sub)).toBe('*(子对话无内容)*')
+    expect(buildConclusion(sub)).toBe('_*(empty sub-dialogue)*_')
   })
 
   it('builds from user + assistant messages', () => {

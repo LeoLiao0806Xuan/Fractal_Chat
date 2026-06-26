@@ -203,6 +203,7 @@ export function DialogTree() {
   }
 
   const clearFilters = () => {
+    setSearchQuery('')
     setFilterStatus('all')
     setFilterTags([])
     setSortMode('custom')
@@ -296,7 +297,7 @@ export function DialogTree() {
   const renderNode = (node: TreeNode, depth = 0) => {
     const active = node.id === currentDialogId
     const hasKids = node.children.length > 0
-    const expanded = !collapsed.has(node.id)
+    const expanded = searchQuery ? true : !collapsed.has(node.id)
     const isOver = dragOverId === node.id
     const indent = node.isSubDialog ? `${Math.min(depth, 8) * 14 + 8}px` : '12px'
 

@@ -13,9 +13,17 @@ export function MessageList() {
     [dialogs, currentDialogId],
   )
   const bottomRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Only auto-scroll if user was already near the bottom
+    const el = scrollRef.current
+    if (!el) return
+    const threshold = 100 // px from bottom
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold
+    if (isNearBottom) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [currentDialog?.messages.length])
 
   // Empty state — no dialog selected
@@ -81,7 +89,7 @@ export function MessageList() {
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-5 min-h-0" data-dialog-id={currentDialogId}>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5 min-h-0" data-dialog-id={currentDialogId}>
         {currentDialog.messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-[#a3a3a3]">
             <div className="text-center px-8">

@@ -138,7 +138,8 @@ export default function SubDialogPanel() {
     }
     if (subDialogId) {
       const labels: Record<MergeMode, string> = { replace: t('sub.replaced'), footnote: t('sub.appended'), 'keep-child': t('sub.kept') }
-      useDialogStore.getState().updateDialogTitle(subDialogId, `${labels[mergeMode]}: ${subDialog.title}`)
+      const cleanTitle = subDialog.title.replace(/^[✏️📎🌿]\s*/, '')
+      useDialogStore.getState().updateDialogTitle(subDialogId, `${labels[mergeMode]}: ${cleanTitle}`)
     }
     setShowMerge(false); close()
   }
