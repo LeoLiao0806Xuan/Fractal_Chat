@@ -75,8 +75,8 @@ const DEEPSEEK: FreeProvider = {
   locales: ['en', 'zh'],
   apiUrl: 'https://api.deepseek.com',
   models: [
-    { id: 'deepseek-chat', label: 'DeepSeek V4 (deepseek-chat)' },
-    { id: 'deepseek-reasoner', label: 'DeepSeek R1 (deepseek-reasoner)' },
+    { id: 'deepseek-chat', label: 'DeepSeek V4' },
+    { id: 'deepseek-reasoner', label: 'DeepSeek R1' },
   ],
   defaultModel: 'deepseek-chat',
   signupUrl: 'https://platform.deepseek.com',
