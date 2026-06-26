@@ -29,17 +29,16 @@ export function MessageBubble({ message }: Props) {
   const [editing, setEditing] = useState(false)
   const dialogs = useDialogStore(s => s.dialogs)
   const configs = useModelStore(s => s.configs)
-  const enabledPlugins = usePluginStore(s => s.plugins.filter(p => s.enabled.has(p.id)))
+  const plugins = usePluginStore(s => s.plugins)
+  const enabled = usePluginStore(s => s.enabled)
 
-  // Apply plugin onMessageRender hooks
+  // Resolve enabled plugins with onMessageRender hooks (stable reference)
   const renderedContent = useMemo(() => {
-    if (!enabledPlugins.length) return message.content
+    const active = plugins.filter(p => enabled.has(p.id) && p.hooks?.onMessageRender)
+    if (!active.length) return message.content
     const ctx = { dialogs, configs }
-    return enabledPlugins.reduce((text, p) => {
-      if (p.hooks?.onMessageRender) return p.hooks.onMessageRender(text, ctx)
-      return text
-    }, message.content)
-  }, [message.content, enabledPlugins, dialogs])
+    return active.reduce((text, p) => p.hooks!.onMessageRender!(text, ctx), message.content)
+  }, [message.content, plugins, enabled, dialogs])
   const [editText, setEditText] = useState('')
   const editRef = useRef<HTMLTextAreaElement>(null)
   const openSubDialog = useSubDialogStore(s => s.open)

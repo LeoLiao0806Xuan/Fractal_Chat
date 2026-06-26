@@ -87,6 +87,7 @@ export function MessageList() {
       <div className="flex-1 min-h-0">
         <Virtuoso
           ref={virtuosoRef}
+          key={currentDialogId}
           data={messages}
           itemContent={(_index, msg) => (
             <div className="px-4">
