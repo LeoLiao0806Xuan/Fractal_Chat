@@ -91,12 +91,12 @@ export function OnboardingWizard({ onComplete }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto" onClick={() => onComplete('skipped')}>
-      <div className="bg-white rounded-2xl shadow-2xl w-[94vw] sm:w-[580px] my-6 max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl shadow-2xl w-[94vw] sm:w-[580px] my-6 max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
 
         {step === 'list' && (
           <>
             {/* Hero header */}
-            <div className="text-center px-6 pt-8 pb-4 bg-gradient-to-b from-indigo-50/60 to-transparent">
+            <div className="text-center px-6 pt-8 pb-4 bg-gradient-to-b from-indigo-50/60 to-transparent rounded-t-2xl">
               <div className="text-4xl mb-3 animate-bounce">🚀</div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 {isZh ? '欢迎使用 Fractal Chat' : 'Welcome to Fractal Chat'}
@@ -116,7 +116,7 @@ export function OnboardingWizard({ onComplete }: Props) {
                   onClick={() => openDetail(provider)}
                   className="w-full text-left group"
                 >
-                  <div className={`rounded-xl border-2 p-5 transition-all hover:shadow-lg hover:-translate-y-0.5
+                  <div className={`rounded-xl border-2 p-5 transition-all hover:shadow-lg hover:border-indigo-400
                     ${idx === 0
                       ? 'border-indigo-200 bg-gradient-to-r from-indigo-50/80 to-purple-50/40 hover:border-indigo-400'
                       : 'border-gray-200 bg-white hover:border-gray-300'
