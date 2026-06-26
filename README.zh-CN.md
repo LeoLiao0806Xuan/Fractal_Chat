@@ -15,6 +15,10 @@
 
 ---
 
+> **🌐 在线体验:** [fractal-chat.netlify.app](https://fractal-chat.netlify.app) — 无需安装，无需注册。
+
+---
+
 ## ✨ 功能特性
 
 ### 🧬 递归子对话树
