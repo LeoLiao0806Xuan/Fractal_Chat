@@ -27,6 +27,7 @@ export function MessageBubble({ message }: Props) {
   const { t } = useTranslation()
   const [selectionResult, setSelectionResult] = useState<SelectionResult | null>(null)
   const [editing, setEditing] = useState(false)
+  const dialogs = useDialogStore(s => s.dialogs)
   const configs = useModelStore(s => s.configs)
   const enabledPlugins = usePluginStore(s => s.plugins.filter(p => s.enabled.has(p.id)))
 
@@ -43,7 +44,6 @@ export function MessageBubble({ message }: Props) {
   const editRef = useRef<HTMLTextAreaElement>(null)
   const openSubDialog = useSubDialogStore(s => s.open)
   const currentDialogId = useDialogStore(s => s.currentDialogId)
-  const dialogs = useDialogStore(s => s.dialogs)
 
   useEffect(() => {
     if (editing && editRef.current) {

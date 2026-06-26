@@ -59,7 +59,7 @@ export function MessageList() {
   if (messages.length === 0) {
     return (
       <div className="flex-1 flex flex-col min-h-0">
-        {isSubDialog && <SubDialogBanner />}
+        {isSubDialog && <SubDialogBanner parentDialog={parentDialog} currentDialog={currentDialog} isMerged={isMerged} t={t} />}
         <div className="flex-1 flex items-center justify-center text-[#a3a3a3]">
           <div className="text-center px-8">
             <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100
@@ -88,7 +88,7 @@ export function MessageList() {
         <Virtuoso
           ref={virtuosoRef}
           data={messages}
-          itemContent={(index, msg) => (
+          itemContent={(_index, msg) => (
             <div className="px-4">
               <MessageBubble key={msg.id} message={msg} />
             </div>

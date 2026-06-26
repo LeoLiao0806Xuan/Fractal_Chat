@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from '../../i18n'
-import { getProvidersByLocale, type FreeProvider, type ProviderModel } from '../../data/freeProviders'
+import { getProvidersByLocale, type FreeProvider } from '../../data/freeProviders'
 import { useModelStore } from '../../stores/modelStore'
 import { encryptAPIKey, storeSessionKey, setSessionPassword, getSessionPassword } from '../../services/crypto'
 
@@ -11,7 +11,7 @@ interface Props {
 type Step = 'list' | 'detail' | 'success'
 
 export function OnboardingWizard({ onComplete }: Props) {
-  const { t, locale } = useTranslation()
+  const { locale } = useTranslation()
   const { primary, other } = getProvidersByLocale(locale)
   const addConfig = useModelStore(s => s.addConfig)
 
