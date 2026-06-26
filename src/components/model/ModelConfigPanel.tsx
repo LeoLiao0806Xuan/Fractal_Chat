@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useModelStore } from '../../stores/modelStore'
-import { encryptAPIKey, storeSessionKey, setSessionPassword, getSessionPassword } from '../../services/crypto'
+import { encryptAPIKey, decryptAPIKey, storeSessionKey, setSessionPassword, getSessionPassword } from '../../services/crypto'
 import { useTranslation } from '../../i18n'
 
 export function ModelConfigPanel({ onClose }: { onClose: () => void }) {
@@ -21,9 +21,16 @@ export function ModelConfigPanel({ onClose }: { onClose: () => void }) {
     modelName: 'gpt-4o',
   })
 
-  const handleUnlock = () => {
+  const handleUnlock = async () => {
     if (password.length < 4) return
     setSessionPassword(password)
+    // Try to decrypt existing keys and restore to session store
+    for (const cfg of configs) {
+      try {
+        const raw = await decryptAPIKey(cfg.apiKey, password)
+        storeSessionKey(cfg.id, raw)
+      } catch { /* wrong password — skip this key */ }
+    }
     setUnlocked(true)
   }
 

@@ -9,6 +9,8 @@ export interface ModelCallOptions {
   onChunk?: (text: string) => void
   onDone?: (fullText: string) => void
   onError?: (error: Error) => void
+  /** Called when token usage is available from the API response */
+  onUsage?: (totalTokens: number) => void
   signal?: AbortSignal
 }
 
@@ -53,7 +55,7 @@ async function smartFetch(
       ? text.slice(0, 300).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
       : '(empty body)'
     if (proxyRes.status === 429 || proxyRes.status === 403) {
-      throw new Error(`API 提供方拒绝了代理请求(${proxyRes.status})。建议换用 OpenAI 或检查 API Key 是否有效。`)
+      throw new Error(`API returned ${proxyRes.status}: ${snippet}`)
     }
     throw new Error(`API 返回 ${proxyRes.status}: ${snippet}`)
   }
@@ -64,9 +66,10 @@ async function smartFetch(
 async function parseOpenAISSE(
   reader: ReadableStreamDefaultReader<Uint8Array>,
   onChunk?: (full: string) => void,
-): Promise<string> {
+): Promise<{ text: string; usage: number | null }> {
   const decoder = new TextDecoder()
   let fullText = ''
+  let usage: number | null = null
   while (true) {
     const { done, value } = await reader.read()
     if (done) break
@@ -77,6 +80,10 @@ async function parseOpenAISSE(
       if (data === '[DONE]') continue
       try {
         const parsed = JSON.parse(data)
+        // Capture token usage from final chunk (choices empty, usage present)
+        if (parsed.usage?.total_tokens != null) {
+          usage = parsed.usage.total_tokens
+        }
         const content = parsed.choices?.[0]?.delta?.content || ''
         if (content) {
           fullText += content
@@ -85,16 +92,17 @@ async function parseOpenAISSE(
       } catch { /* skip malformed JSON chunks */ }
     }
   }
-  return fullText
+  return { text: fullText, usage }
 }
 
 // ── Parse Anthropic SSE event stream ──
 async function parseAnthropicSSE(
   reader: ReadableStreamDefaultReader<Uint8Array>,
   onChunk?: (full: string) => void,
-): Promise<string> {
+): Promise<{ text: string; usage: number | null }> {
   const decoder = new TextDecoder()
   let fullText = ''
+  let usage: number | null = null
   while (true) {
     const { done, value } = await reader.read()
     if (done) break
@@ -103,6 +111,10 @@ async function parseAnthropicSSE(
     for (const line of lines) {
       try {
         const parsed = JSON.parse(line.slice(6))
+        // Capture usage from message_delta event
+        if (parsed.type === 'message_delta' && parsed.usage?.output_tokens != null) {
+          usage = parsed.usage.output_tokens
+        }
         if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
           fullText += parsed.delta.text
           onChunk?.(fullText)
@@ -110,7 +122,7 @@ async function parseAnthropicSSE(
       } catch { /* skip */ }
     }
   }
-  return fullText
+  return { text: fullText, usage }
 }
 
 // ── OpenAI-compatible API streaming ──
@@ -135,7 +147,8 @@ export async function callOpenAICompatible(options: ModelCallOptions): Promise<s
     const reader = response.body?.getReader()
     if (!reader) throw new Error('Response body not readable')
 
-    const fullText = await parseOpenAISSE(reader, onChunk)
+    const { text: fullText, usage } = await parseOpenAISSE(reader, onChunk)
+    if (usage != null) options.onUsage?.(usage)
     onDone?.(fullText)
     return fullText
   } catch (err) {
@@ -182,7 +195,8 @@ export async function callAnthropic(options: ModelCallOptions): Promise<string> 
     const reader = response.body?.getReader()
     if (!reader) throw new Error('Response body not readable')
 
-    const fullText = await parseAnthropicSSE(reader, onChunk)
+    const { text: fullText, usage } = await parseAnthropicSSE(reader, onChunk)
+    if (usage != null) options.onUsage?.(usage)
     onDone?.(fullText)
     return fullText
   } catch (err) {

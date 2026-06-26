@@ -3,6 +3,7 @@ import { useDialogStore } from './stores/dialogStore'
 import { useModelStore } from './stores/modelStore'
 import { AppLayout } from './components/layout/AppLayout'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { OnboardingWizard } from './components/onboarding/OnboardingWizard'
 import { loadAllDialogs, saveAllDialogs, loadAllModels, saveAllModels } from './lib/db'
 import { generateSampleDialogs } from './lib/sampleData'
 import { I18nProvider, useTranslation } from './i18n'
@@ -33,6 +34,7 @@ function AppContent() {
   const initialized = useRef(false)
   const welcomeDialogId = useRef<string | null>(null)
   const [loaded, setLoaded] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   // 1. Load persisted data from IndexedDB on mount
   useEffect(() => {
@@ -44,24 +46,24 @@ function AppContent() {
       }),
       loadAllModels().then(savedModels => {
         if (savedModels.length > 0) {
-          useModelStore.setState({ configs: savedModels })
+          useModelStore.setState({
+            configs: savedModels,
+            activeModelId: savedModels.find(m => m.isDefault)?.id || savedModels[0].id,
+          })
         }
       }),
     ]).then(() => setLoaded(true))
   }, [])
 
-  // 2. Create default dialog or load demo data if no dialogs exist
+  // 2. First-run: show onboarding wizard or load demo data
   useEffect(() => {
     if (!loaded) return
     if (dialogs.length === 0 && !initialized.current) {
       initialized.current = true
 
-      // First-time user with no API keys → load demo sample data
+      // First-time user with no API keys → show onboarding wizard
       if (useModelStore.getState().configs.length === 0) {
-        const samples = generateSampleDialogs(locale)
-        useDialogStore.setState({ dialogs: samples, currentDialogId: samples[0].id })
-        // Save demo data to IndexedDB so it survives refresh
-        saveAllDialogs(samples)
+        setShowOnboarding(true)
         return
       }
 
@@ -78,6 +80,16 @@ function AppContent() {
       })
     }
   }, [loaded, dialogs.length, createDialog])
+
+  // 2b. Handle onboarding completion
+  const handleOnboardingComplete = (action: 'connected' | 'skipped') => {
+    setShowOnboarding(false)
+    if (action === 'skipped') {
+      const samples = generateSampleDialogs(locale)
+      useDialogStore.setState({ dialogs: samples, currentDialogId: samples[0].id })
+      saveAllDialogs(samples)
+    }
+  }
 
   // 2b. Re-translate welcome dialog when language changes
   useEffect(() => {
@@ -117,7 +129,12 @@ function AppContent() {
 
   return (
     <ErrorBoundary errorTitle={t('error.something_wrong')} errorButton={t('chat.input.reload')}>
-      {!loaded ? <LoadingScreen /> : <AppLayout />}
+      {!loaded ? <LoadingScreen /> : (
+        <>
+          {showOnboarding && <OnboardingWizard onComplete={handleOnboardingComplete} />}
+          <AppLayout />
+        </>
+      )}
     </ErrorBoundary>
   )
 }

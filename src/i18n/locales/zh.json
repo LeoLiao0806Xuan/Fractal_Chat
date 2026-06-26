@@ -119,5 +119,23 @@
   "tree.tag_placeholder": "输入标签：",
   "tree.unarchive": "📂 取消归档",
   "tree.archive": "📦 归档",
-  "tree.delete": "🗑️ 删除"
+  "tree.delete": "🗑️ 删除",
+
+  "settings.title": "设置",
+  "settings.general": "通用",
+  "settings.usage": "用量",
+  "settings.about": "关于",
+
+  "usage.tokens_label": "已用 Token",
+  "usage.requests_label": "请求次数",
+  "usage.percent": "已用 {pct}%",
+  "usage.empty": "暂无用量数据 — 开始聊天后自动记录",
+  "usage.deleted": "(已删除)",
+  "usage.unlimited": "永久免费不限量",
+
+  "about.tagline": "递归对话树 · 多模型 AI 聊天工作台",
+  "about.version": "版本",
+  "about.license": "许可证",
+  "about.github": "GitHub",
+  "about.tech_stack": "技术栈"
 }

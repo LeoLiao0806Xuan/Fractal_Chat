@@ -119,7 +119,7 @@ export const useDialogStore = create<DialogState>((set, get) => ({
                 m.id === msgId
                   ? { ...m, ...updates,
                       previousVersions:
-                        m.content !== updates.content && updates.content
+                        m.content !== updates.content && updates.content && m.status !== 'streaming'
                           ? [...(m.previousVersions || []), { content: m.content, editedAt: getTimestamp() }]
                           : m.previousVersions,
                     }

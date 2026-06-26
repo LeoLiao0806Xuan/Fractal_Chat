@@ -123,7 +123,9 @@ export function DialogTree() {
 
   const handleContextMenu = (e: React.MouseEvent, id: string) => {
     e.preventDefault(); e.stopPropagation()
-    setContextMenu({ id, x: e.clientX, y: e.clientY })
+    const x = Math.min(e.clientX, window.innerWidth - 280)
+    const y = Math.min(e.clientY, window.innerHeight - 360)
+    setContextMenu({ id, x, y })
   }
 
   useEffect(() => {
@@ -262,7 +264,7 @@ export function DialogTree() {
     }
 
     return nodes
-  }, [tree, searchQuery, dialogs, showArchived, filterStatus, filterTags, sortMode])
+  }, [tree, searchQuery, dialogs, showArchived, filterStatus, filterTags, sortMode, dialogOrder])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -516,8 +518,8 @@ export function DialogTree() {
             )}
           </div>
         ) : filteredTree.map(n => renderNode(n, 0))}
-        {/* Demo link at bottom of tree */}
-        {!hasDemoDialogs && filteredTree.length > 0 && (
+        {/* Demo link at bottom of tree — only show when no dialogs exist at all */}
+        {dialogs.length === 0 && (
           <div className="sticky bottom-0 px-3 pt-1 pb-2 bg-gradient-to-t from-[#faf9fe] via-[#faf9fe] to-transparent">
             <button onClick={() => {
               const samples = generateSampleDialogs(locale);

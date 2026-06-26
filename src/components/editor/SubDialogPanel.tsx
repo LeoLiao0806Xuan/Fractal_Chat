@@ -4,6 +4,7 @@ import { useSubDialogStore } from '../../stores/subDialogStore'
 import { useModelStore } from '../../stores/modelStore'
 import { getSessionKey } from '../../services/crypto'
 import { callModel } from '../../services/api'
+import { useUsageStore } from '../../stores/usageStore'
 import { buildConclusion, formatMergeContent, type MergeMode } from '../../lib/mergeUtils'
 import { TiptapRenderer } from './TiptapRenderer'
 import { SelectionMenu } from './SelectionMenu'
@@ -50,6 +51,7 @@ export default function SubDialogPanel() {
     await callModel({ apiUrl: cfg.apiUrl, apiKey: key, model: cfg.modelName, messages: ctx, signal,
       onChunk: (t) => state.updateMessage(dialogId, assistantId, { content: t }),
       onDone: (t) => state.updateMessage(dialogId, assistantId, { content: t, status: 'complete' }),
+      onUsage: (tokens) => useUsageStore.getState().recordUsage(cfg.id, cfg.name, cfg.modelName, tokens),
     })
   }
 
@@ -74,10 +76,12 @@ export default function SubDialogPanel() {
     const autoContent = mode === 'debug'
       ? t('sub.auto_debug') + '\n\n' + selectedText
       : t('sub.auto_deep_dive') + '\n\n' + selectedText
+    const autoController = new AbortController()
+    abortRef.current = autoController
     addMessage(subDialogId, { role: 'user', content: autoContent, parentId: null, branchId: 'main', status: 'complete' })
     const aid = addMessage(subDialogId, { role: 'assistant', content: '', parentId: null, branchId: 'main', status: 'streaming', model: '' })
-    sendToAI(subDialogId, aid, new AbortController().signal).catch((err: Error) => {
-      useDialogStore.getState().updateMessage(subDialogId, aid, { content: `错误: ${err.message}`, status: 'error' })
+    sendToAI(subDialogId, aid, autoController.signal).catch((err: Error) => {
+      useDialogStore.getState().updateMessage(subDialogId, aid, { content: `⚠️ ${err.message}`, status: 'error' })
     })
   }, [subDialogId, isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -103,7 +107,7 @@ export default function SubDialogPanel() {
     try { await sendToAI(subDialogId, assistantId, controller.signal) }
     catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') { updateMessage(subDialogId, assistantId, { content: t('sub.cancelled'), status: 'error' }); return }
-      updateMessage(subDialogId, assistantId, { content: `错误: ${(err as Error).message}`, status: 'error' })
+      updateMessage(subDialogId, assistantId, { content: `⚠️ ${(err as Error).message}`, status: 'error' })
     } finally { setSending(false); if (abortRef.current === controller) abortRef.current = null }
   }
 
@@ -128,7 +132,9 @@ export default function SubDialogPanel() {
         updateMessage(parentDialogId, targetMsgId, { content: parentMsg.content + formatMergeContent(conclusion, mergeMode), mergedFromSubDialogId: subDialogId })
       }
     } else if (targetMsgId && subDialogId) {
-      useDialogStore.getState().updateDialog(subDialogId, { mergeSnapshot: { parentMessageId: targetMsgId, originalContent: '', originalTitle: subDialog.title, mergeMode, mergedAt: getTimestamp() } })
+      const parentDialog = dialogs.find(d => d.id === parentDialogId)
+      const parentMsg = parentDialog?.messages.find(m => m.id === targetMsgId)
+      useDialogStore.getState().updateDialog(subDialogId, { mergeSnapshot: { parentMessageId: targetMsgId, originalContent: parentMsg?.content || '', originalTitle: subDialog.title, mergeMode, mergedAt: getTimestamp() } })
     }
     if (subDialogId) {
       const labels: Record<MergeMode, string> = { replace: t('sub.replaced'), footnote: t('sub.appended'), 'keep-child': t('sub.kept') }

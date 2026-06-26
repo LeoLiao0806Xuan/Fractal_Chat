@@ -11,7 +11,7 @@ interface Translations {
 interface I18nContextValue {
   locale: Locale;
   setLocale: (l: Locale) => void;
-  t: (key: string, fallback?: string) => string;
+  t: (key: string, params?: Record<string, string | number>, fallback?: string) => string;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -33,7 +33,9 @@ function detectLocale(): Locale {
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(() => {
-    return (localStorage.getItem('fractal-locale') as Locale) || detectLocale();
+    const stored = localStorage.getItem('fractal-locale');
+    if (stored === 'en' || stored === 'zh-CN') return stored;
+    return detectLocale();
   });
 
   useEffect(() => {
@@ -43,9 +45,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const setLocale = useCallback((l: Locale) => setLocaleState(l), []);
 
   // Compute dict directly from locale — no separate state, no stale closure
-  const t = useCallback((key: string, fallback?: string): string => {
+  // Supports {param} template interpolation
+  const t = useCallback((key: string, params?: Record<string, string | number>, fallback?: string): string => {
     const dict = allDicts[locale];
-    return dict[key as keyof typeof dict] ?? fallback ?? key;
+    const value = dict[key as keyof typeof dict] ?? fallback ?? key;
+    if (params && value) {
+      return value.replace(/\{(\w+)\}/g, (_, k: string) => String(params[k] ?? `{${k}}`));
+    }
+    return value;
   }, [locale]);
 
   return (

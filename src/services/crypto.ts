@@ -31,6 +31,16 @@ export async function encryptAPIKey(apiKey: string, password: string): Promise<s
   return btoa(String.fromCharCode(...combined))
 }
 
+export async function decryptAPIKey(encryptedData: string, password: string): Promise<string> {
+  const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0))
+  const salt = combined.slice(0, 16)
+  const iv = combined.slice(16, 28)
+  const data = combined.slice(28)
+  const key = await getKey(password, salt)
+  const decrypted = await crypto.subtle.decrypt({ name: ALGORITHM, iv }, key, data)
+  return new TextDecoder().decode(decrypted)
+}
+
 // ── Session key store (raw keys kept in memory only) ──
 const sessionKeyStore = new Map<string, string>()
 

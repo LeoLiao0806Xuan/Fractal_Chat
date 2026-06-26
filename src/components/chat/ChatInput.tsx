@@ -3,6 +3,7 @@ import { useDialogStore } from '../../stores/dialogStore'
 import { useModelStore } from '../../stores/modelStore'
 import { getSessionKey } from '../../services/crypto'
 import { callModel } from '../../services/api'
+import { useUsageStore } from '../../stores/usageStore'
 import { streamMockResponse } from '../../services/mockAI'
 import { ModelSelector } from '../model/ModelSelector'
 import { useTranslation } from '../../i18n'
@@ -62,6 +63,7 @@ export function ChatInput() {
       messages: ctx, signal,
       onChunk: (t) => updateMessage(dialogId, assistantId, { content: t }),
       onDone: (t) => updateMessage(dialogId, assistantId, { content: t, status: 'complete' }),
+      onUsage: (tokens) => useUsageStore.getState().recordUsage(cfg.id, cfg.name, cfg.modelName, tokens),
     })
   }
 
@@ -150,7 +152,7 @@ export function ChatInput() {
                 updateMessage(currentDialogId, id, { content: t('chat.input.cancelled'), status: 'error' })
                 return
               }
-              updateMessage(currentDialogId, id, { content: `错误: ${err.message}`, status: 'error' })
+              updateMessage(currentDialogId, id, { content: `⚠️ ${err.message}`, status: 'error' })
               setError(`${cfg.name}: ${err.message}`)
             }),
         ),

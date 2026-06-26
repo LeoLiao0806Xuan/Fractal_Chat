@@ -119,5 +119,23 @@
   "tree.tag_placeholder": "Enter tag:",
   "tree.unarchive": "📂 Unarchive",
   "tree.archive": "📦 Archive",
-  "tree.delete": "🗑️ Delete"
+  "tree.delete": "🗑️ Delete",
+
+  "settings.title": "Settings",
+  "settings.general": "General",
+  "settings.usage": "Usage",
+  "settings.about": "About",
+
+  "usage.tokens_label": "Tokens Used",
+  "usage.requests_label": "Requests",
+  "usage.percent": "{pct}% used",
+  "usage.empty": "No usage data yet — start chatting to auto-track",
+  "usage.deleted": "(deleted)",
+  "usage.unlimited": "Free unlimited",
+
+  "about.tagline": "A recursive conversation tree for multi-model AI chat.",
+  "about.version": "Version",
+  "about.license": "License",
+  "about.github": "GitHub",
+  "about.tech_stack": "Tech Stack"
 }
