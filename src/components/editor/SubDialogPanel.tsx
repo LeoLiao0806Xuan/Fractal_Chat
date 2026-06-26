@@ -272,7 +272,7 @@ export default function SubDialogPanel() {
       {showMerge && subDialog && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm"
              onClick={() => setShowMerge(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-[480px] animate-fade-in-scale"
+          <div className="bg-white rounded-2xl shadow-xl w-[90vw] max-w-[480px] animate-fade-in-scale max-h-[90vh] overflow-y-auto"
                onClick={e => e.stopPropagation()}>
             <div className="p-5 border-b border-[#f0eff5]">
               <h3 className="font-semibold text-base text-[#171717]">{t('sub.merge_back')}</h3>

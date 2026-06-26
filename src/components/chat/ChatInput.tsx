@@ -178,7 +178,7 @@ export function ChatInput() {
   if (!currentDialogId) return null
 
   return (
-    <div className="border-t border-[#f0eff5] bg-white px-4 py-3">
+    <div className="border-t border-[#f0eff5] bg-white px-3 sm:px-4 py-2 sm:py-3">
       <div className="max-w-4xl mx-auto space-y-2.5">
         {/* Model selector bar */}
         <div className="flex items-center justify-between">
@@ -248,7 +248,7 @@ export function ChatInput() {
             onClick={handleSend}
             disabled={!input.trim() || sending}
             className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl
-                       px-5 py-2.5 text-sm font-medium
+                       px-4 sm:px-5 py-2.5 sm:py-2.5 text-sm font-medium min-h-[44px]
                        hover:from-indigo-600 hover:to-purple-700 disabled:opacity-30
                        disabled:cursor-not-allowed transition-all shadow-sm
                        hover:shadow-md active:scale-[0.97]

@@ -22,7 +22,7 @@ export function SettingsPanel({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-[540px] max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl shadow-2xl w-[92vw] sm:w-[520px] max-h-[85vh] sm:max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between shrink-0">
           <h2 className="text-lg font-semibold">{t('settings.title')}</h2>
@@ -33,8 +33,8 @@ export function SettingsPanel({ onClose }: Props) {
           </button>
         </div>
 
-        {/* Tab bar */}
-        <div className="flex border-b border-gray-200 px-4 shrink-0">
+        {/* Tab bar — scrollable on mobile */}
+        <div className="flex border-b border-gray-200 px-4 shrink-0 overflow-x-auto">
           {tabs.map(tab => (
             <button
               key={tab.id}

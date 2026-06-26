@@ -106,7 +106,7 @@ export function OnboardingWizard({ onComplete }: Props) {
   // ── Render ──
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => onComplete('skipped')}>
-      <div className="bg-white rounded-2xl shadow-2xl w-[540px] max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl shadow-2xl w-[92vw] sm:w-[540px] max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
         {step === 'list' && (
           <ListView
             primary={primary}
