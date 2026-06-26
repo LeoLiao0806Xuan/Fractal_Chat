@@ -6,6 +6,8 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard'
 import { loadAllDialogs, saveAllDialogs, loadAllModels, saveAllModels } from './lib/db'
 import { generateSampleDialogs } from './lib/sampleData'
+import { usePluginStore } from './stores/pluginStore'
+import charCounterPlugin from './plugins/char-counter'
 import { I18nProvider, useTranslation } from './i18n'
 
 function LoadingScreen() {
@@ -36,8 +38,11 @@ function AppContent() {
   const [loaded, setLoaded] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
 
-  // 1. Load persisted data from IndexedDB on mount
+  // 1. Load persisted data from IndexedDB on mount + register plugins
   useEffect(() => {
+    // Register built-in plugins
+    usePluginStore.getState().register(charCounterPlugin)
+
     Promise.all([
       loadAllDialogs().then(savedDialogs => {
         if (savedDialogs.length > 0) {

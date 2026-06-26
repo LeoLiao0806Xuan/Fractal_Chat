@@ -137,5 +137,9 @@
   "about.version": "Version",
   "about.license": "License",
   "about.github": "GitHub",
-  "about.tech_stack": "Tech Stack"
+  "about.tech_stack": "Tech Stack",
+
+  "settings.plugins": "Plugins",
+  "plugins.empty": "No plugins installed.",
+  "plugins.by": "by"
 }

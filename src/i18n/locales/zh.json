@@ -137,5 +137,9 @@
   "about.version": "版本",
   "about.license": "许可证",
   "about.github": "GitHub",
-  "about.tech_stack": "技术栈"
+  "about.tech_stack": "技术栈",
+
+  "settings.plugins": "插件",
+  "plugins.empty": "暂无已安装的插件。",
+  "plugins.by": "作者"
 }

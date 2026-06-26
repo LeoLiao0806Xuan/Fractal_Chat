@@ -1,10 +1,12 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import type { Message } from '../../lib/types'
 import { TiptapRenderer } from '../editor/TiptapRenderer'
 import { SelectionMenu } from '../editor/SelectionMenu'
 import type { SelectionResult } from '../../services/selectionEngine'
 import { useSubDialogStore } from '../../stores/subDialogStore'
 import { useDialogStore } from '../../stores/dialogStore'
+import { usePluginStore } from '../../stores/pluginStore'
+import { useModelStore } from '../../stores/modelStore'
 import { getTimestamp } from '../../lib/utils'
 import { useTranslation } from '../../i18n'
 
@@ -25,6 +27,18 @@ export function MessageBubble({ message }: Props) {
   const { t } = useTranslation()
   const [selectionResult, setSelectionResult] = useState<SelectionResult | null>(null)
   const [editing, setEditing] = useState(false)
+  const configs = useModelStore(s => s.configs)
+  const enabledPlugins = usePluginStore(s => s.plugins.filter(p => s.enabled.has(p.id)))
+
+  // Apply plugin onMessageRender hooks
+  const renderedContent = useMemo(() => {
+    if (!enabledPlugins.length) return message.content
+    const ctx = { dialogs, configs }
+    return enabledPlugins.reduce((text, p) => {
+      if (p.hooks?.onMessageRender) return p.hooks.onMessageRender(text, ctx)
+      return text
+    }, message.content)
+  }, [message.content, enabledPlugins, dialogs])
   const [editText, setEditText] = useState('')
   const editRef = useRef<HTMLTextAreaElement>(null)
   const openSubDialog = useSubDialogStore(s => s.open)
@@ -153,7 +167,7 @@ export function MessageBubble({ message }: Props) {
               <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-white/95">{message.content}</div>
             ) : (
               <div>
-                <TiptapRenderer content={message.content} onSelection={handleSelection} />
+                <TiptapRenderer content={renderedContent} onSelection={handleSelection} />
               </div>
             )}
 

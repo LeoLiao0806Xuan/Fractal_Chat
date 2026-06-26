@@ -63,3 +63,30 @@ export interface SubDialog {
   mergedAt?: string
 }
 
+// ── Plugin system types ──
+
+export interface PluginHookContext {
+  dialogs: Dialog[]
+  configs: ModelConfig[]
+}
+
+export interface PluginHooks {
+  onMessageRender?: (content: string, ctx: PluginHookContext) => string
+  onModelCall?: (call: { model: string; messages: { role: string; content: string }[] }) => { model: string; messages: { role: string; content: string }[] }
+  onAppReady?: (ctx: PluginHookContext) => void
+}
+
+export interface Plugin {
+  id: string
+  name: string
+  version: string
+  description: string
+  author?: string
+  hooks?: PluginHooks
+  components?: {
+    SidebarItem?: React.ComponentType
+    SettingsTab?: { id: string; label: string; Component: React.ComponentType }
+    MessageAction?: React.ComponentType<{ message: Message }>
+  }
+}
+

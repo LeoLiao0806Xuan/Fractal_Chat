@@ -3,12 +3,13 @@ import { useTranslation } from '../../i18n'
 import { GeneralTab } from './GeneralTab'
 import { UsageTab } from './UsageTab'
 import { AboutTab } from './AboutTab'
+import { PluginsTab } from './PluginsTab'
 
 interface Props {
   onClose: () => void
 }
 
-type TabId = 'general' | 'usage' | 'about'
+type TabId = 'general' | 'usage' | 'plugins' | 'about'
 
 export function SettingsPanel({ onClose }: Props) {
   const { t } = useTranslation()
@@ -17,6 +18,7 @@ export function SettingsPanel({ onClose }: Props) {
   const tabs: { id: TabId; label: string; icon: string }[] = [
     { id: 'general', label: t('settings.general'), icon: '⚙️' },
     { id: 'usage', label: t('settings.usage'), icon: '📊' },
+    { id: 'plugins', label: t('settings.plugins'), icon: '🔌' },
     { id: 'about', label: t('settings.about'), icon: 'ℹ️' },
   ]
 
@@ -55,6 +57,7 @@ export function SettingsPanel({ onClose }: Props) {
         <div className="flex-1 overflow-y-auto">
           {activeTab === 'general' && <GeneralTab />}
           {activeTab === 'usage' && <UsageTab />}
+          {activeTab === 'plugins' && <PluginsTab />}
           {activeTab === 'about' && <AboutTab />}
         </div>
       </div>
