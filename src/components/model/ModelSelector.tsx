@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { useModelStore } from '../../stores/modelStore'
+import { useDialogStore } from '../../stores/dialogStore'
 import { SettingsPanel } from '../settings/SettingsPanel'
 import { OnboardingWizard } from '../onboarding/OnboardingWizard'
+import { generateSampleDialogs } from '../../lib/sampleData'
+import { saveAllDialogs } from '../../lib/db'
 import { useTranslation } from '../../i18n'
 
 export function ModelSelector() {
@@ -91,7 +94,7 @@ export function ModelSelector() {
       </div>
 
       {showPanel && <SettingsPanel onClose={() => setShowPanel(false)} />}
-      {showOnboarding && <OnboardingWizard onComplete={() => setShowOnboarding(false)} />}
+      {showOnboarding && <OnboardingWizard onComplete={(action) => { setShowOnboarding(false); if (action === 'skipped') { const loc = navigator.language.startsWith('zh') ? 'zh-CN' as const : 'en' as const; const samples = generateSampleDialogs(loc); useDialogStore.setState({ dialogs: samples, currentDialogId: samples[0].id }); saveAllDialogs(samples) } }} />}
     </>
   )
 }
