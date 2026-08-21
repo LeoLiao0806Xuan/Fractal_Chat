@@ -1,0 +1,50 @@
+title: "[Research] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We are studying how people make high-cost, multi-option technical decisions through an asynchronous questionnaire. No meeting is required. Read INTERVIEWS.md before participating and do not share employer-confidential information.
+  - type: dropdown
+    id: participation
+    attributes:
+      label: How would you like to participate?
+      options:
+        - Complete the asynchronous research questionnaire
+        - Share a sanitized ADR, RFC, or workflow example
+        - Ask a question about the research
+    validations:
+      required: true
+  - type: textarea
+    id: recent-decision
+    attributes:
+      label: Recent decision context
+      description: Briefly describe the type of technical decision you faced. Keep companies, people, systems, and data anonymous.
+      placeholder: In the last 30 days I compared several approaches to...
+    validations:
+      required: true
+  - type: dropdown
+    id: review-requirement
+    attributes:
+      label: Did the decision require documentation, review, or explanation to someone else?
+      options:
+        - "Yes"
+        - "No"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: follow-up
+    attributes:
+      label: Asynchronous follow-up preferences
+      description: Optional. Explain what kind of public follow-up would be useful, or leave this blank and watch the Discussion for a reply. Do not post private contact details.
+    validations:
+      required: false
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Research boundaries
+      options:
+        - label: I read INTERVIEWS.md and understand this is product research, not customer support or employment screening.
+          required: true
+        - label: I have not included secrets, personal data, or employer-confidential information.
+          required: true
