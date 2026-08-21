@@ -2,15 +2,15 @@
 
 # Fractal Chat
 
-## 让复杂技术决策变得可评审
+## 探索复杂技术问题，不再丢失思路
 
-**Fractal Chat 是一个开源、本地优先的 AI 决策工作台。**
+**Fractal Chat 是一个开源、本地优先的分支式多模型 AI 工作台。**
 
-Fractal Chat 帮助技术团队比较替代方案、整理证据、挑战假设，并形成可评审的决策记录。
+你可以从任意对话节点建立独立分支，探索不同方案、比较模型回答，并在讨论不断深入时保留清晰上下文。
 
-它服务需要解释、评审和复查的高成本、多方案技术决策，而不是帮助用户积累更多 AI 回答。
+**[在线体验](https://fractal-chat.netlify.app)** · **[参加异步用户研究](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=user_research.yml)** · **[打开 GitHub 仓库](https://github.com/LeoLiao0806Xuan/Fractal_Chat)**
 
-**[体验 Release v1.1](https://github.com/LeoLiao0806Xuan/Fractal_Chat/releases/tag/v1.1)** · **[参加异步用户研究](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=user_research.yml)** · **[Star / Watch 项目](https://github.com/LeoLiao0806Xuan/Fractal_Chat)**
+如果希望支持或关注项目，请打开仓库后使用 GitHub 页面上的 **Star** 或 **Watch / Notifications** 按钮。
 
 [English](README.md)
 
@@ -28,89 +28,35 @@ Fractal Chat 帮助技术团队比较替代方案、整理证据、挑战假设�
 </div>
 
 > [!IMPORTANT]
-> **Fractal Chat 正在进行一次重要的产品升级。** 当前应用是可运行的树形多模型聊天原型；Phase A 正在把这套基础升级为端到端决策工作台。在线原型尚未包含下文描述的全部决策能力。
+> Fractal Chat 目前是持续开发中的原型。在线版本展示当前的分支式对话体验，功能可能随项目开发继续变化。
 
-## 从分散回答到决策记录
+## 为什么使用 Fractal Chat
 
-复杂技术决策很少缺少答案，真正缺少的是可以被检查的判断过程：有哪些方案、依据来自哪里、哪些只是模型观点、什么条件可能推翻结论，以及为什么最终选择这一条路径。
+长对话经常把多种方案混进同一条时间线。Fractal Chat 允许从有价值的对话节点创建独立子对话，让不同思路分别发展而不互相覆盖。
 
-Fractal Chat 将这些工作组织成一个闭环：
+当一个技术问题存在多个可行答案、需要比较不同模型观点，或经过多轮研究后仍要保持上下文清晰时，这种方式尤其有用。
 
-```text
-明确问题、背景和约束
-  → 用分支保留方案、假设、反例、风险和未知项
-  → 从不同角色、方法或模型获得独立观点
-  → 区分用户事实、外部证据、模型观点、推断和未知项
-  → 比较分歧、取舍、风险和证据缺口
-  → 形成综合建议，同时保留反方意见
-  → 导出可评审的 ADR 或 Markdown 决策草案
-  → 由用户确认、替代或在条件变化后复查决定
-```
+## 当前功能
 
-树是探索机制，不是产品终点。真正的完成状态，是得到一份能够交给另一个人检查和质疑的决策草案。
+- 递归对话与独立子对话分支；
+- 多个已配置模型的并行流式回答；
+- 支持 OpenAI 兼容接口和 Anthropic 风格供应商，并采用 BYOK；
+- 对话树、搜索、标签、归档、编辑及合并/撤销；
+- 本地持久化和 Markdown/JSON 对话导出；
+- 中英文界面、首次使用引导、设置和响应式布局。
 
-## 适用场景
+## 在线体验
 
-当一项技术任务同时具备以下特征时，Fractal Chat 最有价值：
+打开 **[在线原型](https://fractal-chat.netlify.app)**，无需安装，也不需要注册 Fractal Chat 账户。
 
-- 决策错误或反悔成本较高；
-- 存在多个可行方案；
-- 结论具有争议或不确定性；
-- 必须形成文档、接受评审或向他人解释；
-- 会带来明显的交付、成本、安全或架构风险。
+- 选择 **Skip to demo**，无需配置模型即可查看界面和示例。
+- 如需发送自己的 Prompt，请使用自己的 API Key 连接受支持的模型供应商。
 
-典型场景包括架构选型、平台迁移、自建与采购比较、数据库或消息系统选择、安全方案评审、性能与成本权衡，以及需要形成 ADR、RFC 或技术提案的工作。
+[v1.1 Release 页面](https://github.com/LeoLiao0806Xuan/Fractal_Chat/releases/tag/v1.1)用于查看对应版本说明和源码快照，它不是在线应用入口。
 
-职级不是准入条件。早期用户可能是中高级工程师、Tech Lead、架构师、工程经理、独立开发者、开源维护者，以及平台、数据、安全或基础设施团队成员。产品边界由任务决定，不由职位名称决定。
+## 本地运行
 
-## 产品承诺与责任边界
-
-Fractal Chat 提高的是**决策过程和交付物的确定性**：
-
-- 重要替代方案不会轻易消失在线性聊天里；
-- 模型观点不会被伪装成外部证据；
-- 风险、反方、未知项和证据缺口不会在综合时被自动隐藏；
-- 草案中的来源、状态和用户确认动作可以追溯；
-- 用户可以通过开放格式带走数据。
-
-它不承诺自动找到全部方案、验证所有来源、给出唯一正确决定，也不替代真实环境测试、安全审查和最终责任人。
-
-## 项目现状
-
-Fractal Chat 当前处于**基础原型向首个决策工作台 MVP 迁移**的阶段。
-
-| 当前已经具备 | Phase A 正在建设 |
-| :--- | :--- |
-| 递归对话与多个独立子分支 | `Decision` 领域对象与明确状态 |
-| 多模型并行流式回复与 BYOK | 方案、主张、风险、反方和未知项 |
-| 对话树、搜索、标签、归档和编辑 | 外部证据与模型观点的明确边界 |
-| 本地持久化与对话 Markdown/JSON 导出 | 分歧比较与可编辑综合结论 |
-| 中英文界面、引导、设置和响应式布局 | 带版本的 ADR/Markdown 决策记录 |
-| 缓冲式 SSE 解析与本地结构事件契约 | 增量式决策实体存储与迁移 |
-
-在 Phase A 完成前，应把本仓库视为一个能力较完整的树形聊天原型和工程底座，而不是已经完成的决策产品。
-
-## 为什么不是另一个全能 AI 工具
-
-聊天、搜索、分支、多模型、导出和集成都可以成为底层能力，但它们必须服务同一个用户承诺：完成一份可评审、可追溯的技术决策记录。
-
-Fractal Chat 不打算同时重建通用聊天、知识库、项目管理、文档编辑和协作平台。用户从普通问题开始，约束、证据、风险、反方和高级模型控制按需出现；所有入口共享同一个数据模型和完成状态，而不是拆成互不兼容的 Quick、Guided 和 Expert 三套产品。
-
-## 模型共识不等于证据
-
-多个模型重复相似观点，并不会让观点自动成为证据：
-
-| 类型 | 含义 |
-| :--- | :--- |
-| 用户事实 | 由用户确认的条件、约束或事实 |
-| 外部证据 | 可核查的文档、测试、基准、论文或代码引用 |
-| 模型观点 | 默认仍待验证的模型生成主张 |
-| 推断 | 基于事实或证据形成的判断 |
-| 未知项 | 可能改变结论但尚未解决的假设 |
-
-## 快速开始
-
-使用 [`package.json`](package.json) 中依赖支持的较新 Node.js/npm 环境：
+使用 [`package.json`](package.json) 依赖支持的较新 Node.js/npm 环境：
 
 ```bash
 git clone https://github.com/LeoLiao0806Xuan/Fractal_Chat.git fractal-chat
@@ -119,55 +65,37 @@ npm install
 npm run dev
 ```
 
-打开 Vite 在终端显示的本地地址。应用不需要 Fractal Chat 账户或产品后端。
+打开 Vite 在终端显示的本地地址。
 
-首次运行向导可以帮助连接模型供应商，也可以在设置中手动配置 API 地址和自己的 API Key。API Key 会先在浏览器中加密，再持久化到本地。Prompt 发送给用户配置的模型供应商时必然会离开浏览器，请自行检查供应商和中转地址的数据政策。
+如需运行准确的 v1.1 源码快照，请在 `npm install` 前执行 `git checkout v1.1`。
 
-## 架构方向
+## 配置模型
 
-仓库正在渐进迁移到单向分层架构：
+首次运行向导可以帮助连接模型供应商，也可以在设置中手动配置：
 
-```text
-Presentation
-  单一渐进工作流：问题 → 结构 → 评审
-        ↓
-Application
-  CreateDecision / AddBranch / RunPerspective / AttachEvidence
-  BuildDraft / TransitionStatus / ExportDecision
-   ├──→ Domain
-   │     Decision / Branch / Evidence / Synthesis / DecisionRecord
-   └──→ Ports
-         DecisionRepository / ModelProvider / Exporter / Telemetry
-              ↑
-         Infrastructure
-         IndexedDB / Provider Adapter / Export / Optional Cloud
-```
+1. 设置会话加密密码。
+2. 添加受支持或 OpenAI 兼容的 API 地址。
+3. 提供自己的 API Key。
+4. 如需并行比较，可以添加多个模型。
 
-现有 React/Zustand 对话实现是迁移起点，不是目标架构。所有新增和修改代码都应遵循仓库的原子模块和依赖边界规范。
+## 隐私与数据
 
-## 由证据解锁的路线图
+Fractal Chat 是纯客户端、本地优先应用。对话数据和设置保存在浏览器中，API Key 会先加密再持久化到本地。
 
-| 阶段 | 目标结果 | 解锁条件 |
-| :--- | :--- | :--- |
-| **Phase A — 决策闭环** | 一个真实技术问题形成可评审决策草案 | 设计伙伴能够无阻塞地完成并导出真实 Decision |
-| **Phase B — 传播与工作流连接** | 决策能够被评审、复用并连接工程流程 | Phase A 出现外部评审和重复使用 |
-| **Phase C — Pro 与持续价值** | 加密同步、版本比较、提醒和有限自动化 | 留存和付费意愿得到验证 |
-| **Phase D — 团队治理** | 共享空间、评审、权限、审计及可能的第二垂直 | 团队付费需求得到验证 |
-
-功能不会仅仅因为“有用”就自动进入路线图。每项工作必须改善核心决策任务的激活、完成、评审、重复使用或付费信号。
+当 Prompt 被发送到用户配置的模型供应商或中转地址时，数据必然会离开浏览器。请检查所用供应商和端点的数据政策，不要向不可信服务提交凭据或机密信息。
 
 ## 反馈与社区
 
-[Issues](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=bug_report.md) 只接收可复现的 Bug。产品探索与使用支持进入 Discussions：
+[Issues](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=bug_report.md) 用于报告可复现的 Bug。产品反馈和使用支持请进入 Discussions：
 
-- [Ideas](https://github.com/LeoLiao0806Xuan/Fractal_Chat/discussions/categories/ideas) — 基于真实决策工作流的产品建议；
-- [RFC](https://github.com/LeoLiao0806Xuan/Fractal_Chat/discussions/categories/rfc) — 重要产品与架构决策；
+- [Ideas](https://github.com/LeoLiao0806Xuan/Fractal_Chat/discussions/categories/ideas) — 基于真实工作流的产品建议；
+- [RFC](https://github.com/LeoLiao0806Xuan/Fractal_Chat/discussions/categories/rfc) — 影响较大的产品或架构提案；
 - [Q&A](https://github.com/LeoLiao0806Xuan/Fractal_Chat/discussions/categories/q-a) — 配置和使用问题；
-- [填写异步用户研究问卷](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=user_research.yml) — 无需预约会议，分享一次脱敏后的近期技术决策。
+- [异步用户研究](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=user_research.yml) — 无需预约会议，分享一次脱敏后的近期技术决策。
 
-发帖前请阅读 [FEEDBACK.md](FEEDBACK.md)，了解分流规则、证据要求和公开仓库的隐私边界。
+发帖前请阅读 [FEEDBACK.md](FEEDBACK.md)。这是公开仓库，请勿提交 API Key、个人数据、私人对话或雇主机密信息。
 
-## 开发与贡献
+## 开发与质量
 
 提交变更前运行：
 
@@ -177,18 +105,12 @@ npm test
 npm run build
 ```
 
-架构、TypeScript、测试、隐私、迁移和验收要求统一由项目工程规范管理。修改产品代码前，请完整阅读仓库说明和[贡献指南](CONTRIBUTING.md)。
+架构、TypeScript、测试、隐私、迁移和验收要求由项目工程规范统一管理。修改产品代码前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-欢迎能够强化同一决策工作流、提高可靠性或帮助真实用户验证产品的贡献。开始大型功能或架构调整前，请先建立 Issue，确认它对应的产品证据和模块边界。
+## 参与贡献
+
+欢迎改善现有用户体验、可靠性、可访问性、供应商兼容性、文档或测试覆盖率的贡献。开始大型功能或架构调整前，请先建立 Issue 或 Discussion。
 
 ## 许可证
 
 [Apache 2.0](LICENSE) — 个人和商业使用免费。
-
----
-
-<div align="center">
-
-**功能集中产生便利，任务聚焦产生信任。**
-
-</div>
