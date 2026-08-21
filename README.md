@@ -15,7 +15,7 @@
 
 ---
 
-> **🌐 Try it online:** [fractal-chat.netlify.app](https://fractal-chat.netlify.app) — no install, no signup.
+> **[Try Release v1.1](https://github.com/LeoLiao0806Xuan/Fractal_Chat/releases/tag/v1.1)** · **[Join the asynchronous user research](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=user_research.yml)** · **[Star / Watch the project](https://github.com/LeoLiao0806Xuan/Fractal_Chat)**
 
 ---
 
@@ -171,6 +171,17 @@ Current: **24 tests** across modelStore, dialogStore, and mergeUtils — all pas
 - [ ] Virtual scrolling for long conversations
 - [ ] Mobile adaptation
 - [ ] Plugin system
+
+---
+
+## 🔬 Participate in user research
+
+Fractal Chat is running a public, asynchronous questionnaire about recent complex technical decisions. No meeting, call, or recording is required.
+
+- [Complete the questionnaire](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=user_research.yml)
+- [Read the research and privacy guidance](INTERVIEWS.md)
+
+Please share only sanitized information. Do not include personal data, employer-confidential information, credentials, source code, or security-sensitive details.
 
 ---
 

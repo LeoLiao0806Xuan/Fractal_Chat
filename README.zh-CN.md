@@ -15,7 +15,7 @@
 
 ---
 
-> **🌐 在线体验:** [fractal-chat.netlify.app](https://fractal-chat.netlify.app) — 无需安装，无需注册。
+> **[体验 Release v1.1](https://github.com/LeoLiao0806Xuan/Fractal_Chat/releases/tag/v1.1)** · **[参加异步用户研究](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=user_research.yml)** · **[Star / Watch 项目](https://github.com/LeoLiao0806Xuan/Fractal_Chat)**
 
 ---
 
@@ -155,6 +155,17 @@ npm run build   # 类型检查 + 生产构建
 - [ ] 对话筛选（按标签、日期、状态）
 - [ ] 移动端深度优化
 - [ ] 更完善的插件系统
+
+---
+
+## 🔬 参加用户研究
+
+Fractal Chat 正在通过公开的异步问卷研究近期复杂技术决策。不需要参加会议、通话或录音。
+
+- [填写异步研究问卷](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=user_research.yml)
+- [阅读研究与隐私说明](INTERVIEWS.md)
+
+请只分享经过脱敏的信息，不要填写个人数据、雇主机密、凭证、源代码或安全敏感内容。
 
 ---
 
