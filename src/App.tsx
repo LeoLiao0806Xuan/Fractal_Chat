@@ -8,7 +8,8 @@ import { loadAllDialogs, saveAllDialogs, loadAllModels, saveAllModels } from './
 import { generateSampleDialogs } from './lib/sampleData'
 import { usePluginStore } from './stores/pluginStore'
 import charCounterPlugin from './plugins/char-counter'
-import { I18nProvider, useTranslation } from './i18n'
+import { I18nProvider } from './i18n'
+import { useTranslation } from './i18n/context'
 
 function LoadingScreen() {
   return (
@@ -33,10 +34,11 @@ function AppContent() {
   const { t, locale } = useTranslation()
   const dialogs = useDialogStore(s => s.dialogs)
   const createDialog = useDialogStore(s => s.createDialog)
+  const modelCount = useModelStore(s => s.configs.length)
   const initialized = useRef(false)
   const welcomeDialogId = useRef<string | null>(null)
   const [loaded, setLoaded] = useState(false)
-  const [showOnboarding, setShowOnboarding] = useState(false)
+  const showOnboarding = loaded && dialogs.length === 0 && modelCount === 0
 
   // 1. Load persisted data from IndexedDB on mount + register plugins
   useEffect(() => {
@@ -68,7 +70,6 @@ function AppContent() {
 
       // First-time user with no API keys → show onboarding wizard
       if (useModelStore.getState().configs.length === 0) {
-        setShowOnboarding(true)
         return
       }
 
@@ -84,11 +85,10 @@ function AppContent() {
         status: 'complete',
       })
     }
-  }, [loaded, dialogs.length, createDialog])
+  }, [loaded, dialogs.length, createDialog, t])
 
   // 2b. Handle onboarding completion
   const handleOnboardingComplete = (action: 'connected' | 'skipped') => {
-    setShowOnboarding(false)
     if (action === 'skipped') {
       const samples = generateSampleDialogs(locale)
       useDialogStore.setState({ dialogs: samples, currentDialogId: samples[0].id })

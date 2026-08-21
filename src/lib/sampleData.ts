@@ -1,7 +1,7 @@
 // ── Demo sample data for first-time users without API keys ──
 import type { Dialog } from './types'
 import { generateId } from './utils'
-import type { Locale } from '../i18n'
+import type { Locale } from '../i18n/context'
 
 function id(seed: string): string {
   return `demo-${seed}`

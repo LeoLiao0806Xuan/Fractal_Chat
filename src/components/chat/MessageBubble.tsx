@@ -8,7 +8,7 @@ import { useDialogStore } from '../../stores/dialogStore'
 import { usePluginStore } from '../../stores/pluginStore'
 import { useModelStore } from '../../stores/modelStore'
 import { getTimestamp } from '../../lib/utils'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 
 interface Props {
   message: Message
@@ -38,7 +38,7 @@ export function MessageBubble({ message }: Props) {
     if (!active.length) return message.content
     const ctx = { dialogs, configs }
     return active.reduce((text, p) => p.hooks!.onMessageRender!(text, ctx), message.content)
-  }, [message.content, plugins, enabled, dialogs])
+  }, [message.content, plugins, enabled, dialogs, configs])
   const [editText, setEditText] = useState('')
   const editRef = useRef<HTMLTextAreaElement>(null)
   const openSubDialog = useSubDialogStore(s => s.open)
@@ -49,7 +49,7 @@ export function MessageBubble({ message }: Props) {
       editRef.current.focus()
       editRef.current.setSelectionRange(editText.length, editText.length)
     }
-  }, [editing])
+  }, [editing, editText.length])
 
   const handleSelection = (result: SelectionResult) => {
     if (isUser) return

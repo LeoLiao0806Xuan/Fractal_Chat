@@ -77,7 +77,8 @@ export const useUsageStore = create<UsageState>((set, get) => ({
 
   resetRecord: (configId) => {
     set(state => {
-      const { [configId]: _, ...rest } = state.records
+      const rest = { ...state.records }
+      delete rest[configId]
       saveToStorage(rest)
       return { records: rest }
     })

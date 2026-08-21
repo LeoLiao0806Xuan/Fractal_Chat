@@ -1,5 +1,5 @@
 import { usePluginStore } from '../../stores/pluginStore'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 
 export function PluginsTab() {
   const { t } = useTranslation()

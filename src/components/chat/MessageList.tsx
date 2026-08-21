@@ -1,9 +1,9 @@
-import { useRef, useMemo } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso'
 import { useDialogStore } from '../../stores/dialogStore'
 import { useSubDialogStore } from '../../stores/subDialogStore'
 import { MessageBubble } from './MessageBubble'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 
 export function MessageList() {
   const { t } = useTranslation()
@@ -14,18 +14,18 @@ export function MessageList() {
     [dialogs, currentDialogId],
   )
   const virtuosoRef = useRef<VirtuosoHandle>(null)
-  const dialogLenRef = useRef(0)
+  const previousMessagesRef = useRef({ dialogId: null as string | null, count: 0 })
 
-  // Track message count changes for auto-scroll on new messages
   const msgLen = currentDialog?.messages.length ?? 0
-  if (msgLen !== dialogLenRef.current) {
-    const prev = dialogLenRef.current
-    dialogLenRef.current = msgLen
-    // If a new message was added (not just streaming update), scroll to bottom
-    if (prev > 0 && msgLen > prev) {
-      setTimeout(() => virtuosoRef.current?.scrollToIndex({ index: msgLen - 1, behavior: 'smooth' }), 50)
-    }
-  }
+  useEffect(() => {
+    const previous = previousMessagesRef.current
+    previousMessagesRef.current = { dialogId: currentDialogId, count: msgLen }
+    if (previous.dialogId !== currentDialogId || previous.count === 0 || msgLen <= previous.count) return
+    const timer = window.setTimeout(() => {
+      virtuosoRef.current?.scrollToIndex({ index: msgLen - 1, behavior: 'smooth' })
+    }, 50)
+    return () => window.clearTimeout(timer)
+  }, [currentDialogId, msgLen])
 
   // Empty state — no dialog selected
   if (!currentDialog) {
@@ -98,7 +98,7 @@ export function MessageList() {
             Header: () => (
               <div className="text-center pt-5 pb-2 px-4">
                 <h2 className="text-base font-semibold text-[#52525b]">
-                  {currentDialog.title.replace(/^[✏️📎🌿]\s*/, '')}
+                  {currentDialog.title.replace(/^(?:✏️|📎|🌿)\s*/u, '')}
                 </h2>
                 <p className="text-[11px] text-[#a3a3a3] mt-0.5">
                   {messages.length} {t('chat.list.messages')}

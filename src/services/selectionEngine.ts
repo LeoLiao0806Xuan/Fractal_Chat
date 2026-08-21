@@ -121,7 +121,7 @@ export function extractContext(range: Range): { before: string; after: string } 
  * Score how "intentional" a selection looks — range-based heuristics
  * that help distinguish a deliberate swipe from an accidental click.
  */
-export function scoreSelection(text: string, _range: Range): number {
+export function scoreSelection(text: string): number {
   let score = 0.5 // base
 
   const trimmed = text.trim()
@@ -139,7 +139,7 @@ export function scoreSelection(text: string, _range: Range): number {
   if (/^\w/.test(trimmed) && /\w$/.test(trimmed)) score += 0.05
 
   // Code-like selections (contains operators, brackets)
-  if (/[{}()\[\]=><\+\-\*\/]/.test(trimmed)) score += 0.05
+  if (/[{}()=><+*/-]|\[|\]/.test(trimmed)) score += 0.05
 
   // Selection that starts with a capital letter (sentence boundary)
   if (/^[A-Z一-鿿]/.test(trimmed)) score += 0.05
@@ -167,7 +167,7 @@ export function analyzeSelection(
   const rect = range.getBoundingClientRect()
   const type = detectSelectionType(range)
   const context = extractContext(range)
-  const confidence = scoreSelection(text, range)
+  const confidence = scoreSelection(text)
 
   return {
     text,

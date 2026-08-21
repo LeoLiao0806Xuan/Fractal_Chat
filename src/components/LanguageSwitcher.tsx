@@ -1,4 +1,4 @@
-import { useTranslation, type Locale } from '../i18n';
+import { useTranslation, type Locale } from '../i18n/context';
 
 const FLAGS: Record<Locale, string> = { en: '🇺🇸', 'zh-CN': '🇨🇳' };
 const LABELS: Record<Locale, string> = { en: 'EN', 'zh-CN': '中文' };

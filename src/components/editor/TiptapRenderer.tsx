@@ -1,7 +1,7 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useEffect, useRef, useCallback, useMemo } from 'react'
-import { marked } from 'marked'
+import { marked, type Tokens } from 'marked'
 import { useDialogStore } from '../../stores/dialogStore'
 import { analyzeSelection } from '../../services/selectionEngine'
 import type { SelectionResult } from '../../services/selectionEngine'
@@ -34,8 +34,9 @@ function ensureMarkedExtensions() {
             return { type: 'blockMath', raw: match[0], text: match[1].trim() };
           }
         },
-        renderer(token: any) {
-          return `<div class="math-block bg-gray-50 rounded-lg p-3 my-2 text-xs font-mono border border-gray-200 overflow-x-auto">${token.text}</div>`;
+        renderer(token: Tokens.Generic) {
+          const text = typeof token.text === 'string' ? token.text : ''
+          return `<div class="math-block bg-gray-50 rounded-lg p-3 my-2 text-xs font-mono border border-gray-200 overflow-x-auto">${text}</div>`;
         },
       },
       {
@@ -48,8 +49,9 @@ function ensureMarkedExtensions() {
             return { type: 'inlineMath', raw: match[0], text: match[1] };
           }
         },
-        renderer(token: any) {
-          return `<code class="math-inline bg-gray-100 text-purple-700 px-1 rounded text-xs font-mono">${token.text}</code>`;
+        renderer(token: Tokens.Generic) {
+          const text = typeof token.text === 'string' ? token.text : ''
+          return `<code class="math-inline bg-gray-100 text-purple-700 px-1 rounded text-xs font-mono">${text}</code>`;
         },
       },
     ],

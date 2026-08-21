@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 import { GeneralTab } from './GeneralTab'
 import { UsageTab } from './UsageTab'
 import { AboutTab } from './AboutTab'

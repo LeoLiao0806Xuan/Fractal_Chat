@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import type { SelectionResult } from '../../services/selectionEngine'
 import { selectionTypeLabel, selectionTypeIcon } from '../../services/selectionEngine'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 
 interface MenuItem {
   id: string

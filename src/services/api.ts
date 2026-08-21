@@ -1,3 +1,8 @@
+import {
+  parseAnthropicSse,
+  parseOpenAICompatibleSse,
+} from '../infrastructure/providers/sse'
+
 // ── Unified API layer for Fractal Chat ──
 // Supports OpenAI-compatible and Anthropic APIs with CORS-safe proxy fallback.
 
@@ -62,69 +67,6 @@ async function smartFetch(
   return proxyRes
 }
 
-// ── Parse OpenAI-compatible SSE event stream ──
-async function parseOpenAISSE(
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  onChunk?: (full: string) => void,
-): Promise<{ text: string; usage: number | null }> {
-  const decoder = new TextDecoder()
-  let fullText = ''
-  let usage: number | null = null
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    const chunk = decoder.decode(value, { stream: true })
-    const lines = chunk.split('\n').filter(l => l.startsWith('data: '))
-    for (const line of lines) {
-      const data = line.slice(6)
-      if (data === '[DONE]') continue
-      try {
-        const parsed = JSON.parse(data)
-        // Capture token usage from final chunk (choices empty, usage present)
-        if (parsed.usage?.total_tokens != null) {
-          usage = parsed.usage.total_tokens
-        }
-        const content = parsed.choices?.[0]?.delta?.content || ''
-        if (content) {
-          fullText += content
-          onChunk?.(fullText)
-        }
-      } catch { /* skip malformed JSON chunks */ }
-    }
-  }
-  return { text: fullText, usage }
-}
-
-// ── Parse Anthropic SSE event stream ──
-async function parseAnthropicSSE(
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  onChunk?: (full: string) => void,
-): Promise<{ text: string; usage: number | null }> {
-  const decoder = new TextDecoder()
-  let fullText = ''
-  let usage: number | null = null
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    const chunk = decoder.decode(value, { stream: true })
-    const lines = chunk.split('\n').filter(l => l.startsWith('data: '))
-    for (const line of lines) {
-      try {
-        const parsed = JSON.parse(line.slice(6))
-        // Capture usage from message_delta event
-        if (parsed.type === 'message_delta' && parsed.usage?.output_tokens != null) {
-          usage = parsed.usage.output_tokens
-        }
-        if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
-          fullText += parsed.delta.text
-          onChunk?.(fullText)
-        }
-      } catch { /* skip */ }
-    }
-  }
-  return { text: fullText, usage }
-}
-
 // ── OpenAI-compatible API streaming ──
 export async function callOpenAICompatible(options: ModelCallOptions): Promise<string> {
   const { apiUrl, apiKey, model, messages, onChunk, onDone, onError, signal } = options
@@ -147,7 +89,7 @@ export async function callOpenAICompatible(options: ModelCallOptions): Promise<s
     const reader = response.body?.getReader()
     if (!reader) throw new Error('Response body not readable')
 
-    const { text: fullText, usage } = await parseOpenAISSE(reader, onChunk)
+    const { text: fullText, usage } = await parseOpenAICompatibleSse(reader, onChunk)
     if (usage != null) options.onUsage?.(usage)
     onDone?.(fullText)
     return fullText
@@ -195,7 +137,7 @@ export async function callAnthropic(options: ModelCallOptions): Promise<string> 
     const reader = response.body?.getReader()
     if (!reader) throw new Error('Response body not readable')
 
-    const { text: fullText, usage } = await parseAnthropicSSE(reader, onChunk)
+    const { text: fullText, usage } = await parseAnthropicSse(reader, onChunk)
     if (usage != null) options.onUsage?.(usage)
     onDone?.(fullText)
     return fullText

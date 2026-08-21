@@ -1,6 +1,6 @@
 import { useUsageStore, getProviderLimit } from '../../stores/usageStore'
 import { useModelStore } from '../../stores/modelStore'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 
 export function UsageTab() {
   const { t } = useTranslation()

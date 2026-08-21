@@ -5,7 +5,7 @@ import { SettingsPanel } from '../settings/SettingsPanel'
 import { OnboardingWizard } from '../onboarding/OnboardingWizard'
 import { generateSampleDialogs } from '../../lib/sampleData'
 import { saveAllDialogs } from '../../lib/db'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 
 export function ModelSelector() {
   const { t } = useTranslation()

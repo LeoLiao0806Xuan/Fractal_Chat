@@ -1,6 +1,6 @@
 import { DialogTree } from '../tree/DialogTree'
 import { LanguageSwitcher } from '../LanguageSwitcher'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 
 export function Sidebar() {
   const { t } = useTranslation()

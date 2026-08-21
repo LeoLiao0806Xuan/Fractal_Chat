@@ -1,6 +1,6 @@
 // ── Mock AI responses for demo/try-out mode (bilingual) ──
 
-import type { Locale } from '../i18n'
+import type { Locale } from '../i18n/context'
 
 const MOCK_RESPONSES_EN = [
   `That's an interesting point! Let me share my thoughts on this.

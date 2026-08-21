@@ -44,8 +44,8 @@ export const usePluginStore = create<PluginState>((set, get) => ({
 
   unregister: (id) => {
     set(state => {
-      const { [id]: _, ...rest } = Object.fromEntries(state.enabled.entries())
-      const newEnabled = new Set(Object.keys(rest))
+      const newEnabled = new Set(state.enabled)
+      newEnabled.delete(id)
       saveEnabled(newEnabled)
       return { plugins: state.plugins.filter(p => p.id !== id), enabled: newEnabled }
     })

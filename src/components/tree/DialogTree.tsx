@@ -1,10 +1,10 @@
-import { useMemo, useState, useRef, useEffect } from 'react'
+import { useCallback, useMemo, useState, useRef, useEffect } from 'react'
 import { useDialogStore } from '../../stores/dialogStore'
 import { useSubDialogStore } from '../../stores/subDialogStore'
 import { exportDialogToMarkdown, exportDialogToJSON } from '../../lib/exporter'
 import { generateSampleDialogs } from '../../lib/sampleData'
 import { saveAllDialogs } from '../../lib/db'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 
 interface TreeNode {
   id: string
@@ -22,6 +22,29 @@ interface TreeNode {
   tags: string[]
 }
 
+type ContextMenuEntry =
+  | { label: string; action: () => void; hover: string; muted?: boolean; danger?: boolean }
+  | { tags: string[] }
+  | null
+
+function isTagEntry(entry: Exclude<ContextMenuEntry, null>): entry is { tags: string[] } {
+  return 'tags' in entry && Array.isArray(entry.tags)
+}
+
+const COLLAPSED_KEY = 'fractal-chat-collapsed'
+const ORDER_KEY = 'fractal-chat-order'
+const MERGE_PREFIX = /^(?:✏️|📎|🌿)\s*/u
+const MERGED_TITLE = /^(?:✏️|📎|🌿)/u
+
+function loadCollapsedDialogs(): Set<string> {
+  try {
+    const stored = localStorage.getItem(COLLAPSED_KEY)
+    return stored ? new Set(JSON.parse(stored) as string[]) : new Set()
+  } catch {
+    return new Set()
+  }
+}
+
 export function DialogTree() {
   const { t, locale } = useTranslation()
   const dialogs = useDialogStore(s => s.dialogs)
@@ -36,15 +59,14 @@ export function DialogTree() {
   const [renameValue, setRenameValue] = useState('')
   const renameInputRef = useRef<HTMLInputElement>(null)
 
-  const COLLAPSED_KEY = 'fractal-chat-collapsed'
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  const [collapsed, setCollapsed] = useState<Set<string>>(loadCollapsedDialogs)
 
   useEffect(() => {
-    try { const s = localStorage.getItem(COLLAPSED_KEY); if (s) setCollapsed(new Set(JSON.parse(s))) } catch {}
-  }, [])
-
-  useEffect(() => {
-    try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed])) } catch {}
+    try {
+      localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed]))
+    } catch {
+      // Storage can be unavailable in private or restricted browser contexts.
+    }
   }, [collapsed])
 
   const toggleCollapse = (e: React.MouseEvent, id: string) => {
@@ -56,22 +78,11 @@ export function DialogTree() {
     })
   }
 
-  const ORDER_KEY = 'fractal-chat-order'
   const [dialogOrder, setDialogOrder] = useState<Record<string, number>>(() => {
     try { return JSON.parse(localStorage.getItem(ORDER_KEY) || '{}') } catch { return {} }
   })
 
   useEffect(() => { localStorage.setItem(ORDER_KEY, JSON.stringify(dialogOrder)) }, [dialogOrder])
-
-  useEffect(() => {
-    const validIds = new Set(dialogs.map(d => d.id))
-    const orphaned = Object.keys(dialogOrder).filter(id => !validIds.has(id))
-    if (orphaned.length > 0) {
-      const cleaned = { ...dialogOrder }
-      orphaned.forEach(id => delete cleaned[id])
-      setDialogOrder(cleaned)
-    }
-  }, [dialogs])
 
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
@@ -145,42 +156,11 @@ export function DialogTree() {
     if (renamingId && renameInputRef.current) { renameInputRef.current.focus(); renameInputRef.current.select() }
   }, [renamingId])
 
-  const sortNodes = (items: TreeNode[], byDate = false) =>
+  const sortNodes = useCallback((items: TreeNode[], byDate = false) =>
     [...items].sort((a, b) => byDate
       ? new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-      : (dialogOrder[a.id] ?? Number.MAX_SAFE_INTEGER) - (dialogOrder[b.id] ?? Number.MAX_SAFE_INTEGER))
-
-  const applySortMode = (items: TreeNode[]) => {
-    if (sortMode === 'newest') {
-      return [...items].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-    } else if (sortMode === 'oldest') {
-      return [...items].sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime())
-    }
-    return sortNodes(items, false)
-  }
-
-  const tree = useMemo((): TreeNode[] => {
-    const build = (pid: string): TreeNode[] =>
-      sortNodes(dialogs.filter(d => d.parentDialogId === pid).map(c => ({
-        id: c.id,
-        name: c.title.replace(/^[✏️📎🌿]\s*/, ''),
-        messageCount: c.messages.length,
-        preview: getPreview(c.messages),
-        hasSubDialogs: dialogs.some(d => d.parentDialogId === c.id),
-        isSubDialog: true, parentId: pid,
-        children: build(c.id),
-        isMerged: /^[✏️📎🌿]/.test(c.title),
-        mergeIcon: c.title.startsWith('✏️') ? '🔀' : c.title.startsWith('📎') ? '📎' : '🌿',
-        status: c.status, updatedAt: c.updatedAt, tags: c.tags || [],
-      })))
-
-    return sortNodes(dialogs.filter(d => !d.parentDialogId).map(r => ({
-      id: r.id, name: r.title, messageCount: r.messages.length,
-      preview: getPreview(r.messages), hasSubDialogs: dialogs.some(d => d.parentDialogId === r.id),
-      isSubDialog: false, parentId: null, children: build(r.id),
-      isMerged: false, mergeIcon: '', status: r.status, updatedAt: r.updatedAt, tags: r.tags || [],
-    })))
-  }, [dialogs, dialogOrder])
+      : (dialogOrder[a.id] ?? Number.MAX_SAFE_INTEGER) - (dialogOrder[b.id] ?? Number.MAX_SAFE_INTEGER)),
+  [dialogOrder])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [showArchived, setShowArchived] = useState(false)
@@ -189,6 +169,16 @@ export function DialogTree() {
   const [filterTags, setFilterTags] = useState<string[]>([])
   const [sortMode, setSortMode] = useState<'custom' | 'newest' | 'oldest'>('custom')
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  const applySortMode = useCallback((items: TreeNode[]) => {
+    if (sortMode === 'newest') {
+      return [...items].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    }
+    if (sortMode === 'oldest') {
+      return [...items].sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime())
+    }
+    return sortNodes(items, false)
+  }, [sortMode, sortNodes])
 
   const allTags = useMemo(() => {
     const set = new Set<string>()
@@ -232,13 +222,13 @@ export function DialogTree() {
     const build = (pid: string): TreeNode[] =>
       applySortMode(dialogsInView.filter(d => d.parentDialogId === pid).map(c => ({
         id: c.id,
-        name: c.title.replace(/^[✏️📎🌿]\s*/, ''),
+        name: c.title.replace(MERGE_PREFIX, ''),
         messageCount: c.messages.length,
         preview: getPreview(c.messages),
         hasSubDialogs: dialogsInView.some(d => d.parentDialogId === c.id),
         isSubDialog: true, parentId: pid,
         children: build(c.id),
-        isMerged: /^[✏️📎🌿]/.test(c.title),
+        isMerged: MERGED_TITLE.test(c.title),
         mergeIcon: c.title.startsWith('✏️') ? '🔀' : c.title.startsWith('📎') ? '📎' : '🌿',
         status: c.status, updatedAt: c.updatedAt, tags: c.tags || [],
       })))
@@ -265,7 +255,7 @@ export function DialogTree() {
     }
 
     return nodes
-  }, [tree, searchQuery, dialogs, showArchived, filterStatus, filterTags, sortMode, dialogOrder])
+  }, [searchQuery, dialogs, showArchived, filterStatus, filterTags, applySortMode])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -398,7 +388,7 @@ export function DialogTree() {
       }
     })
     useDialogStore.setState({ dialogs: updated })
-  }, [locale])
+  }, [locale, hasDemoDialogs])
 
   return (
     <div className="flex flex-col h-full">
@@ -541,17 +531,17 @@ export function DialogTree() {
           className="fixed z-[9999] bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl
                      border border-[#f0eff5]/80 py-1.5 min-w-[160px] animate-fade-in overflow-hidden"
           style={{ left: contextMenu.x, top: contextMenu.y }}>
-          {[
+          {([
             { label: t('tree.rename'), action: () => {
               const d = dialogs.find(x => x.id === contextMenu.id)
-              startRenaming(contextMenu.id, d?.title?.replace(/^[✏️📎🌿]\s*/, '') || '')
+              startRenaming(contextMenu.id, d?.title?.replace(MERGE_PREFIX, '') || '')
               setContextMenu(null)
             }, hover: 'hover:bg-indigo-50 hover:text-indigo-700' },
             ...(dialogs.find(d => d.id === contextMenu.id)?.mergeSnapshot
               ? [{ label: t('tree.undo_merge'), action: () => { useDialogStore.getState().undoMerge(contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-amber-50 hover:text-amber-700' }] : []),
             { label: t('tree.copy_ref'), action: () => {
               const d = dialogs.find(x => x.id === contextMenu.id)
-              if (d) navigator.clipboard.writeText(`→[${d.title.replace(/^[✏️📎🌿]\s*/, '')}](fc-dialog://${d.id})`).catch(() => {})
+              if (d) navigator.clipboard.writeText(`→[${d.title.replace(MERGE_PREFIX, '')}](fc-dialog://${d.id})`).catch(() => {})
               setContextMenu(null)
             }, hover: 'hover:bg-purple-50 hover:text-purple-700' },
             null,
@@ -567,9 +557,9 @@ export function DialogTree() {
               : { label: t('tree.archive'), action: () => { useDialogStore.getState().archiveDialog(contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-gray-50 text-gray-600', muted: true }),
             null,
             { label: t('tree.delete'), action: () => { handleDelete(null, contextMenu.id); setContextMenu(null) }, hover: 'hover:bg-red-50 hover:text-red-700', danger: true },
-          ].filter(Boolean).map((item: any, i) =>
+          ] satisfies ContextMenuEntry[]).map((item, i) =>
             item === null ? <div key={i} className="border-t border-[#f0eff5] my-1" /> :
-            item.tags ? (
+            isTagEntry(item) ? (
               <div key={i} className="flex flex-wrap gap-1 px-3 py-1.5">
                 {item.tags.map((t: string) => (
                   <span key={t} className="inline-flex items-center gap-1 text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-full">

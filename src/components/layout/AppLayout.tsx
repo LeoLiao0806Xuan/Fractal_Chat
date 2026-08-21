@@ -4,7 +4,7 @@ import { useSubDialogStore } from '../../stores/subDialogStore'
 import { Sidebar } from './Sidebar'
 import { MessageList } from '../chat/MessageList'
 import { ChatInput } from '../chat/ChatInput'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 
 const SubDialogPanel = lazy(() => import('../editor/SubDialogPanel'))
 

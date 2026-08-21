@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 import { getProvidersByLocale, type FreeProvider } from '../../lib/freeProviders'
 import { useModelStore } from '../../stores/modelStore'
 import { encryptAPIKey, storeSessionKey, setSessionPassword, getSessionPassword } from '../../services/crypto'

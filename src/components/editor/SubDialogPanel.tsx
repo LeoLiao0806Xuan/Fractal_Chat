@@ -10,7 +10,8 @@ import { TiptapRenderer } from './TiptapRenderer'
 import { SelectionMenu } from './SelectionMenu'
 import type { SelectionResult } from '../../services/selectionEngine'
 import { getTimestamp } from '../../lib/utils'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
+import { createSubDialog } from '../../application/create-sub-dialog'
 
 export default function SubDialogPanel() {
   const { t } = useTranslation()
@@ -29,7 +30,6 @@ export default function SubDialogPanel() {
   }
 
   const dialogs = useDialogStore(s => s.dialogs)
-  const createDialog = useDialogStore(s => s.createDialog)
   const addMessage = useDialogStore(s => s.addMessage)
   const updateMessage = useDialogStore(s => s.updateMessage)
   const { selectedText, mode, parentMessageId, parentDialogId, subDialogId, close, setSubDialogId } = useSubDialogStore()
@@ -57,17 +57,27 @@ export default function SubDialogPanel() {
 
   useEffect(() => {
     if (!isOpen || !parentDialogId || subDialogId) return
-    const existing = useDialogStore.getState().dialogs.find(d => d.parentDialogId === parentDialogId)
-    if (existing) { setSubDialogId(existing.id); return }
     const parentDialog = dialogs.find(d => d.id === parentDialogId)
     const rootId = parentDialog?.rootDialogId || parentDialogId
     const shortTitle = selectedText.slice(0, 22).replace(/\n/g, ' ')
-    const id = createDialog(shortTitle + (selectedText.length > 22 ? '…' : ''), parentDialogId, rootId, false)
     const modeLabel: Record<string, string> = { 'deep-dive': t('sub.deep_dive'), 'debug': t('sub.code_review'), 'ask-other': t('sub.switch_model'), 'anchor': t('sub.pin') }
-    addMessage(id, { role: 'system', content: t('sub.system_prompt').replace('{mode}', modeLabel[mode] || t('sub.deep_dive')).replace('{text}', selectedText), parentId: null, branchId: 'main', status: 'complete' })
-    if (parentMessageId) useDialogStore.getState().updateDialog(id, { contextAnchor: { messageId: parentMessageId, selectedText } })
+    const dialogState = useDialogStore.getState()
+    const id = createSubDialog({
+      parentDialogId,
+      rootDialogId: rootId,
+      parentMessageId,
+      selectedText,
+      title: shortTitle + (selectedText.length > 22 ? '…' : ''),
+      systemPrompt: t('sub.system_prompt')
+        .replace('{mode}', modeLabel[mode] || t('sub.deep_dive'))
+        .replace('{text}', selectedText),
+    }, {
+      createDialog: dialogState.createDialog,
+      addMessage: dialogState.addMessage,
+      updateDialog: dialogState.updateDialog,
+    })
     setSubDialogId(id)
-  }, [isOpen, subDialogId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dialogs, isOpen, mode, parentDialogId, parentMessageId, selectedText, setSubDialogId, subDialogId, t])
 
   useEffect(() => {
     if (!subDialogId || !isOpen || (mode !== 'deep-dive' && mode !== 'debug')) return
@@ -138,7 +148,7 @@ export default function SubDialogPanel() {
     }
     if (subDialogId) {
       const labels: Record<MergeMode, string> = { replace: t('sub.replaced'), footnote: t('sub.appended'), 'keep-child': t('sub.kept') }
-      const cleanTitle = subDialog.title.replace(/^[✏️📎🌿]\s*/, '')
+      const cleanTitle = subDialog.title.replace(/^(?:✏️|📎|🌿)\s*/u, '')
       useDialogStore.getState().updateDialogTitle(subDialogId, `${labels[mergeMode]}: ${cleanTitle}`)
     }
     setShowMerge(false); close()

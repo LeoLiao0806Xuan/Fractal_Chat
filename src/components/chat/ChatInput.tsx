@@ -6,7 +6,7 @@ import { callModel } from '../../services/api'
 import { useUsageStore } from '../../stores/usageStore'
 import { streamMockResponse } from '../../services/mockAI'
 import { ModelSelector } from '../model/ModelSelector'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 
 export function ChatInput() {
   const { t, locale } = useTranslation()

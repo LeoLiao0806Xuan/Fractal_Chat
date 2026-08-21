@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useModelStore } from '../../stores/modelStore'
 import { encryptAPIKey, decryptAPIKey, storeSessionKey, setSessionPassword, getSessionPassword } from '../../services/crypto'
-import { useTranslation } from '../../i18n'
+import { useTranslation } from '../../i18n/context'
 
 export function GeneralTab() {
   const { t } = useTranslation()
