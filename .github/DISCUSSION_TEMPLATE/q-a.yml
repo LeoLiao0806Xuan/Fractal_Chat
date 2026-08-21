@@ -1,0 +1,37 @@
+title: "[Question] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use Q&A for setup and usage questions. Reproducible product defects belong in Issues.
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to accomplish?
+      description: Describe the task and the result you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What have you tried?
+      description: Include the relevant steps and any non-sensitive error message.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, operating system, and Fractal Chat version or commit.
+      placeholder: Chrome 125, Windows 11, commit abc1234
+    validations:
+      required: true
+  - type: checkboxes
+    id: routing
+    attributes:
+      label: Routing and privacy
+      options:
+        - label: This is a usage question, not a reproducible bug report or product proposal.
+          required: true
+        - label: I removed API keys, authorization headers, private prompts, and personal data.
+          required: true

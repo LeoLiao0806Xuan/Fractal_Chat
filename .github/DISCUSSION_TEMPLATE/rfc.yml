@@ -1,0 +1,50 @@
+title: "[RFC] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use an RFC for consequential product or architecture decisions. State the problem before the preferred solution, preserve alternatives, and make the trade-offs reviewable.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and decision boundary
+      description: What must be decided, for whom, and what is explicitly out of scope?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and constraints
+      description: Link checkable sources and separate confirmed facts from assumptions or model opinions.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include at least two viable options when possible, including keeping the current behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed direction
+      description: Explain the recommendation, expected user value, module or data impact, and why this option is preferred.
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks, dissent, and reversibility
+      description: What could invalidate the proposal? How can it be tested, migrated, rolled back, or revisited?
+    validations:
+      required: true
+  - type: checkboxes
+    id: review-readiness
+    attributes:
+      label: Review readiness
+      options:
+        - label: I have separated facts, evidence, assumptions, and unknowns.
+          required: true
+        - label: I have not included secrets, personal data, or confidential company information.
+          required: true

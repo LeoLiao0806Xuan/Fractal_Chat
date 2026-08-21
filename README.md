@@ -1,201 +1,228 @@
 <div align="center">
 
-# 🌿 Fractal Chat
+# Fractal Chat
 
-**A recursive conversation tree for multi-model AI chat**
+## Make complex technical decisions reviewable
 
-> Select any text → branch into a focused sub-dialogue → compare answers from GPT-4.1, Claude, DeepSeek, and more — side by side.
+**Fractal Chat is an open-source, local-first AI decision workbench.**
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-8-646CFF)](https://vitejs.dev/)
+Fractal Chat helps technical teams compare alternatives, organize evidence, challenge assumptions, and produce reviewable decision records.
+
+Built for technical teams facing high-cost, multi-option decisions that must be explained, reviewed, and revisited—not for collecting more AI answers.
+
+**[Try Release v1.1](https://github.com/LeoLiao0806Xuan/Fractal_Chat/releases/tag/v1.1)** · **[Join the asynchronous user research](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=user_research.yml)** · **[Star / Watch the project](https://github.com/LeoLiao0806Xuan/Fractal_Chat)**
+
+[简体中文](README.zh-CN.md)
 
 </div>
 
 ---
 
-> **🌐 Try it online:** [fractal-chat.netlify.app](https://fractal-chat.netlify.app) — no install, no signup.
+<div align="center">
 
----
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF)](https://vite.dev/)
 
-## ✨ Features
+</div>
 
-### 🧬 Recursive Sub-Dialogue Tree
-Select any part of a response → right-click → create a focused sub-dialogue. Each sub-dialogue is a new branch where you can keep digging deeper, then merge insights back into the parent conversation.
+> [!IMPORTANT]
+> **Fractal Chat is undergoing a major product transition.** The current application is a working tree-based, multi-model chat prototype. Phase A is turning that foundation into an end-to-end decision workbench. The online prototype does not yet contain every decision capability described below.
 
-<img src="public/assets/sub-dialogue-flow.svg" alt="Sub-dialogue flow" width="800">
+## Why Fractal Chat
 
-### 🔄 Multi-Model Parallel Comparison
-Send the same prompt to multiple LLMs at once and watch their responses stream in real-time, side by side. No more manual copy-paste between tabs.
+Linear AI chat is useful for producing answers, but complex technical decisions require more than an answer. Alternatives diverge, models disagree, evidence has different levels of trust, and the result must often survive review by someone else.
 
-<img src="public/assets/multi-model.svg" alt="Multi-model comparison" width="800">
+Fractal Chat is designed for decisions that are:
 
-### 🌲 Visual Conversation Tree
-Navigate your entire conversation history as an interactive tree. Fold, expand, search, drag to reorder — your context never gets lost.
+- costly to reverse;
+- based on multiple viable options;
+- disputed or uncertain;
+- expected to be documented, reviewed, or explained;
+- exposed to meaningful delivery, financial, security, or architectural risk.
 
-- **Full-text search** across all messages
-- **Drag & drop** to reorder dialogues
-- **Collapse/expand** for focus
-- **Right-click context menu** for quick actions
+The product promise is deliberately narrow:
 
-<img src="public/assets/conversation-tree.svg" alt="Conversation tree" width="800">
+> Help a user produce a reviewable, traceable technical decision draft with clear evidence boundaries.
 
-### 🏷️ Organize & Export
-- **Tags** and **archiving** for conversation management
-- **Export** single dialogues or full trees as Markdown / JSON
-- **Cross-dialogue @references** — link to any conversation
+Fractal Chat helps make the **process and artifact** more reliable. It does not claim to automatically produce the one correct decision, verify every source, replace real-world testing, or assume responsibility for the outcome.
 
-### ✏️ Edit & Version
-- **Message editing** with version history
-- **"Edited" timestamps** for transparency
-- **Merge undo** — revert merged sub-dialogues with one click
+## The decision loop
 
-### 🚀 First-Run Onboarding
-- **Onboarding wizard** on first visit — pick DeepSeek, Groq, or SiliconFlow
-- **Locale-aware recommendations** — Chinese users see DeepSeek + SiliconFlow; English users see DeepSeek + Groq
-- **In-app API key configuration** with step-by-step guide, no external detours
-- **"Skip to demo"** to explore without configuring anything
+```text
+Frame the question and constraints
+  → preserve alternatives, assumptions, counterexamples, and risks as branches
+  → obtain independent perspectives from roles, approaches, or models
+  → separate user facts, external evidence, model opinions, inferences, and unknowns
+  → compare disagreements, trade-offs, and evidence gaps
+  → synthesize a recommendation without hiding the dissenting case
+  → export a reviewable ADR or Markdown decision draft
+  → let the user confirm, replace, or revisit the decision
+```
 
-### ⚙️ Settings Panel
-- **General tab** — manage model configs, encryption password
-- **Usage tab** — track API token consumption with progress bars
-- **About tab** — version, GitHub link, license, tech stack
-- Accessible from the **sidebar footer** gear icon
+The tree is a mechanism for exploration, not the final product. The completion point is a decision draft that another person can inspect and challenge.
 
----
+## Project status
 
-## 🚀 Quick Start
+Fractal Chat is currently a **foundation prototype moving toward its first decision-workbench MVP**.
+
+### Available today
+
+- Recursive conversations and multiple independent sub-dialogue branches;
+- parallel, streaming responses from multiple configured models;
+- OpenAI-compatible and Anthropic-style provider support with BYOK;
+- visual tree navigation, search, tags, archive, editing, and merge/undo;
+- local persistence plus Markdown and JSON conversation export;
+- English and Chinese UI, onboarding, settings, usage display, and responsive layout;
+- buffered SSE parsing and local-only structural telemetry contracts for Phase A reliability work.
+
+### Being built in Phase A
+
+- a first-class `Decision` object with context, constraints, criteria, and explicit status;
+- typed branches for options, claims, risks, counterarguments, and unknowns;
+- evidence boundaries that distinguish sources from model-generated opinions;
+- disagreement comparison and editable synthesis;
+- versioned ADR and Markdown decision-draft export;
+- user-confirmed completion and a traceable path from source dialogue to decision record;
+- versioned, incremental local persistence for decision entities.
+
+Until those Phase A items are complete, the repository should be evaluated as a capable conversation prototype and engineering foundation—not as a finished decision product.
+
+## Who it is for
+
+Seniority is not the admission criterion. Fractal Chat is for anyone who recently had to make a high-cost, multi-option technical decision and explain it to others.
+
+Likely early users include:
+
+- senior and mid-level software engineers;
+- tech leads, staff engineers, architects, and engineering managers;
+- independent developers, founders, and open-source maintainers;
+- platform, data, security, infrastructure, and operations engineers;
+- technical product managers, consultants, and solution architects.
+
+Senior engineers remain a useful beachhead because these tasks occur frequently and carry visible consequences. The long-term boundary is defined by the task, not the job title.
+
+## Product principles
+
+### One workflow, progressive depth
+
+Users begin with a normal question. Structure appears only when it helps: constraints, options, evidence, risks, dissent, and advanced model controls all feed the same decision model and the same completion state. Fractal Chat is not building separate Quick, Guided, and Expert products.
+
+### Centralized capabilities, focused promise
+
+Chat, search, branching, multiple models, export, and integrations can support the workbench. A capability belongs in the core only if it improves completion or quality of the same decision loop. Fractal Chat is not trying to rebuild a general-purpose chat client, knowledge base, project manager, document editor, and collaboration suite in one application.
+
+### Evidence is not consensus
+
+Several models repeating the same claim does not turn that claim into evidence. The product is moving toward explicit treatment of:
+
+| Type | Meaning |
+| :--- | :--- |
+| User fact | A constraint or fact confirmed by the user |
+| External evidence | A checkable document, test, benchmark, paper, or code reference |
+| Model opinion | A model-generated claim that remains unverified by default |
+| Inference | A conclusion derived from facts or evidence |
+| Unknown | An unresolved assumption that could change the decision |
+
+### Local first, user controlled
+
+The first phase remains client-side and BYOK. Core data is stored locally, and the user owns the data and export path. Prompts necessarily leave the browser when sent to model providers configured by the user. Optional cloud services must remain explicit and separable from the local core.
+
+## Quick start
+
+Requirements: a recent Node.js/npm environment supported by the dependencies in [`package.json`](package.json).
 
 ```bash
-git clone https://github.com/LeoLiao0806Xuan/Fractal_Chat.git
+git clone https://github.com/LeoLiao0806Xuan/Fractal_Chat.git fractal-chat
 cd fractal-chat
 npm install
 npm run dev
 ```
 
-Open the URL shown in terminal — no backend, no database, no signup.
+Open the local URL printed by Vite. No Fractal Chat account or application backend is required.
 
 ### Configure a model
 
-On first visit the **Onboarding Wizard** will guide you through connecting a free provider. Alternatively:
+The first-run wizard can help connect a provider, or you can configure one from Settings:
 
-1. Click ⚙️ in the input bar, or ⚙️ **Settings** in the sidebar footer
-2. Set an encryption password (session-only, AES-256-GCM)
-3. Add your API endpoint (DeepSeek / Groq / OpenAI / Anthropic / Gemini / any OpenAI-compatible)
-4. Paste your API key — it's encrypted before touching disk
-5. Start chatting!
+1. Set the session encryption password.
+2. Add a supported or OpenAI-compatible API endpoint.
+3. Provide your own API key.
+4. Add multiple models if you want parallel comparison.
 
-> **💡 Tip:** Add multiple models and toggle **⊕ Compare** mode — send one prompt to all of them simultaneously and watch responses stream side by side.
+API keys are encrypted in the browser before local persistence. Do not use an untrusted relay or endpoint, and review the data policy of every model provider you configure.
 
----
+## Architecture direction
 
-## 🖼️ Screenshots
+The repository is being migrated progressively toward a one-way layered architecture:
 
-| Conversation Tree | Multi-Model Compare |
-|---|---|
-| <img src="public/assets/conversation-tree.svg" alt="Tree" width="300"> | <img src="public/assets/multi-model.svg" alt="Compare" width="300"> |
-
-| Sub-Dialogue Flow | Architecture |
-|---|---|
-| <img src="public/assets/sub-dialogue-flow.svg" alt="Sub-dialogue" width="300"> | <img src="public/assets/hero.svg" alt="Architecture" width="300"> |
-
----
-
-## 🏗️ Architecture
-
-Fractal Chat is a **pure client-side** application. No backend, no user accounts, no data leaves your browser unless it's sent to the LLM APIs you configure.
-
-```
-┌──────────────────────────────────────────┐
-│            React 19 + TypeScript           │
-│  ┌─────────┐  ┌──────────┐  ┌──────────┐ │
-│  │ Dialog  │  │Onboarding│  │ Settings │ │
-│  │ Tree    │  │ Wizard   │  │ Panel    │ │
-│  │(recursive)│  │(first-run)│  │(tabs)    │ │
-│  └────┬────┘  └──────────┘  └────┬─────┘ │
-│       │                          │       │
-│  ┌────▼──────────────────────────▼─────┐ │
-│  │          Zustand Stores              │ │
-│  │  dialogStore · modelStore · usageStore│ │
-│  └────────────┬─────────────────────────┘ │
-│       │                │                  │
-│  ┌────▼────┐   ┌──────▼──────────┐      │
-│  │IndexedDB│   │  API Layer      │      │
-│  │ (idb)   │   │ callModel()     │      │
-│  │persistence│  │ OAI/Anthropic  │      │
-│  │ +localStorage│  │ + usage tracking │      │
-│  └─────────┘   └──────┬──────────┘      │
-│                       │                  │
-│              ┌────────▼────────┐        │
-│              │  LLM Providers  │        │
-│              │  (your API key) │        │
-│              └─────────────────┘        │
-└──────────────────────────────────────────┘
+```text
+Presentation
+  One progressive workflow: question → structure → review
+        ↓
+Application
+  CreateDecision / AddBranch / RunPerspective / AttachEvidence
+  BuildDraft / TransitionStatus / ExportDecision
+   ├──→ Domain
+   │     Decision / Branch / Evidence / Synthesis / DecisionRecord
+   └──→ Ports
+         DecisionRepository / ModelProvider / Exporter / Telemetry
+              ↑
+         Infrastructure
+         IndexedDB / Provider adapters / Export / Optional cloud
 ```
 
-### Key decisions
+The existing React/Zustand conversation implementation is the migration source, not the target architecture. New and modified code follows the repository's atomic module and dependency-boundary standards.
 
-| Choice | Why |
-|--------|-----|
-| **Pure client-side** | Zero ops, zero cost, complete privacy |
-| **IndexedDB** via `idb` | Survives page refresh, no server needed |
-| **localStorage** | UI preferences and usage tracking |
-| **Zustand** | Lightweight state — no boilerplate, no providers |
-| **Tiptap** | Rich text rendering with Markdown support |
-| **AES-256-GCM** | API keys encrypted before touching IndexedDB |
+## Evidence-gated roadmap
 
----
+| Phase | Outcome | Unlock condition |
+| :--- | :--- | :--- |
+| **A — Decision loop** | A real technical question becomes a reviewable decision draft | Design partners complete and export real decisions without blocking failures |
+| **B — Sharing and workflow connections** | Decisions can be reviewed, reused, and connected to engineering work | Phase A shows external review and repeat use |
+| **C — Pro and continuity** | Encrypted sync, version comparison, reminders, and selected automation | Retention and willingness-to-pay are demonstrated |
+| **D — Team governance** | Shared spaces, review, permissions, audit, and a possible second vertical | Paid team demand is demonstrated |
 
-## 🧪 Testing
+Features are not promoted merely because they are useful. Each roadmap item must improve activation, completion, review, repeat use, or willingness to pay for the core decision task.
+
+## Feedback and community
+
+Use [Issues](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=bug_report.md) only for reproducible bugs. Product discovery and support happen in Discussions:
+
+- [Ideas](https://github.com/LeoLiao0806Xuan/Fractal_Chat/discussions/categories/ideas) — product suggestions grounded in a real decision workflow;
+- [RFC](https://github.com/LeoLiao0806Xuan/Fractal_Chat/discussions/categories/rfc) — important product and architecture decisions;
+- [Q&A](https://github.com/LeoLiao0806Xuan/Fractal_Chat/discussions/categories/q-a) — setup and usage questions;
+- [Take the asynchronous research survey](https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=user_research.yml) — share a sanitized recent technical decision without scheduling a meeting.
+
+Read [FEEDBACK.md](FEEDBACK.md) before posting. It explains routing, evidence expectations, and public-repository privacy boundaries.
+
+## Development and quality
+
+Before submitting a change, run:
 
 ```bash
-npm test        # Run tests (Vitest)
-npm run build   # Type-check + production build
+npm run lint
+npm test
+npm run build
 ```
 
-Current: **24 tests** across modelStore, dialogStore, and mergeUtils — all passing.
+Architecture, TypeScript, testing, privacy, migration, and acceptance rules are defined by the project's engineering standards. Please read the repository guidance and [contributing guide](CONTRIBUTING.md) before modifying product code.
 
----
+## Contributing
 
-## 🗺️ Roadmap
+Contributions are welcome when they strengthen the same decision workflow, improve reliability, or make the product easier to validate with real users. Please open an issue before starting a large feature or architectural change so its product evidence and module boundary can be agreed first.
 
-- [x] Phase 0 — Prototype: API unification, persistence, error boundaries
-- [x] Phase 1 — MVP: Sub-dialogues, tree navigation, search, export, tags
-- [x] Multi-model parallel comparison
-- [x] i18n — English & Chinese (2026-06-25)
-- [x] Onboarding wizard — locale-aware free provider recommendations
-- [x] Settings panel — General / Usage / About tabs
-- [x] Usage tracking — token consumption with progress bars
-- [ ] Conversation filters (by tag, date, status)
-- [ ] Virtual scrolling for long conversations
-- [ ] Mobile adaptation
-- [ ] Plugin system
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow.
 
----
+## License
 
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to open an issue or submit a PR.
-
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feature/amazing`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push (`git push origin feature/amazing`)
-5. Open a Pull Request
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
-
----
-
-## 📄 License
-
-[Apache 2.0](LICENSE) — Free for personal and commercial use.
+[Apache 2.0](LICENSE) — free for personal and commercial use.
 
 ---
 
 <div align="center">
 
-**Built with ❤️ for people who talk to AI a lot.**
+**The underlying capabilities can expand. The user promise stays focused.**
 
 </div>

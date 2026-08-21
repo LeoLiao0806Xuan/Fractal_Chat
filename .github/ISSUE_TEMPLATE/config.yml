@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Product idea
+    url: https://github.com/LeoLiao0806Xuan/Fractal_Chat/discussions/categories/ideas
+    about: Suggest an improvement grounded in a real technical decision workflow.
+  - name: Product or architecture RFC
+    url: https://github.com/LeoLiao0806Xuan/Fractal_Chat/discussions/categories/rfc
+    about: Propose a consequential product or architecture change with alternatives and trade-offs.
+  - name: Usage question
+    url: https://github.com/LeoLiao0806Xuan/Fractal_Chat/discussions/categories/q-a
+    about: Ask for help with setup, configuration, or using Fractal Chat.
+  - name: Asynchronous user research
+    url: https://github.com/LeoLiao0806Xuan/Fractal_Chat/issues/new?template=user_research.yml
+    about: Complete the public, privacy-safe research questionnaire without scheduling a meeting.

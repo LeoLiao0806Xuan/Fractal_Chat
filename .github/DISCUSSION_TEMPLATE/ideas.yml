@@ -1,0 +1,42 @@
+title: "[Idea] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas should start from a real decision-making problem, not a feature list. English and Chinese responses are both welcome.
+  - type: textarea
+    id: decision-context
+    attributes:
+      label: Decision context
+      description: What technical decision or workflow created the need? Describe a real or representative example without sharing confidential information.
+      placeholder: We needed to choose between... The decision mattered because...
+    validations:
+      required: true
+  - type: textarea
+    id: current-workaround
+    attributes:
+      label: Current workaround and friction
+      description: How do you handle this today, and where do time, evidence, or review break down?
+    validations:
+      required: true
+  - type: textarea
+    id: desired-outcome
+    attributes:
+      label: Desired outcome
+      description: What outcome should improve? Avoid prescribing an implementation unless it is essential.
+    validations:
+      required: true
+  - type: textarea
+    id: product-fit
+    attributes:
+      label: Fit with the decision loop
+      description: How would this help compare alternatives, organize evidence, challenge assumptions, or produce a reviewable decision record?
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed API keys, private conversation content, personal data, and confidential company information.
+          required: true

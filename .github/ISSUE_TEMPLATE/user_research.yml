@@ -1,0 +1,162 @@
+name: "User research questionnaire / 用户研究问卷"
+description: "Share a sanitized recent technical decision asynchronously; no meeting is required. / 异步分享一次脱敏后的近期技术决策，无需参加会议。"
+title: "[Research response] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping Fractal Chat study how people make complex technical decisions. This is an asynchronous questionnaire, not a meeting or job interview. It usually takes 10–15 minutes.
+
+        感谢你帮助 Fractal Chat 研究复杂技术决策。本问卷为异步填写，不是会议或求职面试，通常需要 10–15 分钟。
+
+        **This response will be public on GitHub.** Do not include your name, email address, employer, customer data, source code, API keys, internal links, security-sensitive details, or any other confidential information. Generalize names and values while preserving the decision structure.
+
+        **回答会公开显示在 GitHub。** 请勿填写姓名、邮箱、雇主、客户数据、源代码、API Key、内部链接、安全敏感信息或其他机密内容。请对名称和数值进行泛化，只保留决策结构。
+
+  - type: checkboxes
+    id: public-consent
+    attributes:
+      label: "Public response consent / 公开回答确认"
+      options:
+        - label: "I understand that my answers will be public, and I have removed identifying and confidential information. / 我理解回答将公开显示，并已删除身份信息和机密信息。"
+          required: true
+
+  - type: checkboxes
+    id: role
+    attributes:
+      label: "Role or function / 角色或职能"
+      description: "Select all that apply. / 可多选。"
+      options:
+        - label: "Software engineer / 软件工程师"
+        - label: "Tech lead, staff engineer, or architect / 技术负责人、专家工程师或架构师"
+        - label: "Engineering manager / 工程经理"
+        - label: "Independent developer, founder, or open-source maintainer / 独立开发者、创业者或开源维护者"
+        - label: "Platform, SRE, data, security, or operations specialist / 平台、SRE、数据、安全或运维工程师"
+        - label: "Technical product manager, consultant, or solution architect / 技术产品经理、顾问或解决方案架构师"
+        - label: "Other role or function / 其他角色或职能"
+
+  - type: dropdown
+    id: recent-decision
+    attributes:
+      label: "Recent decision / 近期决策"
+      description: "In the last 30 days, did you participate in a real task that required a technical conclusion? / 过去 30 天内，你是否参与过需要形成技术结论的真实任务？"
+      options:
+        - "Yes / 是"
+        - "No / 否"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: decision-type
+    attributes:
+      label: "Decision type / 决策类型"
+      description: "Select all that apply. / 可多选。"
+      options:
+        - label: "Technology, framework, database, cloud, or vendor selection / 技术栈、框架、数据库、云服务或供应商选型"
+        - label: "Architecture, migration, refactoring, or build-versus-buy / 架构、迁移、重构或自建与采购比较"
+        - label: "Performance, security, incident, or risk analysis / 性能、安全、故障或风险分析"
+        - label: "RFC, design document, dependency, or proposal review / RFC、设计文档、依赖或方案评审"
+        - label: "Other decision type / 其他决策类型"
+
+  - type: textarea
+    id: decision-summary
+    attributes:
+      label: "Sanitized decision summary / 脱敏后的决策摘要"
+      description: "Describe the task in one or two sentences without naming people, companies, products under NDA, or internal systems. / 用一两句话描述任务，不要出现人员、公司、保密产品或内部系统名称。"
+      placeholder: "Example: We needed to choose between two database approaches for a latency-sensitive service before a migration deadline."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: decision-characteristics
+    attributes:
+      label: "Task characteristics / 任务特征"
+      options:
+        - label: "Compared at least two alternatives / 比较了至少两个方案"
+        - label: "Encountered conflicting views from people, sources, or AI tools / 出现过同事、资料或 AI 观点冲突"
+        - label: "Required a document or explanation to other people / 需要形成文档或向他人解释"
+        - label: "Required formal review or approval / 需要正式评审或批准"
+        - label: "A wrong choice carried meaningful time, cost, security, or migration risk / 错误选择会带来明显的时间、成本、安全或迁移风险"
+        - label: "Used three or more tools to collect and organize information / 使用三种及以上工具整理信息"
+        - label: "Included significant rework or a reopened decision / 经历过明显返工或重新开启"
+
+  - type: dropdown
+    id: time-invested
+    attributes:
+      label: "Time to a reviewable draft / 形成可评审草案的时间"
+      options:
+        - "Less than 1 hour / 少于 1 小时"
+        - "1–3 hours / 1–3 小时"
+        - "4–8 hours / 4–8 小时"
+        - "1–3 working days / 1–3 个工作日"
+        - "More than 3 working days / 超过 3 个工作日"
+    validations:
+      required: true
+
+  - type: textarea
+    id: workflow
+    attributes:
+      label: "Workflow and deliverable / 工作过程与交付物"
+      description: "Briefly describe the sequence of work, the tools used, and the final artifact such as an ADR, RFC, document, pull-request comment, presentation, or verbal decision. / 简述工作顺序、使用的工具，以及最终形成的 ADR、RFC、文档、PR 评论、演示文稿或口头决定。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternatives and discarded options / 备选与淘汰方案"
+      description: "What alternatives were considered, and why were some rejected? Can those reasons still be found today? / 考虑过哪些方案，为什么淘汰其中一些？现在还能找到这些理由吗？"
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence-conflict
+    attributes:
+      label: "Evidence, disagreement, and unknowns / 证据、分歧与未知项"
+      description: "Describe one important disagreement or uncertainty. How did you distinguish project facts, external evidence, AI opinions, inferences, and unknowns? / 描述一个重要分歧或不确定项。你如何区分项目事实、外部证据、AI 观点、推断和未知项？"
+    validations:
+      required: true
+
+  - type: textarea
+    id: review-rework
+    attributes:
+      label: "Review and rework / 评审与返工"
+      description: "What did reviewers challenge, what changed afterward, and which step caused the most avoidable work? / 评审者质疑了什么，随后修改了什么，哪个环节造成了最多可避免的工作？"
+    validations:
+      required: true
+
+  - type: textarea
+    id: traceability
+    attributes:
+      label: "Traceability / 可追溯性"
+      description: "Could someone understand this decision six months later? What context or evidence would be missing? / 半年后，其他人能否理解这项决策？届时可能缺少哪些背景或证据？"
+    validations:
+      required: true
+
+  - type: textarea
+    id: product-fit
+    attributes:
+      label: "Potential product fit / 潜在产品匹配度"
+      description: "Fractal Chat aims to organize alternatives, evidence, risks, counterarguments, and unknowns into a reviewable decision draft. Which two capabilities would help most, and which would add unnecessary work? / Fractal Chat 希望把方案、证据、风险、反方和未知项整理成可评审决策草案。哪两项能力最有帮助，哪一项会增加不必要的负担？"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: next-action
+    attributes:
+      label: "Optional next action / 可选后续行动"
+      description: "No meeting is required. Select only actions you would genuinely consider. / 不要求参加会议，只选择你确实愿意考虑的行动。"
+      options:
+        - label: "Try Release v1.1 with a sanitized real problem and report the result asynchronously / 使用脱敏后的真实问题试用 Release v1.1，并异步反馈结果"
+        - label: "Ask a colleague to review a draft produced during the trial / 邀请同事评审试用产生的草案"
+        - label: "Post an asynchronous follow-up after one week / 一周后异步补充反馈"
+        - label: "Allow maintainers to ask follow-up questions in this public issue / 允许维护者在此公开 Issue 中追问"
+        - label: "No follow-up / 暂不参与后续研究"
+
+  - type: checkboxes
+    id: final-check
+    attributes:
+      label: "Final privacy check / 最终隐私检查"
+      options:
+        - label: "I reviewed my response and it contains no personal, employer-confidential, customer, credential, source-code, or security-sensitive information. / 我已检查回答，其中不包含个人、雇主机密、客户、凭证、源代码或安全敏感信息。"
+          required: true
